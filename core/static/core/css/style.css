@@ -1,0 +1,59 @@
+/* Custom Styles for Fransick */
+
+/* Keyframe animations */
+@keyframes expandWidth {
+    0% { width: 0; }
+    100% { width: 4rem; }
+}
+
+.animate-width {
+    animation: expandWidth 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Base style settings */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    scroll-behavior: smooth;
+}
+
+/* Glassmorphism Styles (inspired by mockup) */
+.glass-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 32px 0 rgba(27, 95, 168, 0.08);
+}
+
+.glass-card-dark {
+    background: rgba(27, 95, 168, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+}
+
+/* Custom premium hover enhancements */
+.hover-card {
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hover-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px -15px rgba(27, 95, 168, 0.15);
+    border-color: rgba(27, 95, 168, 0.2);
+}
+
+.hover-card-green {
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hover-card-green:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px -15px rgba(109, 190, 69, 0.15);
+    border-color: rgba(109, 190, 69, 0.2);
+}

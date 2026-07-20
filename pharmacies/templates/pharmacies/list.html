@@ -1,0 +1,45 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+{% block title %}{% translate "Pharmacies de Garde et Proches - Fransick" %}{% endblock %}
+{% block content %}
+<section class="py-12 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <h1 class="text-3xl font-bold font-poppins text-medical-blue mb-8">{% translate "Localisateur de Pharmacies" %}
+        </h1>
+        <div class="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 mb-8 max-w-xl">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">{% translate "Rechercher une pharmacie à proximité" %}</h3>
+            <div class="flex gap-2">
+                <input type="text" placeholder="Code postal, ville, nom..."
+                    class="flex-grow px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-medical-blue">
+                <button onclick="alert('Recherche en cours...')"
+                    class="bg-medical-blue hover:bg-medical-dark text-white font-semibold px-6 py-3 rounded-xl shadow transition-colors">
+                    {% translate "Rechercher" %}
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex gap-4">
+                <div
+                    class="w-12 h-12 rounded-2xl bg-leaf-light text-leaf-green flex items-center justify-center flex-shrink-0 font-bold text-xl">
+                    +</div>
+                <div>
+                    <h4 class="text-lg font-bold text-gray-800">Grande Pharmacie Centre Fransick</h4>
+                    <p class="text-sm text-gray-500 mt-1">12 Rue de la Santé, 75001 Paris</p>
+                    <p class="text-xs text-leaf-green font-semibold mt-2">{% translate "Ouvert" %}</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex gap-4">
+                <div
+                    class="w-12 h-12 rounded-2xl bg-leaf-light text-leaf-green flex items-center justify-center flex-shrink-0 font-bold text-xl">
+                    +</div>
+                <div>
+                    <h4 class="text-lg font-bold text-gray-800">Pharmacie Saint-Germain</h4>
+                    <p class="text-sm text-gray-500 mt-1">45 Boulevard Saint-Germain, 75006 Paris</p>
+                    <p class="text-xs text-orange-500 font-semibold mt-2">{% translate "Fermé - Ouvre à 08:30" %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

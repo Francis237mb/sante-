@@ -1,0 +1,17 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+{% block title %}{% translate "Mes Ordonnances Électroniques - Fransick" %}{% endblock %}
+{% block content %}
+<section class="py-12 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <h1 class="text-3xl font-bold font-poppins text-medical-blue mb-8">{% translate "Mes Ordonnances" %}</h1>
+        <div class="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 max-w-2xl text-center space-y-6">
+            <div class="w-20 h-20 bg-leaf-light text-leaf-green rounded-full flex items-center justify-center mx-auto text-3xl">📄</div>
+            <h3 class="text-xl font-bold text-gray-800">{% translate "Aucune ordonnance électronique disponible" %}</h3>
+            <p class="text-gray-500 max-w-md mx-auto text-sm leading-relaxed">
+                {% translate "Dès qu'un médecin générera une ordonnance suite à votre téléconsultation, elle sera accessible en ligne ici." %}
+            </p>
+        </div>
+    </div>
+</section>
+{% endblock %}

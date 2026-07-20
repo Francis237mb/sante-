@@ -1,0 +1,237 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Fransick\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-16 17:00+0100\n"
+"PO-Revision-Date: 2026-07-16 17:00+0100\n"
+"Last-Translator: Antigravity\n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Accueil"
+msgstr "Home"
+
+msgid "À propos"
+msgstr "About"
+
+msgid "Patient"
+msgstr "Patient"
+
+msgid "Médecin"
+msgstr "Doctor"
+
+msgid "Se connecter"
+msgstr "Login"
+
+msgid "Pharmacie"
+msgstr "Pharmacy"
+
+msgid "Déconnexion"
+msgstr "Logout"
+
+msgid "Fransick - Votre Plateforme Médicale Intelligente"
+msgstr "Fransick - Your Intelligent Medical Platform"
+
+msgid "Plateforme Médicale Intelligente d'Accompagnement"
+msgstr "Intelligent Medical Companion Platform"
+
+msgid "Votre Santé, <br class='hidden md:inline'>Notre Priorité"
+msgstr "Your Health, <br class='hidden md:inline'>Our Priority"
+
+msgid "Un accompagnement médical personnalisé et de confiance pour vous et vos proches. Consultez un médecin, obtenez vos ordonnances et localisez vos pharmacies."
+msgstr "Personalized and trusted medical support for you and your family. Consult a doctor, obtain prescriptions, and locate nearby pharmacies."
+
+msgid "Découvrir nos services"
+msgstr "Discover our services"
+
+msgid "Parler à l'assistant IA"
+msgstr "Talk to the AI assistant"
+
+msgid "Prendre un Rendez-vous"
+msgstr "Book an Appointment"
+
+msgid "Simple, rapide et sécurisé."
+msgstr "Simple, fast, and secure."
+
+msgid "Département"
+msgstr "Department"
+
+msgid "Sélectionner le département"
+msgstr "Select department"
+
+msgid "Médecine Générale"
+msgstr "General Medicine"
+
+msgid "Pédiatrie"
+msgstr "Pediatrics"
+
+msgid "Cardiologie"
+msgstr "Cardiology"
+
+msgid "Gynécologie"
+msgstr "Gynecology"
+
+msgid "Choisir un médecin"
+msgstr "Choose a doctor"
+
+msgid "Date de consultation"
+msgstr "Consultation Date"
+
+msgid "Réserver maintenant"
+msgstr "Book Now"
+
+msgid "Nos Départements"
+msgstr "Our Departments"
+
+msgid "Des pôles de compétences spécialisés pour répondre à tous vos besoins thérapeutiques."
+msgstr "Specialized medical units dedicated to all your healthcare needs."
+
+msgid "Urgences Médicales"
+msgstr "Emergency Care"
+
+msgid "Une assistance rapide 24h/24 et 7j/7 pour faire face à toutes les urgences vitales."
+msgstr "24/7 rapid response and support for all life-threatening emergencies."
+
+msgid "Un accompagnement bienveillant et des soins adaptés au développement de vos enfants."
+msgstr "Compassionate support and adapted healthcare for your children's development."
+
+msgid "Prévention, diagnostic et traitement complet des maladies cardiovasculaires."
+msgstr "Prevention, diagnosis, and comprehensive treatment of cardiovascular diseases."
+
+msgid "Nos Services Phares"
+msgstr "Our Featured Services"
+
+msgid "Accédez facilement aux soins et aux services de santé modernes en quelques clics."
+msgstr "Easily access modern healthcare and services in just a few clicks."
+
+msgid "Consultez votre médecin à distance, en visioconférence sécurisée et sans vous déplacer."
+msgstr "Consult your doctor remotely with a secure video call, without traveling."
+
+msgid "Prendre rendez-vous"
+msgstr "Book an appointment"
+
+msgid "Ordonnance Électronique"
+msgstr "E-Prescription"
+
+msgid "Générez et recevez des ordonnances électroniques sécurisées immédiatement après vos consultations."
+msgstr "Generate and receive secure electronic prescriptions instantly after your appointments."
+
+msgid "Gérer mes ordonnances"
+msgstr "Manage my prescriptions"
+
+msgid "Trouver une Pharmacie"
+msgstr "Find a Pharmacy"
+
+msgid "Localisez instantanément les pharmacies les plus proches et vérifiez la disponibilité des médicaments."
+msgstr "Instantly find nearby pharmacies and check medication availability."
+
+msgid "Localiser une pharmacie"
+msgstr "Locate a pharmacy"
+
+msgid "Assistant Médical IA"
+msgstr "AI Medical Assistant"
+
+msgid "Une assistance conversationnelle intelligente 24h/24 pour répondre à vos questions et vous guider."
+msgstr "Intelligent conversational assistance available 24/7 to answer questions and guide you."
+
+msgid "Lancer la discussion"
+msgstr "Start Chat"
+
+msgid "À Propos de Fransick"
+msgstr "About Fransick"
+
+msgid "Fransick est né de la volonté de rapprocher les patients et les professionnels de santé grâce aux technologies numériques avancées. Notre but est de fluidifier le parcours thérapeutique, d'accélérer les démarches administratives de soins (ordonnances, consultations) et d'apporter un soutien thérapeutique intelligent permanent."
+msgstr "Fransick was born from the desire to bring patients and healthcare professionals closer using advanced digital technologies. Our goal is to streamline the therapeutic journey, accelerate administrative care procedures, and provide constant intelligent support."
+
+msgid "Chaque patient bénéficie d'un suivi personnalisé de haute qualité et d'un accès instantané aux services de soins et aux pharmacies partenaires de son secteur."
+msgstr "Each patient benefits from high-quality personalized follow-up and instant access to healthcare services and partner pharmacies in their sector."
+
+msgid "En savoir plus sur notre mission"
+msgstr "Learn more about our mission"
+
+msgid "S'inscrire"
+msgstr "Register"
+
+msgid "Espace"
+msgstr "Space"
+
+msgid "Nom d'utilisateur ou Email"
+msgstr "Username or Email"
+
+msgid "Mot de passe"
+msgstr "Password"
+
+msgid "Connexion"
+msgstr "Login"
+
+msgid "Chargement..."
+msgstr "Loading..."
+
+msgid "Nos Spécialités Médicales"
+msgstr "Our Medical Specialties"
+
+msgid "Consultez directement le spécialiste adapté à votre besoin de santé, sans attente."
+msgstr "Consult directly with the appropriate specialist for your health needs, without waiting."
+
+msgid "Généraliste"
+msgstr "General Practitioner"
+
+msgid "Ophtalmo"
+msgstr "Ophthalmologist"
+
+msgid "Dentiste"
+msgstr "Dentist"
+
+msgid "Pourquoi Choisir Fransick ?"
+msgstr "Why Choose Fransick?"
+
+msgid "Des services de santé en ligne à haute valeur ajoutée pour vous faciliter la vie au quotidien."
+msgstr "Value-added online health services to make your daily life easier."
+
+msgid "Téléconsultation face-à-face"
+msgstr "Face-to-face teleconsultation"
+
+msgid "Consultez directement votre médecin en vidéo depuis chez vous. Évitez les déplacements fastidieux et les longues salles d'attente à l'hôpital."
+msgstr "Consult your doctor directly via video from home. Avoid tedious travel and long waiting rooms at the hospital."
+
+msgid "Ordonnance Électronique Sécurisée"
+msgstr "Secure Electronic Prescription"
+
+msgid "Obtenez et stockez vos ordonnances de façon numérique après chaque rendez-vous. Partagez-les facilement avec vos pharmacies partenaires."
+msgstr "Obtain and store your prescriptions digitally after each appointment. Share them easily with partner pharmacies."
+
+msgid "Localisateur Intelligent de Pharmacie"
+msgstr "Intelligent Pharmacy Locator"
+
+msgid "Trouvez instantanément la pharmacie de garde ou de proximité ouverte la plus proche, et vérifiez directement la disponibilité de vos traitements."
+msgstr "Instantly find the nearest open pharmacy, and directly check treatment availability."
+
+msgid "Assistant Médical IA disponible 24h/24"
+msgstr "AI Medical Assistant available 24/7"
+
+msgid "Une question sur un symptôme ou un médicament ? Discutez à tout moment avec notre assistant intelligent pour obtenir des conseils immédiats."
+msgstr "Any questions about a symptom or medication? Chat with our intelligent assistant anytime for immediate advice."
+
+msgid "Qui sommes-nous ?"
+msgstr "Who are we?"
+
+msgid "Chaque patient bénéficie d'un suivi personnalisé de haute qualité et d'un accès instantané aux services de soins et aux pharmacies partenaires de son secteur. Avec Fransick, la santé devient plus accessible, humaine et intelligente."
+msgstr "Each patient benefits from high-quality personalized follow-up and instant access to care services and partner pharmacies. With Fransick, health becomes more accessible, humane, and intelligent."
+
+msgid "Navigation"
+msgstr "Navigation"
+
+msgid "Espaces & Connexion"
+msgstr "Spaces & Login"
+
+msgid "Tableau de Bord Patient"
+msgstr "Patient Dashboard"
+
+msgid "Tableau de Bord Médecin"
+msgstr "Doctor Dashboard"
+
+msgid "Langue de l'interface"
+msgstr "Interface Language"

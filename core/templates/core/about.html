@@ -1,0 +1,15 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+{% block title %}{% translate "À propos de Fransick" %}{% endblock %}
+{% block content %}
+<section class="py-20 bg-gray-50">
+    <div class="container mx-auto px-4 max-w-4xl">
+        <h1 class="text-4xl font-bold font-poppins text-medical-blue mb-6">{% translate "À propos de nous" %}</h1>
+        <div class="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 space-y-6 text-gray-600 leading-relaxed">
+            <p>{% translate "Fransick est une plateforme numérique innovante qui a pour but d'améliorer la prise en charge médicale thérapeutique et de simplifier l'accès aux services de santé de proximité." %}</p>
+            <p>{% translate "Notre projet vise à connecter de manière fluide et intelligente les patients, les médecins et les officines pharmaceutiques. Grâce à notre assistant IA, vous disposez d'un conseil médical informatif à tout moment de la journée." %}</p>
+            <p>{% translate "Ce service n'a pas vocation à remplacer les examens cliniques physiques ou les avis d'urgence mais vise à orienter et accompagner efficacement chaque citoyen dans son parcours de soins." %}</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

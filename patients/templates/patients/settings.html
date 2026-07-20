@@ -1,0 +1,883 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% translate "Paramètres - Fransick" %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'medical-blue': '#1B5FA8',
+                        'medical-light': '#EBF3FC',
+                        'medical-dark': '#14467d',
+                        'leaf-green': '#6DBE45',
+                        'leaf-light': '#F0F9EB',
+                        'leaf-dark': '#559c30',
+                    },
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif'],
+                        'inter': ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* Switch toggle styles */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #6DBE45;
+            background-color: #6DBE45;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #6DBE45;
+        }
+    </style>
+</head>
+<body class="bg-gray-50/70 font-inter text-gray-800 antialiased overflow-hidden">
+
+    <!-- App Shell Layout -->
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- ================= DESKTOP SIDEBAR ================= -->
+        <aside class="hidden lg:flex flex-col w-64 bg-white border-r border-gray-200/80 flex-shrink-0 sticky top-0 h-screen">
+            <!-- Sidebar Header / Logo -->
+            <div class="h-20 flex items-center px-6 border-b border-gray-100 select-none">
+                <a href="{% url 'core:home' %}" class="flex items-center space-x-2.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-8 h-8 text-medical-blue">
+                        <path d="M37 28 C20 28 15 48 30 65 C40 75 50 82 50 82 C50 82 60 75 70 65 C85 48 80 28 63 28" fill="none" stroke="#1B5FA8" stroke-width="6" stroke-linecap="round"/>
+                        <circle cx="37" cy="28" r="4.5" fill="#38BDF8" />
+                        <circle cx="63" cy="28" r="4.5" fill="#38BDF8" />
+                        <path d="M30 65 C22 55 15 55 12 60 C8 65 14 74 22 72" fill="none" stroke="#1B5FA8" stroke-width="6" stroke-linecap="round"/>
+                        <circle cx="22" cy="72" r="6" fill="#14467d" />
+                        <path d="M43 46 H57 M50 39 V53" stroke="#38BDF8" stroke-width="5.5" stroke-linecap="round" />
+                        <path d="M48 68 L58 60 L60 72 Z" fill="#15803d" />
+                        <path d="M50 82 C68 76 83 60 83 38 C83 55 70 70 50 82 Z" fill="#6DBE45" />
+                        <path d="M50 82 C55 70 65 60 83 38" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                    <span class="font-poppins font-bold text-xl text-medical-blue tracking-tight">Fransick</span>
+                </a>
+            </div>
+
+            <!-- Active User Profile Summary -->
+            <div class="px-5 py-6 border-b border-gray-100 flex items-center space-x-3.5">
+                {% if user.profile_picture %}
+                    <img class="h-11 w-11 rounded-full object-cover ring-2 ring-leaf-green/20" src="{{ user.profile_picture.url }}" alt="{{ user.username }}">
+                {% else %}
+                    <div class="h-11 w-11 rounded-xl bg-leaf-green text-white flex items-center justify-center font-bold font-poppins text-lg shadow-sm">{{ user.username|slice:":2"|upper }}</div>
+                {% endif %}
+                <div class="overflow-hidden">
+                    <h4 class="text-sm font-bold text-gray-800 truncate">{{ user.username }}</h4>
+                    <span class="inline-block bg-leaf-green/10 text-leaf-green font-bold text-[9px] uppercase tracking-wider px-2.5 py-0.5 rounded-full mt-1">
+                        {% translate "Patient" %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto custom-scrollbar">
+                <!-- Dashboard -->
+                <a href="{% url 'patients:dashboard' %}" class="flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-leaf-green hover:bg-gray-50 font-semibold text-sm transition-all group">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 group-hover:scale-105 transition-transform">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                    </svg>
+                    <span>{% translate "Tableau de Bord" %}</span>
+                </a>
+
+                <!-- Mon Suivi Médical (RDV & Ordonnances unifiés) -->
+                <a href="{% url 'patients:dashboard' %}#suivi-section" class="flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-leaf-green hover:bg-gray-50 font-semibold text-sm transition-all group">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 group-hover:scale-105 transition-transform">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801-1.206a2.25 2.25 0 0 0-3.479-.015m5.578-2.583a2.25 2.25 0 0 0-2.25 2.25v.003c0 .83.672 1.5 1.5 1.5h1.5a1.5 1.5 0 0 0 1.5-1.5V3a2.25 2.25 0 0 0-2.25-2.25h-.003Z" />
+                    </svg>
+                    <span>{% translate "Mon Suivi (RDV & Ordonnances)" %}</span>
+                </a>
+
+                <!-- Vidéos & Conseils Santé -->
+                <a href="{% url 'patients:dashboard' %}#videos-section" class="flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-leaf-green hover:bg-gray-50 font-semibold text-sm transition-all group">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 text-purple-600 group-hover:scale-105 transition-transform">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+                    </svg>
+                    <span>{% translate "Vidéos & Conseils Santé" %}</span>
+                </a>
+
+                <!-- Pharmacies -->
+                <a href="#" onclick="alert('Recherche de pharmacies bientôt disponible !')" class="flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-leaf-green hover:bg-gray-50 font-semibold text-sm transition-all group">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 group-hover:scale-105 transition-transform">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                    </svg>
+                    <span>{% translate "Pharmacies proches" %}</span>
+                </a>
+
+                <!-- Assistant IA -->
+                <a href="{% url 'ia_assistant:chat' %}" class="flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-leaf-green hover:bg-gray-50 font-semibold text-sm transition-all group">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 text-medical-blue group-hover:scale-105 transition-transform">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 21l-.813-5.096L3 15l5.187-.813L9 9l.813 5.187L15 15l-5.187.813ZM18 7.5 17.25 12l-.75-4.5L12 6.75l4.5-.75.75-4.5.75 4.5 4.5.75-4.5.75-.75 4.5ZM3 3v2.25h2.25v1.5H3V9H1.5V6.75H0v-1.5h1.5V3H3Z" />
+                    </svg>
+                    <span>{% translate "Mon Assistant IA" %}</span>
+                </a>
+
+                <!-- Paramètres (Active) -->
+                <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-2xl bg-leaf-light text-leaf-green font-bold text-sm transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.43l-1.003.828c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.43l1.004-.827c.292-.24.437-.613.43-.991a6.936 6.936 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.645-.869L9.59 3.94Z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                    <span>{% translate "Paramètres" %}</span>
+                </a>
+            </nav>
+
+            <!-- Logout Button (Footer of Sidebar) -->
+            <div class="p-4 border-t border-gray-100">
+                <form action="{% url 'accounts:logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-red-500 bg-red-50/20 border border-red-100 hover:bg-red-50 font-bold text-sm transition-all focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+                        </svg>
+                        <span>{% translate "Déconnexion" %}</span>
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- ================= MOBILE BOTTOM NAVIGATION (WhatsApp Style) ================= -->
+        <div class="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/95 backdrop-blur-md border-t border-gray-200/80 flex items-center justify-around px-2 z-40 shadow-lg select-none">
+            <!-- Home -->
+            <a href="{% url 'patients:dashboard' %}" class="flex flex-col items-center justify-center flex-1 py-1 text-gray-400 hover:text-leaf-green transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                </svg>
+                <span class="text-[9px] mt-0.5 font-medium">{% translate "Accueil" %}</span>
+            </a>
+            
+            <!-- Suivi Médical (RDV & Ordonnances) -->
+            <a href="{% url 'patients:dashboard' %}#suivi-section" class="flex flex-col items-center justify-center flex-1 py-1 text-gray-400 hover:text-leaf-green transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08" />
+                </svg>
+                <span class="text-[9px] mt-0.5 font-medium">{% translate "Suivi" %}</span>
+            </a>
+
+            <!-- Central AI Button -->
+            <a href="{% url 'ia_assistant:chat' %}" class="flex flex-col items-center justify-center flex-1 py-1 text-gray-400 hover:text-leaf-green transition-all relative">
+                <div class="-mt-8 w-12 h-12 rounded-full bg-gradient-to-r from-medical-blue to-leaf-green text-white flex items-center justify-center shadow-md transform active:scale-95 transition-transform duration-200 border-4 border-gray-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 21l-.813-5.096L3 15l5.187-.813L9 9l.813 5.187L15 15l-5.187.813Z" />
+                    </svg>
+                </div>
+                <span class="text-[9px] mt-1 font-bold text-gray-600">{% translate "Assistant" %}</span>
+            </a>
+
+            <!-- Vidéos & Conseils -->
+            <a href="{% url 'patients:dashboard' %}#videos-section" class="flex flex-col items-center justify-center flex-1 py-1 text-gray-400 hover:text-leaf-green transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 text-purple-500">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+                </svg>
+                <span class="text-[9px] mt-0.5 font-medium">{% translate "Vidéos" %}</span>
+            </a>
+
+            <!-- Profile/Settings (Active) -->
+            <a href="#" class="flex flex-col items-center justify-center flex-1 py-1 text-leaf-green font-bold transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.43l-1.003.828c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255" />
+                </svg>
+                <span class="text-[9px] mt-0.5 font-medium">{% translate "Paramètres" %}</span>
+            </a>
+        </div>
+
+        <!-- ================= MAIN LAYOUT SPACE ================= -->
+        <div class="flex-1 flex flex-col min-h-screen overflow-hidden">
+            
+            <!-- Dashboard Top Header Bar (Waspito style on mobile) -->
+            <header class="h-20 bg-white border-b border-gray-200/80 px-4 md:px-8 flex items-center justify-between flex-shrink-0 z-30 select-none">
+                <!-- Mobile Logo and Avatar -->
+                <div class="flex items-center space-x-3 lg:hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-8 h-8 text-leaf-green">
+                        <path d="M37 28 C20 28 15 48 30 65 C40 75 50 82 50 82 C50 82 60 75 70 65 C85 48 80 28 63 28" fill="none" stroke="#6DBE45" stroke-width="6" stroke-linecap="round"/>
+                        <circle cx="37" cy="28" r="4.5" fill="#38BDF8" />
+                        <circle cx="63" cy="28" r="4.5" fill="#38BDF8" />
+                        <path d="M30 65 C22 55 15 55 12 60 C8 65 14 74 22 72" fill="none" stroke="#6DBE45" stroke-width="6" stroke-linecap="round"/>
+                        <circle cx="22" cy="72" r="6" fill="#14467d" />
+                        <path d="M43 46 H57 M50 39 V53" stroke="#38BDF8" stroke-width="5.5" stroke-linecap="round" />
+                        <path d="M48 68 L58 60 L60 72 Z" fill="#15803d" />
+                        <path d="M50 82 C68 76 83 60 83 38 C83 55 70 70 50 82 Z" fill="#6DBE45" />
+                        <path d="M50 82 C55 70 65 60 83 38" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                    <span class="font-poppins font-bold text-lg text-leaf-green tracking-tight">Fransick</span>
+                </div>
+
+                <!-- Desktop Title -->
+                <div class="hidden lg:block">
+                    <h2 class="text-lg font-bold font-poppins text-gray-800">{% translate "Paramètres du Compte" %}</h2>
+                    <p class="text-xs text-gray-400 font-semibold" id="current-date-field"></p>
+                </div>
+
+                <!-- Center Mobile Profile Avatar -->
+                <div class="lg:hidden absolute left-1/2 transform -translate-x-1/2">
+                    <div class="relative cursor-pointer" onclick="openModal('modal-profile')">
+                        {% if user.profile_picture %}
+                            <img class="h-10 w-10 rounded-full object-cover border border-gray-200" src="{{ user.profile_picture.url }}" alt="{{ user.username }}">
+                        {% else %}
+                            <div class="h-10 w-10 rounded-full bg-leaf-green text-white flex items-center justify-center font-bold text-sm">{{ user.username|slice:":2"|upper }}</div>
+                        {% endif %}
+                        <span class="absolute -bottom-1 -right-1 bg-white border border-gray-200 rounded-full p-0.5 shadow-xs">
+                            <!-- green sync arrow icon -->
+                            <svg class="w-2.5 h-2.5 text-leaf-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3-3-3M2.25 12c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M2.25 12l3 3m-3-3-3 3" />
+                            </svg>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Right icons (Gift box, search, notification) -->
+                <div class="flex items-center space-x-3.5">
+                    <!-- Gift Icon -->
+                    <button type="button" onclick="alert('Partagez Fransick pour gagner des points de fidélité !')" class="text-gray-500 hover:text-leaf-green transition-colors">
+                        <span class="text-xl">🎁</span>
+                    </button>
+                    <!-- Search Icon -->
+                    <button type="button" onclick="alert('Recherche globale en cours...')" class="text-gray-500 hover:text-leaf-green transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5.5 h-5.5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                        </svg>
+                    </button>
+                    <!-- Notification Bell -->
+                    <button type="button" onclick="alert('Pas de nouvelles notifications')" class="text-gray-500 hover:text-leaf-green transition-colors relative">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5.5 h-5.5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                        </svg>
+                        <span class="absolute top-0 right-0 w-1.5 h-1.5 rounded-full bg-leaf-green"></span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dashboard Content Scroll Area -->
+            <main class="flex-1 overflow-y-auto p-4 md:p-8 pb-24 lg:pb-8 custom-scrollbar">
+                
+                <!-- Django Messages Alerts -->
+                {% if messages %}
+                    <div class="mb-5 space-y-2 max-w-2xl mx-auto">
+                        {% for message in messages %}
+                            <div class="p-4 rounded-2xl border text-sm font-medium flex items-center space-x-2 {% if message.tags == 'success' %}bg-leaf-light border-leaf-green/20 text-leaf-green{% else %}bg-red-50 border-red-100 text-red-600{% endif %}">
+                                {% if message.tags == 'success' %}
+                                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4"/></svg>
+                                {% else %}
+                                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                {% endif %}
+                                <span>{{ message }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Content Container (Centered for Waspito aesthetic) -->
+                <div class="max-w-2xl mx-auto space-y-6">
+
+                    <!-- ================= PROFILE COMPLETION CARD (Waspito style) ================= -->
+                    <div class="bg-white border border-gray-100 rounded-3xl p-5 md:p-6 shadow-sm relative overflow-hidden flex flex-col space-y-4 select-none">
+                        <!-- Close button -->
+                        <button type="button" onclick="this.parentElement.remove();" class="absolute top-4 right-4 text-gray-300 hover:text-gray-500 focus:outline-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        
+                        <div>
+                            <p class="text-sm text-gray-500 font-medium">Salut</p>
+                            <h3 class="text-lg font-bold text-gray-900 font-poppins mt-0.5">{{ user.username }}</h3>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div class="space-y-2">
+                            <div class="w-full bg-gray-100 rounded-full h-2">
+                                <div class="bg-leaf-green h-2 rounded-full transition-all duration-500" style="width: 75%;"></div>
+                            </div>
+                            <div class="flex items-center justify-between text-xs font-semibold">
+                                <span class="text-gray-400">Votre profil est incomplet (75%)</span>
+                                <button type="button" onclick="openModal('modal-profile')" class="text-leaf-green hover:underline">Compléter</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================= GROUP 1: MON PROFIL ================= -->
+                    <div class="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden select-none">
+                        <div class="px-5 py-4 border-b border-gray-50 bg-gray-50/20">
+                            <h4 class="text-xs font-extrabold text-gray-400 uppercase tracking-widest">Mon profil</h4>
+                        </div>
+                        <div class="divide-y divide-gray-50">
+                            <!-- Modifier mon profil -->
+                            <button type="button" onclick="openModal('modal-profile')" class="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50/50 transition-colors focus:outline-none group">
+                                <div class="flex items-center space-x-3.5">
+                                    <div class="w-8 h-8 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center group-hover:bg-leaf-light group-hover:text-leaf-green transition-all">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4.5 h-4.5">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.83 20.013a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-semibold text-gray-700">Modifier mon profil</span>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-gray-300">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                                </svg>
+                            </button>
+
+                            <!-- Membres de la famille -->
+                            <button type="button" onclick="alert('Gestion des membres de la famille bientôt disponible !')" class="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50/50 transition-colors focus:outline-none group">
+                                <div class="flex items-center space-x-3.5">
+                                    <div class="w-8 h-8 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center group-hover:bg-leaf-light group-hover:text-leaf-green transition-all">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4.5 h-4.5">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-semibold text-gray-700">Membres de la famille</span>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-gray-300">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ================= GROUP 2: CONTACT & SUPPORT ================= -->
+                    <div class="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden select-none">
+                        <div class="px-5 py-4 border-b border-gray-50 bg-gray-50/20">
+                            <h4 class="text-xs font-extrabold text-gray-400 uppercase tracking-widest">Contact et support</h4>
+                        </div>
+                        <div class="divide-y divide-gray-50">
+                            <!-- Parler à un agent (en vert) -->
+                            <button type="button" onclick="alert('Mise en relation avec un conseiller Fransick...')" class="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50/50 transition-colors focus:outline-none group">
+                                <div class="flex items-center space-x-3.5">
+                                    <div class="w-8 h-8 rounded-xl bg-leaf-light text-leaf-green flex items-center justify-center transition-all">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4.5 h-4.5">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-bold text-leaf-green">Parler à un agent</span>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-gray-300">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                                </svg>
+                            </button>
+
+                            <!-- FAQ -->
+                            <button type="button" onclick="alert('Chargement de la FAQ...')" class="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50/50 transition-colors focus:outline-none group">
+                                <div class="flex items-center space-x-3.5">
+                                    <div class="w-8 h-8 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center group-hover:bg-leaf-light group-hover:text-leaf-green transition-all">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4.5 h-4.5">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-semibold text-gray-700">FAQ</span>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-gray-300">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ================= GROUP 3: DOSSIER SANTE (Waspito style) ================= -->
+                    <div class="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden select-none">
+                        <div class="px-5 py-4 border-b border-gray-50 bg-gray-50/20">
+                            <h4 class="text-xs font-extrabold text-gray-400 uppercase tracking-widest">Ma Fiche Médicale</h4>
+                        </div>
+                        <div class="divide-y divide-gray-50">
+                            <!-- Dossier médical -->
+                            <button type="button" onclick="openModal('modal-health')" class="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50/50 transition-colors focus:outline-none group">
+                                <div class="flex items-center space-x-3.5">
+                                    <div class="w-8 h-8 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center group-hover:bg-leaf-light group-hover:text-leaf-green transition-all">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4.5 h-4.5">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801-1.206a2.25 2.25 0 0 0-3.479-.015m5.578-2.583a2.25 2.25 0 0 0-2.25 2.25v.003c0 .83.672 1.5 1.5 1.5h1.5a1.5 1.5 0 0 0 1.5-1.5V3a2.25 2.25 0 0 0-2.25-2.25h-.003Z" />
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-semibold text-gray-700">Dossier médical (Constantes, groupe sanguin)</span>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-gray-300">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ================= GROUP 4: CONFIDENTIALITE ET SECURITE ================= -->
+                    <div class="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden select-none">
+                        <div class="px-5 py-4 border-b border-gray-50 bg-gray-50/20">
+                            <h4 class="text-xs font-extrabold text-gray-400 uppercase tracking-widest">Confidentialité et sécurité</h4>
+                        </div>
+                        <div class="divide-y divide-gray-50">
+                            <!-- 2FA (Switch toggle) -->
+                            <div class="px-5 py-4 flex items-center justify-between">
+                                <div class="flex items-center space-x-3.5">
+                                    <div class="w-8 h-8 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4.5 h-4.5">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-semibold text-gray-700">Double authentification (2FA)</span>
+                                </div>
+                                <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                                    <input type="checkbox" name="toggle" id="toggle-2fa" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 border-gray-300 appearance-none cursor-pointer focus:outline-none"/>
+                                    <label for="toggle-2fa" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-200 cursor-pointer"></label>
+                                </div>
+                            </div>
+
+                            <!-- Options d'anonymat -->
+                            <button type="button" onclick="alert('Options d\'anonymat en cours...')" class="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50/50 transition-colors focus:outline-none group">
+                                <div class="flex items-center space-x-3.5">
+                                    <div class="w-8 h-8 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center group-hover:bg-leaf-light group-hover:text-leaf-green transition-all">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4.5 h-4.5">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-semibold text-gray-700">Options d'anonymat</span>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-gray-300">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                                </svg>
+                            </button>
+
+                            <!-- Changer le mot de passe -->
+                            <button type="button" onclick="openModal('modal-password')" class="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50/50 transition-colors focus:outline-none group">
+                                <div class="flex items-center space-x-3.5">
+                                    <div class="w-8 h-8 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center group-hover:bg-leaf-light group-hover:text-leaf-green transition-all">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4.5 h-4.5">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-semibold text-gray-700">Changer le mot de passe</span>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-gray-300">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                                </svg>
+                            </button>
+
+                            <!-- Biométrie (Switch toggle) -->
+                            <div class="px-5 py-4 flex items-center justify-between">
+                                <div class="flex items-center space-x-3.5">
+                                    <div class="w-8 h-8 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center">
+                                        <!-- face ID style icon -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4.5 h-4.5">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18a2.25 2.25 0 0 1-2.25 2.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M10.125 9h3.75m-3.75 3h3.75m-3.75 3h3.75" />
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-semibold text-gray-700">Sécurité biométrique</span>
+                                </div>
+                                <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                                    <input type="checkbox" name="toggle" id="toggle-bio" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 border-gray-300 appearance-none cursor-pointer focus:outline-none"/>
+                                    <label for="toggle-bio" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-200 cursor-pointer"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================= GROUP 5: LIENS RAPIDES ================= -->
+                    <div class="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden select-none">
+                        <div class="px-5 py-4 border-b border-gray-50 bg-gray-50/20">
+                            <h4 class="text-xs font-extrabold text-gray-400 uppercase tracking-widest">Liens rapides</h4>
+                        </div>
+                        <div class="divide-y divide-gray-50">
+                            <!-- Forums de discussion -->
+                            <button type="button" onclick="alert('Chargement du forum...')" class="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50/50 transition-colors focus:outline-none group">
+                                <div class="flex items-center space-x-3.5">
+                                    <div class="w-8 h-8 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center group-hover:bg-leaf-light group-hover:text-leaf-green transition-all">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4.5 h-4.5">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.083.185.125.39.125.611 0 1.25-.875 2.125-2.125 2.125h-.562c-.221 0-.426.042-.611.125L15 13.5v-3.75H9.75A2.25 2.25 0 0 1 7.5 7.5V4.875C7.5 3.625 8.375 2.75 9.625 2.75h9.375C20.25 2.75 21 3.625 21 4.875v3.636ZM3.75 11.25h9.375c1.25 0 2.125.875 2.125 2.125v3.636c0 .221-.042.426-.125.611l1.625 2.128v-3.75h-.562C15 16 14.125 15.125 14.125 13.875h-.562c-.221 0-.426.042-.611.125L9.625 16.5v-3.75H3.75v-1.5Z" />
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-semibold text-gray-700">Forums de discussions</span>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-gray-300">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                                </svg>
+                            </button>
+
+                            <!-- Recherche pharmacies -->
+                            <button type="button" onclick="alert('Chargement des pharmacies proches...')" class="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50/50 transition-colors focus:outline-none group">
+                                <div class="flex items-center space-x-3.5">
+                                    <div class="w-8 h-8 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center group-hover:bg-leaf-light group-hover:text-leaf-green transition-all">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4.5 h-4.5">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-semibold text-gray-700">Recherche pharmacies</span>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-gray-300">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ================= GROUP 6: PREFERENCES GENERALES ================= -->
+                    <div class="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden select-none">
+                        <div class="px-5 py-4 border-b border-gray-50 bg-gray-50/20">
+                            <h4 class="text-xs font-extrabold text-gray-400 uppercase tracking-widest">Préférences générales</h4>
+                        </div>
+                        <div class="divide-y divide-gray-50">
+                            <!-- Changer de langue (Switch EN / FR) -->
+                            <div class="px-5 py-4 flex items-center justify-between">
+                                <div class="flex items-center space-x-3.5">
+                                    <div class="w-8 h-8 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4.5 h-4.5">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 21a9.003 9.003 0 0 0 8.354-5.646 9.003 9.003 0 0 0-8.354.392m0-3.092a9.003 9.003 0 0 1 8.354-5.646 9.003 9.003 0 0 1-8.354.392M10.5 6.75H6.75M18 12h-7.5" />
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-semibold text-gray-700">Changer de langue</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <!-- Language toggle switch -->
+                                    <form action="/i18n/setlang/" method="POST" id="lang-switch-form" class="flex items-center space-x-1.5 text-xs font-bold text-gray-500">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="next" value="{{ request.path }}">
+                                        <span>EN</span>
+                                        <div class="relative inline-block w-10 mr-1 align-middle select-none transition duration-200 ease-in">
+                                            <input type="checkbox" name="language_toggle" id="toggle-lang" {% if request.LANGUAGE_CODE == 'fr' %}checked{% endif %} class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 border-gray-300 appearance-none cursor-pointer focus:outline-none"/>
+                                            <label for="toggle-lang" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-200 cursor-pointer"></label>
+                                        </div>
+                                        <span>FR</span>
+                                        <input type="hidden" name="language" id="lang-code-input" value="{{ request.LANGUAGE_CODE }}">
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- SE DECONNECTER (Rouge) -->
+                            <button type="button" onclick="document.getElementById('logout-form').submit();" class="w-full px-5 py-4 flex items-center justify-between hover:bg-red-50/20 transition-colors focus:outline-none group">
+                                <div class="flex items-center space-x-3.5">
+                                    <div class="w-8 h-8 rounded-xl bg-red-50 text-red-500 flex items-center justify-center transition-all">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4.5 h-4.5">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-bold text-red-500 uppercase tracking-wide">Se déconnecter</span>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-gray-300">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Hidden Logout Form -->
+                    <form action="{% url 'accounts:logout' %}" method="post" id="logout-form" class="hidden">
+                        {% csrf_token %}
+                    </form>
+
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- ================= MODALS FOR FORMS (Waspito Inspired) ================= -->
+    
+    <!-- Modal 1: Edit Profile -->
+    <div id="modal-profile" class="fixed inset-0 z-50 overflow-y-auto hidden">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <!-- Background overlay -->
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true" onclick="closeModal('modal-profile')">
+                <div class="absolute inset-0 bg-black/40 backdrop-blur-xs"></div>
+            </div>
+
+            <!-- This element is to trick the browser into centering the modal contents. -->
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <!-- Modal Panel -->
+            <div class="inline-block align-bottom bg-white rounded-3xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full select-none">
+                <div class="bg-white px-6 pt-6 pb-4 sm:p-6 border-b border-gray-100 flex items-center justify-between">
+                    <h3 class="text-md font-bold text-gray-900 font-poppins">Modifier mon profil</h3>
+                    <button type="button" onclick="closeModal('modal-profile')" class="text-gray-400 hover:text-gray-500 focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <form method="POST" enctype="multipart/form-data" class="p-6 space-y-5">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update_profile">
+
+                    <!-- Live Avatar Selection -->
+                    <div class="flex items-center space-x-5 justify-center sm:justify-start pb-2 border-b border-gray-50">
+                        <div class="relative w-20 h-20 rounded-full border border-gray-200 shadow-sm flex items-center justify-center bg-gray-50 flex-shrink-0">
+                            {% if user.profile_picture %}
+                                <img id="avatar-preview" class="w-full h-full rounded-full object-cover" src="{{ user.profile_picture.url }}" alt="{{ user.username }}">
+                            {% else %}
+                                <div id="avatar-initials" class="w-full h-full rounded-full bg-leaf-green text-white flex items-center justify-center font-bold text-2xl font-poppins">{{ user.username|slice:":2"|upper }}</div>
+                                <img id="avatar-preview" class="w-full h-full rounded-full object-cover hidden" src="" alt="preview">
+                            {% endif %}
+                        </div>
+                        <div class="space-y-1.5">
+                            <label for="id_profile_picture" class="cursor-pointer inline-block bg-leaf-green hover:bg-leaf-dark text-white font-bold text-[10px] uppercase tracking-wider py-2 px-3 rounded-xl shadow-sm transition-colors duration-200">
+                                Choisir une photo
+                            </label>
+                            <input type="file" name="profile_picture" id="id_profile_picture" accept="image/*" class="hidden">
+                            <p class="text-[9px] text-gray-400">Max 2 Mo. Format JPG, PNG.</p>
+                        </div>
+                    </div>
+
+                    <!-- Email input -->
+                    <div class="space-y-1">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Adresse email</label>
+                        <input type="email" name="email" value="{{ profile_form.email.value|default:user.email }}" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-leaf-green focus:border-transparent transition-all font-medium text-gray-700 bg-gray-50/30" required>
+                    </div>
+
+                    <!-- Téléphone input -->
+                    <div class="space-y-1">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Numéro de téléphone</label>
+                        <input type="tel" name="phone_number" value="{{ profile_form.phone_number.value|default:user.phone_number|default:'' }}" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-leaf-green focus:border-transparent transition-all font-medium text-gray-700 bg-gray-50/30">
+                    </div>
+
+                    <div class="pt-4 border-t border-gray-100 flex justify-end space-x-3">
+                        <button type="button" onclick="closeModal('modal-profile')" class="px-5 py-3 border border-gray-200 text-gray-500 font-bold rounded-xl text-xs uppercase tracking-wider hover:bg-gray-50 transition-colors">Annuler</button>
+                        <button type="submit" class="bg-leaf-green hover:bg-leaf-dark text-white font-bold px-5 py-3 rounded-xl shadow-sm hover:shadow-md transition-all text-xs uppercase tracking-wider">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Change Password -->
+    <div id="modal-password" class="fixed inset-0 z-50 overflow-y-auto hidden">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true" onclick="closeModal('modal-password')">
+                <div class="absolute inset-0 bg-black/40 backdrop-blur-xs"></div>
+            </div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div class="inline-block align-bottom bg-white rounded-3xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full select-none">
+                <div class="bg-white px-6 pt-6 pb-4 sm:p-6 border-b border-gray-100 flex items-center justify-between">
+                    <h3 class="text-md font-bold text-gray-900 font-poppins">Changer le mot de passe</h3>
+                    <button type="button" onclick="closeModal('modal-password')" class="text-gray-400 hover:text-gray-500 focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <form method="POST" class="p-6 space-y-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="change_password">
+
+                    <!-- Old Password -->
+                    <div class="space-y-1">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Mot de passe actuel</label>
+                        <div class="relative">
+                            <input type="password" name="old_password" class="password-input w-full border border-gray-200 rounded-xl pl-4 pr-11 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-leaf-green focus:border-transparent transition-all font-medium text-gray-700 bg-gray-50/30" required>
+                            <button type="button" class="toggle-password-btn absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-leaf-green focus:outline-none">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4.5 h-4.5 eye-closed"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" /></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4.5 h-4.5 hidden eye-open"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><circle cx="12" cy="12" r="3" /></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- New Password -->
+                    <div class="space-y-1">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Nouveau mot de passe</label>
+                        <div class="relative">
+                            <input type="password" name="new_password1" class="password-input w-full border border-gray-200 rounded-xl pl-4 pr-11 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-leaf-green focus:border-transparent transition-all font-medium text-gray-700 bg-gray-50/30" required>
+                            <button type="button" class="toggle-password-btn absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-leaf-green focus:outline-none">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4.5 h-4.5 eye-closed"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" /></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4.5 h-4.5 hidden eye-open"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><circle cx="12" cy="12" r="3" /></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div class="space-y-1">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Confirmation</label>
+                        <div class="relative">
+                            <input type="password" name="new_password2" class="password-input w-full border border-gray-200 rounded-xl pl-4 pr-11 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-leaf-green focus:border-transparent transition-all font-medium text-gray-700 bg-gray-50/30" required>
+                            <button type="button" class="toggle-password-btn absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-leaf-green focus:outline-none">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4.5 h-4.5 eye-closed"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" /></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4.5 h-4.5 hidden eye-open"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><circle cx="12" cy="12" r="3" /></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-gray-100 flex justify-end space-x-3">
+                        <button type="button" onclick="closeModal('modal-password')" class="px-5 py-3 border border-gray-200 text-gray-500 font-bold rounded-xl text-xs uppercase tracking-wider hover:bg-gray-50 transition-colors">Annuler</button>
+                        <button type="submit" class="bg-leaf-green hover:bg-leaf-dark text-white font-bold px-5 py-3 rounded-xl shadow-sm hover:shadow-md transition-all text-xs uppercase tracking-wider">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Health Profile -->
+    <div id="modal-health" class="fixed inset-0 z-50 overflow-y-auto hidden">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true" onclick="closeModal('modal-health')">
+                <div class="absolute inset-0 bg-black/40 backdrop-blur-xs"></div>
+            </div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div class="inline-block align-bottom bg-white rounded-3xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full select-none">
+                <div class="bg-white px-6 pt-6 pb-4 sm:p-6 border-b border-gray-100 flex items-center justify-between">
+                    <h3 class="text-md font-bold text-gray-900 font-poppins">Dossier médical</h3>
+                    <button type="button" onclick="closeModal('modal-health')" class="text-gray-400 hover:text-gray-500 focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <form onsubmit="event.preventDefault(); alert('Informations de santé enregistrées avec succès (Simulation) !'); closeModal('modal-health');" class="p-6 space-y-5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Groupe Sanguin -->
+                        <div class="space-y-1">
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Groupe Sanguin</label>
+                            <select class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-leaf-green focus:border-transparent transition-all font-medium text-gray-700 cursor-pointer">
+                                <option value="">Sélectionner</option>
+                                <option>A+</option>
+                                <option>A-</option>
+                                <option>B+</option>
+                                <option>B-</option>
+                                <option>AB+</option>
+                                <option>AB-</option>
+                                <option>O+</option>
+                                <option>O-</option>
+                            </select>
+                        </div>
+
+                        <!-- Allergies -->
+                        <div class="space-y-1">
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Allergies Principales</label>
+                            <input type="text" placeholder="Ex: Pénicilline, Arachides" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-leaf-green focus:border-transparent transition-all font-medium text-gray-700 bg-gray-50/30">
+                        </div>
+
+                        <!-- Taille -->
+                        <div class="space-y-1">
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Taille (cm)</label>
+                            <input type="number" placeholder="Ex: 175" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-leaf-green focus:border-transparent transition-all font-medium text-gray-700 bg-gray-50/30">
+                        </div>
+
+                        <!-- Poids -->
+                        <div class="space-y-1">
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Poids (kg)</label>
+                            <input type="number" placeholder="Ex: 72" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-leaf-green focus:border-transparent transition-all font-medium text-gray-700 bg-gray-50/30">
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-gray-100 flex justify-end space-x-3">
+                        <button type="button" onclick="closeModal('modal-health')" class="px-5 py-3 border border-gray-200 text-gray-500 font-bold rounded-xl text-xs uppercase tracking-wider hover:bg-gray-50 transition-colors">Annuler</button>
+                        <button type="submit" class="bg-leaf-green hover:bg-leaf-dark text-white font-bold px-5 py-3 rounded-xl shadow-sm hover:shadow-md transition-all text-xs uppercase tracking-wider">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Scripts for tabs, modals, language and password toggle -->
+    <script>
+        // Modal functions
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+            }
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            }
+        }
+
+        // Handle Django redirect errors (if error in password form, open password modal. If in profile form, open profile modal)
+        const activeTabValue = "{{ active_tab }}";
+        if (activeTabValue === 'security') {
+            openModal('modal-password');
+        } else if (activeTabValue === 'profile' && {% if form.errors or profile_form.errors %}true{% else %}false{% endif %}) {
+            openModal('modal-profile');
+        }
+
+        // Live preview of profile picture selection
+        const fileInput = document.getElementById('id_profile_picture');
+        const avatarPreview = document.getElementById('avatar-preview');
+        const avatarInitials = document.getElementById('avatar-initials');
+
+        if (fileInput) {
+            fileInput.addEventListener('change', () => {
+                const file = fileInput.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        if (avatarPreview) {
+                            avatarPreview.src = e.target.result;
+                            avatarPreview.classList.remove('hidden');
+                        }
+                        if (avatarInitials) {
+                            avatarInitials.classList.add('hidden');
+                        }
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Toggle password fields visibility
+        const toggleBtns = document.querySelectorAll('.toggle-password-btn');
+        toggleBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const container = btn.parentElement;
+                const passwordField = container.querySelector('.password-input');
+                const eyeOpenIcon = btn.querySelector('.eye-open');
+                const eyeClosedIcon = btn.querySelector('.eye-closed');
+
+                const isPassword = passwordField.type === 'password';
+                passwordField.type = isPassword ? 'text' : 'password';
+
+                if (isPassword) {
+                    eyeOpenIcon.classList.remove('hidden');
+                    eyeClosedIcon.classList.add('hidden');
+                } else {
+                    eyeOpenIcon.classList.add('hidden');
+                    eyeClosedIcon.classList.remove('hidden');
+                }
+            });
+        });
+
+        // Language Switch trigger (Waspito switch EN/FR style)
+        const toggleLang = document.getElementById('toggle-lang');
+        const langCodeInput = document.getElementById('lang-code-input');
+        const langSwitchForm = document.getElementById('lang-switch-form');
+
+        if (toggleLang) {
+            toggleLang.addEventListener('change', () => {
+                const isChecked = toggleLang.checked; // true means FR
+                langCodeInput.value = isChecked ? 'fr' : 'en';
+                langSwitchForm.submit();
+            });
+        }
+
+        // Date Display
+        const dateField = document.getElementById('current-date-field');
+        if (dateField) {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const today = new Date();
+            let dateStr = today.toLocaleDateString('fr-FR', options);
+            dateField.innerText = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+        }
+    </script>
+</body>
+</html>

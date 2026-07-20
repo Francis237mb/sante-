@@ -1,0 +1,20 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+{% block title %}{% translate "Téléconsultation Médicale - Fransick" %}{% endblock %}
+{% block content %}
+<section class="py-12 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <h1 class="text-3xl font-bold font-poppins text-medical-blue mb-8">{% translate "Mes Téléconsultations" %}</h1>
+        <div class="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 max-w-2xl text-center space-y-6">
+            <div class="w-20 h-20 bg-medical-light text-medical-blue rounded-full flex items-center justify-center mx-auto text-3xl">🎥</div>
+            <h3 class="text-xl font-bold text-gray-800">{% translate "Aucune consultation en cours ou programmée" %}</h3>
+            <p class="text-gray-500 max-w-md mx-auto text-sm leading-relaxed">
+                {% translate "Prenez rendez-vous avec l'un de nos praticiens pour une consultation en vidéo sécurisée." %}
+            </p>
+            <button onclick="alert('Redirection vers la prise de RDV')" class="bg-medical-blue hover:bg-medical-dark text-white font-semibold px-8 py-3 rounded-full transition-colors shadow">
+                {% translate "Prendre un rendez-vous" %}
+            </button>
+        </div>
+    </div>
+</section>
+{% endblock %}

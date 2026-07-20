@@ -1,0 +1,480 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Fransick{% endblock %}</title>
+    <!-- Google Fonts: Poppins & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        medical: {
+                            blue: '#1B5FA8',
+                            dark: '#14467d',
+                            light: '#e8f0fe',
+                        },
+                        leaf: {
+                            green: '#6DBE45',
+                            dark: '#569b35',
+                            light: '#f1fcf0',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        poppins: ['Poppins', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Custom style sheet for animations and glassmorphism -->
+    <link rel="stylesheet" href="{% static 'core/css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="font-sans text-gray-800 bg-gray-50 flex flex-col min-h-screen pt-28">
+
+    <!-- Splash Screen Overlay with Spinning Circle Loader -->
+    <div id="splash-screen" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center transition-all duration-700 ease-out">
+        <div class="flex flex-col items-center select-none text-center">
+            <!-- Spinner Ring around Logo -->
+            <div class="relative w-36 h-36 mb-6 flex items-center justify-center">
+                <!-- Spinning border circle -->
+                <div class="absolute inset-0 rounded-full border-4 border-medical-light border-t-medical-blue animate-spin"></div>
+                <!-- Logo inside -->
+                <div class="z-10 bg-white p-3.5 rounded-full shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-16 h-16">
+                        <!-- Heart-shaped stethoscope tube -->
+                        <path d="M37 28 C20 28 15 48 30 65 C40 75 50 82 50 82 C50 82 60 75 70 65 C85 48 80 28 63 28" fill="none" stroke="#1B5FA8" stroke-width="6" stroke-linecap="round"/>
+                        <!-- Earbuds -->
+                        <circle cx="37" cy="28" r="4.5" fill="#38BDF8" />
+                        <circle cx="63" cy="28" r="4.5" fill="#38BDF8" />
+                        <!-- Chestpiece bell -->
+                        <path d="M30 65 C22 55 15 55 12 60 C8 65 14 74 22 72" fill="none" stroke="#1B5FA8" stroke-width="6" stroke-linecap="round"/>
+                        <circle cx="22" cy="72" r="6" fill="#14467d" />
+                        <!-- Cross in Center -->
+                        <path d="M43 46 H57 M50 39 V53" stroke="#38BDF8" stroke-width="5.5" stroke-linecap="round" />
+                        <!-- Dark green triangle behind leaf -->
+                        <path d="M48 68 L58 60 L60 72 Z" fill="#15803d" />
+                        <!-- Leaf -->
+                        <path d="M50 82 C68 76 83 60 83 38 C83 55 70 70 50 82 Z" fill="#6DBE45" />
+                        <!-- White vein -->
+                        <path d="M50 82 C55 70 65 60 83 38" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+            </div>
+            <h1 class="text-4xl font-poppins font-bold tracking-wider text-medical-blue">Fransick</h1>
+            <div class="w-16 h-1 bg-leaf-green mt-2 rounded-full animate-width"></div>
+            <p class="text-gray-500 text-sm mt-3 font-sans font-medium">{% translate "Plateforme Médicale Intelligente d'Accompagnement" %}</p>
+        </div>
+    </div>
+
+    <!-- Centered Glass floating Navbar -->
+    <div class="fixed top-0 left-0 right-0 z-40 px-4 pt-4 flex justify-center pointer-events-none">
+        <header class="w-full max-w-6xl bg-white/75 backdrop-blur-md border border-white/30 shadow-lg rounded-full px-6 py-2.5 pointer-events-auto transition-all duration-300">
+            <nav class="flex items-center justify-between">
+                <!-- Brand / Logo -->
+                <a href="{% url 'core:home' %}" class="flex items-center group">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-9 h-9 inline-block align-middle mr-2 group-hover:scale-105 transition-transform duration-300">
+                        <path d="M37 28 C20 28 15 48 30 65 C40 75 50 82 50 82 C50 82 60 75 70 65 C85 48 80 28 63 28" fill="none" stroke="#1B5FA8" stroke-width="6" stroke-linecap="round"/>
+                        <circle cx="37" cy="28" r="4.5" fill="#38BDF8" />
+                        <circle cx="63" cy="28" r="4.5" fill="#38BDF8" />
+                        <path d="M30 65 C22 55 15 55 12 60 C8 65 14 74 22 72" fill="none" stroke="#1B5FA8" stroke-width="6" stroke-linecap="round"/>
+                        <circle cx="22" cy="72" r="6" fill="#14467d" />
+                        <path d="M43 46 H57 M50 39 V53" stroke="#38BDF8" stroke-width="5.5" stroke-linecap="round" />
+                        <path d="M48 68 L58 60 L60 72 Z" fill="#15803d" />
+                        <path d="M50 82 C68 76 83 60 83 38 C83 55 70 70 50 82 Z" fill="#6DBE45" />
+                        <path d="M50 82 C55 70 65 60 83 38" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                    <span class="font-poppins font-bold text-xl md:text-2xl text-medical-blue tracking-tight">Fransick</span>
+                </a>
+
+                <!-- Navigation Links (Desktop) -->
+                <div class="hidden md:flex items-center space-x-8 font-medium text-gray-600">
+                    <a href="{% url 'core:home' %}" class="hover:text-medical-blue hover:scale-105 transition-all">{% translate "Accueil" %}</a>
+                    <a href="{% url 'core:home' %}#about" class="hover:text-medical-blue hover:scale-105 transition-all">{% translate "À propos" %}</a>
+                    <a href="{% url 'accounts:login_patient' %}" class="hover:text-medical-blue hover:scale-105 transition-all">{% translate "Patient" %}</a>
+                    <a href="{% url 'accounts:login_medecin' %}" class="hover:text-medical-blue hover:scale-105 transition-all">{% translate "Médecin" %}</a>
+                </div>
+
+                <!-- Right Options: i18n + Login/User -->
+                <div class="flex items-center space-x-4">
+                    
+                    <!-- Language Selector -->
+                    <div class="relative hidden md:block">
+                        <form action="{% url 'set_language' %}" method="post" id="lang-form" class="inline">
+                            {% csrf_token %}
+                            <input name="next" type="hidden" value="{{ request.path }}">
+                            <select name="language" onchange="this.form.submit()" class="bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-full px-3 py-1.5 text-xs font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-medical-blue cursor-pointer transition-colors duration-200">
+                                {% get_current_language as LANGUAGE_CODE %}
+                                {% get_available_languages as LANGUAGES %}
+                                {% for lang in LANGUAGES %}
+                                    <option value="{{ lang.0 }}" {% if lang.0 == LANGUAGE_CODE %}selected{% endif %}>
+                                        {{ lang.0|upper }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </form>
+                    </div>
+
+                    <!-- Authentication -->
+                    <div class="hidden md:block">
+                        {% if user.is_authenticated %}
+                            <div class="relative" id="user-dropdown">
+                                <button type="button" class="flex items-center space-x-2 bg-gray-50 border border-gray-200 hover:border-medical-blue/30 rounded-full px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-white shadow-sm focus:outline-none transition-all duration-300" id="user-btn">
+                                    {% if user.profile_picture %}
+                                        <img class="h-6 w-6 rounded-full object-cover ring-1 ring-medical-blue/20" src="{{ user.profile_picture.url }}" alt="{{ user.username }}">
+                                    {% else %}
+                                        <div class="h-6 w-6 rounded-full bg-medical-blue text-white flex items-center justify-center text-xs font-bold">{{ user.username|slice:":2"|upper }}</div>
+                                    {% endif %}
+                                    <span class="max-w-[100px] truncate">{{ user.username }}</span>
+                                    <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                                <!-- User Menu Dropdown -->
+                                <div class="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-xl shadow-lg ring-1 ring-black/5 hidden" id="user-menu" role="menu">
+                                    <div class="py-1" role="none">
+                                        {% if user.role == 'patient' %}
+                                            <a href="{% url 'patients:dashboard' %}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors" role="menuitem">Tableau de bord Patient</a>
+                                        {% elif user.role == 'medecin' %}
+                                            <a href="{% url 'medecins:dashboard' %}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors" role="menuitem">Tableau de bord Médecin</a>
+                                        {% endif %}
+                                        <hr class="border-gray-100 my-1">
+                                        <form action="{% url 'accounts:logout' %}" method="post" class="block w-full">
+                                            {% csrf_token %}
+                                            <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium">{% translate "Déconnexion" %}</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <!-- Login Dropdown -->
+                            <div class="relative" id="login-dropdown">
+                                <button type="button" class="inline-flex items-center space-x-1.5 rounded-full bg-medical-blue hover:bg-medical-dark px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all duration-300 transform active:scale-95" id="login-btn">
+                                    <span>{% translate "Se connecter" %}</span>
+                                    <svg class="h-4.5 w-4.5 text-white/80" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                                <!-- Login Options Dropdown -->
+                                <div class="absolute right-0 mt-2 w-52 bg-white border border-gray-100 rounded-xl shadow-xl ring-1 ring-black/5 hidden" id="login-menu" role="menu">
+                                    <div class="py-1.5" role="none">
+                                        <div class="px-4 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider">Connexion en tant que :</div>
+                                        <a href="{% url 'accounts:login_patient' %}" class="flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-medical-light/40 hover:text-medical-blue transition-all" role="menuitem">
+                                            <span class="w-2.5 h-2.5 rounded-full bg-leaf-green"></span>
+                                            <span>{% translate "Patient" %}</span>
+                                        </a>
+                                        <a href="{% url 'accounts:login_medecin' %}" class="flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-medical-light/40 hover:text-medical-blue transition-all" role="menuitem">
+                                            <span class="w-2.5 h-2.5 rounded-full bg-medical-blue"></span>
+                                            <span>{% translate "Médecin" %}</span>
+                                        </a>
+                                        <a href="{% url 'accounts:login_pharmacie' %}" class="flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-medical-light/40 hover:text-medical-blue transition-all" role="menuitem">
+                                            <span class="w-2.5 h-2.5 rounded-full bg-orange-400"></span>
+                                            <span>{% translate "Pharmacie" %}</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Mobile Menu Button (Burger) -->
+                    <button type="button" id="mobile-menu-btn" class="md:hidden flex items-center justify-center w-10 h-10 rounded-full text-gray-500 hover:text-medical-blue hover:bg-medical-light/40 border border-gray-200/50 bg-gray-50/50 focus:outline-none transition-all duration-200" aria-label="Toggle Menu">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5.5 h-5.5" id="burger-icon">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5.5 h-5.5 hidden" id="close-icon">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Mobile Navigation Menu Dropdown -->
+        <div id="mobile-menu" class="w-full max-w-6xl mt-2 bg-white/95 backdrop-blur-md border border-white/30 shadow-xl rounded-3xl p-5 pointer-events-auto hidden transition-all duration-300 ease-in-out opacity-0 -translate-y-4 md:hidden">
+            <div class="space-y-6">
+                <!-- Navigation Section -->
+                <div>
+                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 px-1">{% translate "Navigation" %}</div>
+                    <div class="grid grid-cols-1 gap-2">
+                        <!-- Accueil -->
+                        <a href="{% url 'core:home' %}" class="mobile-link flex items-center space-x-3.5 px-4 py-3 rounded-2xl bg-gray-50/60 hover:bg-medical-light/40 hover:text-medical-blue text-sm font-semibold text-gray-700 transition-all">
+                            <div class="w-8 h-8 rounded-xl bg-medical-blue/10 text-medical-blue flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4.5 h-4.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                                </svg>
+                            </div>
+                            <span>{% translate "Accueil" %}</span>
+                        </a>
+
+                        <!-- À propos -->
+                        <a href="{% url 'core:home' %}#about" class="mobile-link flex items-center space-x-3.5 px-4 py-3 rounded-2xl bg-gray-50/60 hover:bg-medical-light/40 hover:text-medical-blue text-sm font-semibold text-gray-700 transition-all">
+                            <div class="w-8 h-8 rounded-xl bg-medical-blue/10 text-medical-blue flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4.5 h-4.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 111.083.986l-1.083 1.354A.75.75 0 0110.5 13.5v-1.875c0-.414.336-.75.75-.75zM12 8.25a.75.75 0 100-1.5.75.75 0 000 1.5zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <span>{% translate "À propos" %}</span>
+                        </a>
+
+                        <!-- Patient -->
+                        <a href="{% url 'accounts:login_patient' %}" class="mobile-link flex items-center space-x-3.5 px-4 py-3 rounded-2xl bg-gray-50/60 hover:bg-leaf-light/60 hover:text-leaf-green text-sm font-semibold text-gray-700 transition-all">
+                            <div class="w-8 h-8 rounded-xl bg-leaf-green/10 text-leaf-green flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4.5 h-4.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0zM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                </svg>
+                            </div>
+                            <span>{% translate "Patient" %}</span>
+                        </a>
+
+                        <!-- Médecin -->
+                        <a href="{% url 'accounts:login_medecin' %}" class="mobile-link flex items-center space-x-3.5 px-4 py-3 rounded-2xl bg-gray-50/60 hover:bg-medical-light/40 hover:text-medical-blue text-sm font-semibold text-gray-700 transition-all">
+                            <div class="w-8 h-8 rounded-xl bg-medical-blue/10 text-medical-blue flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4.5 h-4.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.03 0 1.9.693 2.166 1.638m-7.377 12.408l-1.428-1.428m0 0A3 3 0 106.12 11.23L7.548 12.66m-1.429-1.43a3 3 0 004.243 4.242" />
+                                </svg>
+                            </div>
+                            <span>{% translate "Médecin" %}</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Account/Services Section -->
+                <div>
+                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 px-1">{% translate "Espaces & Connexion" %}</div>
+                    {% if user.is_authenticated %}
+                        <div class="bg-gray-50/50 border border-gray-100 rounded-2xl p-4 flex flex-col space-y-3">
+                            <div class="flex items-center space-x-3">
+                                {% if user.profile_picture %}
+                                    <img class="h-9 w-9 rounded-full object-cover ring-2 ring-medical-blue/20" src="{{ user.profile_picture.url }}" alt="{{ user.username }}">
+                                {% else %}
+                                    <div class="h-9 w-9 rounded-full bg-medical-blue text-white flex items-center justify-center text-sm font-bold shadow-inner">{{ user.username|slice:":2"|upper }}</div>
+                                {% endif %}
+                                <div>
+                                    <div class="text-sm font-bold text-gray-800">{{ user.username }}</div>
+                                    <div class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">{{ user.get_role_display }}</div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 gap-2 pt-1">
+                                {% if user.role == 'patient' %}
+                                    <a href="{% url 'patients:dashboard' %}" class="mobile-link w-full text-center py-2.5 px-4 rounded-xl bg-medical-blue text-white text-xs font-bold shadow-sm transition-all hover:bg-medical-dark">{% translate "Tableau de Bord Patient" %}</a>
+                                {% elif user.role == 'medecin' %}
+                                    <a href="{% url 'medecins:dashboard' %}" class="mobile-link w-full text-center py-2.5 px-4 rounded-xl bg-medical-blue text-white text-xs font-bold shadow-sm transition-all hover:bg-medical-dark">{% translate "Tableau de Bord Médecin" %}</a>
+                                {% endif %}
+                                <form action="{% url 'accounts:logout' %}" method="post" class="block w-full">
+                                    {% csrf_token %}
+                                    <button type="submit" class="w-full text-center py-2.5 px-4 rounded-xl border border-red-200 text-red-500 bg-red-50/40 text-xs font-bold hover:bg-red-50 transition-all">{% translate "Déconnexion" %}</button>
+                                </form>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="grid grid-cols-3 gap-2.5">
+                            <a href="{% url 'accounts:login_patient' %}" class="mobile-link flex flex-col items-center justify-center p-3 rounded-2xl border border-gray-100 hover:border-leaf-green hover:bg-leaf-light/30 transition-all text-center group bg-gray-50/20">
+                                <span class="w-2.5 h-2.5 rounded-full bg-leaf-green shadow-sm group-hover:scale-110 transition-transform mb-1.5"></span>
+                                <span class="text-[10px] font-bold text-gray-600">Patient</span>
+                            </a>
+                            <a href="{% url 'accounts:login_medecin' %}" class="mobile-link flex flex-col items-center justify-center p-3 rounded-2xl border border-gray-100 hover:border-medical-blue hover:bg-medical-light/30 transition-all text-center group bg-gray-50/20">
+                                <span class="w-2.5 h-2.5 rounded-full bg-medical-blue shadow-sm group-hover:scale-110 transition-transform mb-1.5"></span>
+                                <span class="text-[10px] font-bold text-gray-600">Médecin</span>
+                            </a>
+                            <a href="{% url 'accounts:login_pharmacie' %}" class="mobile-link flex flex-col items-center justify-center p-3 rounded-2xl border border-gray-100 hover:border-orange-400 hover:bg-orange-50/20 transition-all text-center group bg-gray-50/20">
+                                <span class="w-2.5 h-2.5 rounded-full bg-orange-400 shadow-sm group-hover:scale-110 transition-transform mb-1.5"></span>
+                                <span class="text-[10px] font-bold text-gray-600">Pharmacie</span>
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Language Section -->
+                <div class="pt-4 border-t border-gray-100">
+                    <div class="flex items-center justify-between px-1">
+                        <div class="flex items-center space-x-2 text-gray-500">
+                            <!-- Globe Icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-.856.12-1.685.342-2.47" />
+                            </svg>
+                            <span class="text-xs font-bold uppercase tracking-wider text-gray-400">{% translate "Langue de l'interface" %}</span>
+                        </div>
+                        <form action="{% url 'set_language' %}" method="post" class="inline">
+                            {% csrf_token %}
+                            <input name="next" type="hidden" value="{{ request.path }}">
+                            <select name="language" onchange="this.form.submit()" class="bg-gray-100/80 hover:bg-gray-200 border border-gray-200/60 rounded-full px-3.5 py-1.5 text-xs font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-medical-blue cursor-pointer transition-all duration-200">
+                                {% get_current_language as LANGUAGE_CODE %}
+                                {% get_available_languages as LANGUAGES %}
+                                {% for lang in LANGUAGES %}
+                                    <option value="{{ lang.0 }}" {% if lang.0 == LANGUAGE_CODE %}selected{% endif %}>
+                                        {{ lang.0|upper }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 pt-16 pb-8 border-t border-gray-800">
+        <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
+            <!-- Brand -->
+            <div class="md:col-span-1">
+                <div class="flex items-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-8 h-8 mr-2">
+                        <path d="M50 80 C15 50 10 25 35 12 C45 6 50 15 50 15 C50 15 55 6 65 12 C90 25 85 50 50 80 Z" fill="none" stroke="#e8f0fe" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="35" cy="12" r="4.5" fill="#e8f0fe" />
+                        <circle cx="65" cy="12" r="4.5" fill="#e8f0fe" />
+                        <path d="M43 45 H57 M50 38 V52" stroke="#e8f0fe" stroke-width="6" stroke-linecap="round" />
+                        <path d="M50 80 C68 75 80 62 80 42 C80 57 68 70 50 80 Z" fill="#6DBE45" />
+                        <path d="M50 80 C55 65 65 55 80 42" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+                    </svg>
+                    <span class="font-poppins font-bold text-xl text-white">Fransick</span>
+                </div>
+                <p class="text-sm leading-relaxed mb-4">
+                    {% translate "Accompagnement thérapeutique innovant et accès intelligent aux soins et aux services pharmaceutiques de proximité." %}
+                </p>
+            </div>
+            
+            <!-- Quick Links -->
+            <div>
+                <h3 class="text-white font-poppins font-semibold text-lg mb-4">{% translate "Plateforme" %}</h3>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="{% url 'core:home' %}" class="hover:text-white transition-colors">{% translate "Accueil" %}</a></li>
+                    <li><a href="{% url 'core:about' %}" class="hover:text-white transition-colors">{% translate "À propos de nous" %}</a></li>
+                    <li><a href="{% url 'patients:dashboard' %}" class="hover:text-white transition-colors">{% translate "Espace Patient" %}</a></li>
+                    <li><a href="{% url 'medecins:dashboard' %}" class="hover:text-white transition-colors">{% translate "Espace Médecin" %}</a></li>
+                </ul>
+            </div>
+            
+            <!-- Services -->
+            <div>
+                <h3 class="text-white font-poppins font-semibold text-lg mb-4">{% translate "Services" %}</h3>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="{% url 'consultations:list' %}" class="hover:text-white transition-colors">{% translate "Téléconsultation" %}</a></li>
+                    <li><a href="{% url 'ordonnances:list' %}" class="hover:text-white transition-colors">{% translate "Ordonnance Électronique" %}</a></li>
+                    <li><a href="{% url 'pharmacies:list' %}" class="hover:text-white transition-colors">{% translate "Pharmacies Proches" %}</a></li>
+                    <li><a href="{% url 'ia_assistant:chat' %}" class="hover:text-white transition-colors">{% translate "Assistant Médical IA" %}</a></li>
+                </ul>
+            </div>
+            
+            <!-- Contact -->
+            <div>
+                <h3 class="text-white font-poppins font-semibold text-lg mb-4">{% translate "Contact & Support" %}</h3>
+                <p class="text-sm leading-relaxed mb-2">Email : contact@fransick.com</p>
+                <p class="text-sm leading-relaxed">Tel : +33 (0) 1 23 45 67 89</p>
+            </div>
+        </div>
+        <div class="container mx-auto px-4 mt-12 pt-8 border-t border-gray-800 text-center text-xs">
+            &copy; 2026 Fransick. Tous droits réservés.
+        </div>
+    </footer>
+
+    <!-- Dropdowns JavaScript -->
+    <script>
+        // Dropdown toggle logic
+        function setupDropdown(btnId, menuId) {
+            const btn = document.getElementById(btnId);
+            const menu = document.getElementById(menuId);
+            if (!btn || !menu) return;
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                menu.classList.toggle('hidden');
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (!menu.contains(e.target) && e.target !== btn) {
+                    menu.classList.add('hidden');
+                }
+            });
+        }
+        
+        setupDropdown('login-btn', 'login-menu');
+        setupDropdown('user-btn', 'user-menu');
+
+        // Splash screen fadeout logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const splash = document.getElementById('splash-screen');
+            if (splash) {
+                document.body.style.overflow = 'hidden';
+                setTimeout(() => {
+                    splash.classList.add('opacity-0');
+                    splash.style.pointerEvents = 'none';
+                    setTimeout(() => {
+                        splash.style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                    }, 700);
+                }, 1000);
+            }
+        });
+
+        // Mobile Menu Logic
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const burgerIcon = document.getElementById('burger-icon');
+        const closeIcon = document.getElementById('close-icon');
+        
+        if (mobileMenuBtn && mobileMenu) {
+            mobileMenuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isHidden = mobileMenu.classList.contains('hidden');
+                
+                if (isHidden) {
+                    mobileMenu.classList.remove('hidden');
+                    mobileMenu.offsetHeight; // force reflow
+                    mobileMenu.classList.remove('opacity-0', '-translate-y-4');
+                    mobileMenu.classList.add('opacity-100', 'translate-y-0');
+                    burgerIcon.classList.add('hidden');
+                    closeIcon.classList.remove('hidden');
+                } else {
+                    closeMenu();
+                }
+            });
+            
+            const mobileLinks = mobileMenu.querySelectorAll('.mobile-link');
+            mobileLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    closeMenu();
+                });
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (!mobileMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+                    closeMenu();
+                }
+            });
+        }
+        
+        function closeMenu() {
+            if (!mobileMenu) return;
+            mobileMenu.classList.remove('opacity-100', 'translate-y-0');
+            mobileMenu.classList.add('opacity-0', '-translate-y-4');
+            burgerIcon.classList.remove('hidden');
+            closeIcon.classList.add('hidden');
+            
+            setTimeout(() => {
+                if (mobileMenu.classList.contains('opacity-0')) {
+                    mobileMenu.classList.add('hidden');
+                }
+            }, 300);
+        }
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

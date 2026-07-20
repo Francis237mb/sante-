@@ -1,0 +1,702 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% translate "Espace Médecin - Fransick" %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'medical-blue': '#1B5FA8',
+                        'medical-light': '#EBF3FC',
+                        'medical-dark': '#14467d',
+                        'leaf-green': '#6DBE45',
+                        'leaf-light': '#F0F9EB',
+                        'leaf-dark': '#559c30',
+                    },
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif'],
+                        'inter': ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-gray-50/80 font-inter text-gray-800 antialiased overflow-hidden">
+
+    <!-- App Shell Layout -->
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- ================= DESKTOP SIDEBAR ================= -->
+        <aside class="hidden lg:flex flex-col w-64 bg-white border-r border-gray-200/80 flex-shrink-0 sticky top-0 h-screen">
+            <!-- Sidebar Header / Logo -->
+            <div class="h-20 flex items-center px-6 border-b border-gray-100 select-none">
+                <a href="{% url 'core:home' %}" class="flex items-center space-x-2.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-8 h-8 text-medical-blue">
+                        <path d="M37 28 C20 28 15 48 30 65 C40 75 50 82 50 82 C50 82 60 75 70 65 C85 48 80 28 63 28" fill="none" stroke="#1B5FA8" stroke-width="6" stroke-linecap="round"/>
+                        <circle cx="37" cy="28" r="4.5" fill="#38BDF8" />
+                        <circle cx="63" cy="28" r="4.5" fill="#38BDF8" />
+                        <path d="M30 65 C22 55 15 55 12 60 C8 65 14 74 22 72" fill="none" stroke="#1B5FA8" stroke-width="6" stroke-linecap="round"/>
+                        <circle cx="22" cy="72" r="6" fill="#14467d" />
+                        <path d="M43 46 H57 M50 39 V53" stroke="#38BDF8" stroke-width="5.5" stroke-linecap="round" />
+                        <path d="M48 68 L58 60 L60 72 Z" fill="#15803d" />
+                        <path d="M50 82 C68 76 83 60 83 38 C83 55 70 70 50 82 Z" fill="#6DBE45" />
+                        <path d="M50 82 C55 70 65 60 83 38" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                    <span class="font-poppins font-bold text-xl text-medical-blue tracking-tight">Fransick</span>
+                </a>
+            </div>
+
+            <!-- Active Doctor Profile Summary -->
+            <div class="px-5 py-6 border-b border-gray-100 flex items-center space-x-3.5 select-none">
+                {% if user.profile_picture %}
+                    <img class="h-11 w-11 rounded-full object-cover ring-2 ring-medical-blue/20" src="{{ user.profile_picture.url }}" alt="{{ user.username }}">
+                {% else %}
+                    <div class="h-11 w-11 rounded-xl bg-medical-blue text-white flex items-center justify-center font-bold font-poppins text-lg shadow-sm">Dr</div>
+                {% endif %}
+                <div class="overflow-hidden">
+                    <h4 class="text-sm font-bold text-gray-800 truncate">Dr. {{ user.username }}</h4>
+                    <span class="inline-block bg-medical-blue/10 text-medical-blue font-bold text-[9px] uppercase tracking-wider px-2.5 py-0.5 rounded-full mt-1">
+                        {% translate "Médecin Praticien" %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto custom-scrollbar select-none">
+                <!-- Dashboard (Active) -->
+                <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-2xl bg-medical-light text-medical-blue font-bold text-sm transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+                    </svg>
+                    <span>{% translate "Tableau de Bord" %}</span>
+                </a>
+
+                <!-- Mes Consultations -->
+                <a href="#" onclick="alert('Gestion des consultations en cours...')" class="flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-medical-blue hover:bg-gray-50 font-semibold text-sm transition-all group">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 group-hover:scale-105 transition-transform">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+                    </svg>
+                    <span>{% translate "Mes Consultations" %}</span>
+                </a>
+
+                <!-- Patient Dossiers -->
+                <a href="#" onclick="alert('Accès aux dossiers patients en cours...')" class="flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-medical-blue hover:bg-gray-50 font-semibold text-sm transition-all group">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 group-hover:scale-105 transition-transform">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6 0 3.375 3.375 0 0 1 6 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+                    </svg>
+                    <span>{% translate "Mes Patients" %}</span>
+                </a>
+
+                <!-- Ordonnances & Actes -->
+                <a href="#" onclick="alert('Rédaction d\'ordonnance en cours...')" class="flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-medical-blue hover:bg-gray-50 font-semibold text-sm transition-all group">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 group-hover:scale-105 transition-transform">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5A3.375 3.375 0 0 0 10.125 2.25H9.75m0 18.75h-1.5A3.375 3.375 0 0 1 4.875 17.625v-12A3.375 3.375 0 0 1 8.25 2.25h1.5a3 3 0 0 1 3 3v2.25c0 .828.672 1.5 1.5 1.5h2.25a3 3 0 0 1 3 3v3.75m-6A3 3 0 0 0 15 18a3 3 0 0 0 3-3m0 0v1.5a3 3 0 0 1-3 3m0-3v1.5a3 3 0 0 1-3 3" />
+                    </svg>
+                    <span>{% translate "Ordonnances" %}</span>
+                </a>
+
+                <!-- Assistant IA Médical -->
+                <a href="{% url 'ia_assistant:chat' %}" class="flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-medical-blue hover:bg-gray-50 font-semibold text-sm transition-all group">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 text-leaf-green group-hover:scale-105 transition-transform">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 21l-.813-5.096L3 15l5.187-.813L9 9l.813 5.187L15 15l-5.187.813ZM18 7.5 17.25 12l-.75-4.5L12 6.75l4.5-.75.75-4.5.75 4.5 4.5.75-4.5.75-.75 4.5ZM3 3v2.25h2.25v1.5H3V9H1.5V6.75H0v-1.5h1.5V3H3Z" />
+                    </svg>
+                    <span>{% translate "Assistant IA Médical" %}</span>
+                </a>
+
+                <!-- Availability Agenda -->
+                <a href="#" onclick="alert('Gestion de l\'agenda médical en cours...')" class="flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-medical-blue hover:bg-gray-50 font-semibold text-sm transition-all group">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 group-hover:scale-105 transition-transform">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                    </svg>
+                    <span>{% translate "Mon Agenda & Disponibilités" %}</span>
+                </a>
+            </nav>
+
+            <!-- Logout Button (Footer of Sidebar) -->
+            <div class="p-4 border-t border-gray-100">
+                <form action="{% url 'accounts:logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-red-500 bg-red-50/20 border border-red-100 hover:bg-red-50 font-bold text-sm transition-all focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+                        </svg>
+                        <span>{% translate "Déconnexion" %}</span>
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- ================= MOBILE BOTTOM NAVIGATION (WhatsApp Style) ================= -->
+        <div class="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/95 backdrop-blur-md border-t border-gray-200/80 flex items-center justify-around px-2 z-40 shadow-lg select-none">
+            <!-- Home / Dashboard -->
+            <a href="#" class="flex flex-col items-center justify-center flex-1 py-1 text-medical-blue font-bold transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+                </svg>
+                <span class="text-[9px] mt-0.5 font-medium">{% translate "Accueil" %}</span>
+            </a>
+            
+            <!-- Consultations -->
+            <a href="#" onclick="alert('Consultations...')" class="flex flex-col items-center justify-center flex-1 py-1 text-gray-400 hover:text-medical-blue transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+                </svg>
+                <span class="text-[9px] mt-0.5 font-medium">{% translate "Consultations" %}</span>
+            </a>
+
+            <!-- Central AI Button -->
+            <a href="{% url 'ia_assistant:chat' %}" class="flex flex-col items-center justify-center flex-1 py-1 text-gray-400 hover:text-medical-blue transition-all relative">
+                <div class="-mt-8 w-12 h-12 rounded-full bg-gradient-to-r from-medical-blue to-medical-dark text-white flex items-center justify-center shadow-md transform active:scale-95 transition-transform duration-200 border-4 border-gray-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 21l-.813-5.096L3 15l5.187-.813L9 9l.813 5.187L15 15l-5.187.813Z" />
+                    </svg>
+                </div>
+                <span class="text-[9px] mt-1 font-bold text-gray-600">{% translate "Assistant IA" %}</span>
+            </a>
+
+            <!-- Patients -->
+            <a href="#" onclick="alert('Accès dossiers patients...')" class="flex flex-col items-center justify-center flex-1 py-1 text-gray-400 hover:text-medical-blue transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6 0 3.375 3.375 0 0 1 6 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+                </svg>
+                <span class="text-[9px] mt-0.5 font-medium">{% translate "Patients" %}</span>
+            </a>
+
+            <!-- Déconnexion -->
+            <a href="#" onclick="document.getElementById('mobile-logout-form').submit();" class="flex flex-col items-center justify-center flex-1 py-1 text-red-400 hover:text-red-600 transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+                </svg>
+                <span class="text-[9px] mt-0.5 font-medium">{% translate "Quitter" %}</span>
+            </a>
+        </div>
+        <form action="{% url 'accounts:logout' %}" method="post" id="mobile-logout-form" class="hidden">{% csrf_token %}</form>
+
+        <!-- ================= MAIN LAYOUT SPACE ================= -->
+        <div class="flex-1 flex flex-col min-h-screen overflow-hidden">
+            
+            <!-- Dashboard Top Header Bar -->
+            <header class="h-20 bg-white border-b border-gray-200/80 px-4 md:px-8 flex items-center justify-between flex-shrink-0 z-30 select-none">
+                <div>
+                    <h2 class="text-base md:text-lg font-bold font-poppins text-gray-800 flex items-center">
+                        {% translate "Espace Médical Praticien" %}
+                    </h2>
+                    <p class="text-[10px] md:text-xs text-gray-400 font-semibold" id="current-date-field"></p>
+                </div>
+
+                <div class="flex items-center space-x-4 relative">
+                    <!-- Status Indicator Toggle (En Ligne / Consultation) -->
+                    <div class="flex items-center space-x-2 bg-leaf-light border border-leaf-green/30 text-leaf-green font-bold text-xs px-3 py-1.5 rounded-full shadow-xs">
+                        <span class="w-2 h-2 rounded-full bg-leaf-green animate-pulse"></span>
+                        <span>{% translate "En ligne & disponible" %}</span>
+                    </div>
+
+                    <!-- Notification Bell Trigger -->
+                    <button type="button" onclick="toggleDocNotificationsPanel()" class="w-10 h-10 rounded-full border border-gray-200/50 bg-gray-50/50 hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-medical-blue transition-all relative focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                        </svg>
+                        <span id="doc-notif-badge" class="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center border-2 border-white shadow-xs">4</span>
+                    </button>
+
+                    <!-- Doctor Notifications Dropdown Panel -->
+                    <div id="doc-notifications-panel" class="hidden absolute right-0 top-12 w-80 sm:w-96 bg-white border border-gray-100 rounded-3xl shadow-2xl z-50 overflow-hidden select-none">
+                        <div class="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                            <h4 class="text-xs font-bold font-poppins text-gray-800 flex items-center space-x-1.5">
+                                <span>Notifications Praticien</span>
+                                <span id="doc-notif-count-badge" class="bg-red-100 text-red-600 px-2 py-0.5 rounded-full text-[9px] font-extrabold">4 nouvelles</span>
+                            </h4>
+                            <button type="button" onclick="markAllDocNotificationsAsRead()" class="text-[10px] text-medical-blue hover:underline font-bold">Tout marquer comme lu</button>
+                        </div>
+                        
+                        <!-- Notifications List -->
+                        <div id="doc-notif-list-container" class="max-h-72 overflow-y-auto custom-scrollbar p-2 space-y-2">
+                            <div class="p-3 rounded-2xl bg-blue-50/40 border border-blue-100 flex items-start space-x-3">
+                                <div class="w-8 h-8 rounded-xl bg-medical-blue text-white flex items-center justify-center flex-shrink-0 font-bold text-xs shadow-xs">📅</div>
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <h5 class="text-xs font-bold text-gray-800">Demande de Consultation Vidéo</h5>
+                                        <span class="text-[9px] text-gray-400 font-normal">Il y a 5 min</span>
+                                    </div>
+                                    <p class="text-[11px] text-gray-600 mt-0.5 leading-snug">Patient Francis M. a réservé un créneau pour demain à 10:00.</p>
+                                </div>
+                            </div>
+
+                            <div class="p-3 rounded-2xl bg-purple-50/40 border border-purple-100 flex items-start space-x-3">
+                                <div class="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center flex-shrink-0 font-bold text-xs shadow-xs">💬</div>
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <h5 class="text-xs font-bold text-gray-800">Nouveau Commentaire Patient</h5>
+                                        <span class="text-[9px] text-gray-400 font-normal">Il y a 30 min</span>
+                                    </div>
+                                    <p class="text-[11px] text-gray-600 mt-0.5 leading-snug">Un patient a posé une question sous votre vidéo "Don de Sang".</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Empty State Container -->
+                        <div id="doc-notif-empty-state" class="hidden p-8 text-center space-y-2">
+                            <div class="w-12 h-12 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mx-auto text-xl">🔔</div>
+                            <h5 class="text-xs font-bold text-gray-700">Aucune notification en attente</h5>
+                            <p class="text-[10px] text-gray-400">Toutes les demandes de rendez-vous et questions sont traitées.</p>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content Scroll Area -->
+            <main class="flex-1 overflow-y-auto p-4 md:p-8 pb-24 lg:pb-8 custom-scrollbar">
+                
+                <!-- Welcome Banner -->
+                <div class="bg-gradient-to-r from-medical-blue to-medical-dark text-white rounded-3xl p-6 md:p-8 shadow-sm flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0 relative overflow-hidden mb-8 select-none">
+                    <div class="absolute -top-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-2xl"></div>
+                    <div class="z-10 text-center md:text-left space-y-2">
+                        <div class="inline-block bg-white/10 text-white font-bold text-[10px] uppercase tracking-wider px-3 py-1 rounded-full border border-white/10 mb-1">
+                            Portail Praticien Santé
+                        </div>
+                        <h2 class="text-2xl md:text-3xl font-extrabold font-poppins leading-tight">
+                            Bonjour, Dr. {{ user.username }} !
+                        </h2>
+                        <p class="text-blue-100 text-sm max-w-md font-medium">
+                            Vous avez 4 consultations vidéo programmées aujourd'hui. Vos créneaux de l'après-midi sont ouverts à la réservation.
+                        </p>
+                    </div>
+                    <div class="z-10 flex-shrink-0 flex flex-col sm:flex-row gap-3">
+                        <button type="button" onclick="openPublishVideoModal()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs uppercase tracking-wider px-5 py-3.5 rounded-2xl shadow-md transition-all flex items-center justify-center space-x-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
+                            <span>Publier Conseil Vidéo</span>
+                        </button>
+                        <button type="button" onclick="alert('Ouverture de la salle d\'attente virtuelle...')" class="bg-white hover:bg-medical-light text-medical-blue font-bold text-xs uppercase tracking-wider px-5 py-3.5 rounded-2xl shadow-md transition-all block text-center">
+                            Salle d'attente (2)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KPI Metric Cards Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 select-none">
+                    <!-- Consultations aujourd'hui -->
+                    <div class="bg-white border border-gray-100 rounded-3xl p-5 shadow-xs flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-2xl bg-medical-light text-medical-blue flex items-center justify-center flex-shrink-0 font-bold">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">RDV Aujourd'hui</span>
+                            <div class="text-xl font-extrabold text-gray-800 font-poppins mt-0.5">8 Patients</div>
+                            <span class="text-[10px] text-leaf-green font-bold flex items-center mt-1">
+                                4 terminés • 4 à venir
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Patients Suivis -->
+                    <div class="bg-white border border-gray-100 rounded-3xl p-5 shadow-xs flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-2xl bg-leaf-light text-leaf-green flex items-center justify-center flex-shrink-0 font-bold">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6 0 3.375 3.375 0 0 1 6 0Z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">Patients Suivis</span>
+                            <div class="text-xl font-extrabold text-gray-800 font-poppins mt-0.5">142 Actifs</div>
+                            <span class="text-[10px] text-leaf-green font-bold flex items-center mt-1">
+                                +12 ce mois-ci
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Note Patients -->
+                    <div class="bg-white border border-gray-100 rounded-3xl p-5 shadow-xs flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-2xl bg-orange-50 text-orange-500 flex items-center justify-center flex-shrink-0 font-bold">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385c.116.488-.42.879-.844.628l-4.69-2.783a.563.563 0 0 0-.58 0l-4.69 2.783c-.424.25-.96-.14-.844-.628l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602c-.38-.325-.178-.948.32-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">Avis Patients</span>
+                            <div class="text-xl font-extrabold text-gray-800 font-poppins mt-0.5">4.9 ★ / 5</div>
+                            <span class="text-[10px] text-gray-400 font-bold flex items-center mt-1">
+                                Basé sur 38 évaluations
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Honoraires du Mois -->
+                    <div class="bg-white border border-gray-100 rounded-3xl p-5 shadow-xs flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0 font-bold">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-6h6m-9 6.75h12a2.25 2.25 0 0 0 2.25-2.25V7.5A2.25 2.25 0 0 0 18.75 5.25H5.25A2.25 2.25 0 0 0 3 7.5v9.75A2.25 2.25 0 0 0 5.25 18.75Z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">Revenus du mois</span>
+                            <div class="text-xl font-extrabold text-gray-800 font-poppins mt-0.5">450 000 FCFA</div>
+                            <span class="text-[10px] text-leaf-green font-bold flex items-center mt-1">
+                                Versé le 30 du mois
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    
+                    <!-- Left: Appointments Today & Patient Files (8 Cols) -->
+                    <div class="lg:col-span-8 space-y-8">
+                        
+                        <!-- Today's Consultations List -->
+                        <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-xs">
+                            <div class="flex items-center justify-between mb-5 border-b border-gray-50 pb-4">
+                                <h3 class="text-md font-bold text-gray-800 font-poppins flex items-center">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-medical-blue mr-2 shadow-xs"></span>
+                                    {% translate "Consultations programmées aujourd'hui" %}
+                                </h3>
+                                <span class="bg-medical-light text-medical-blue text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">En direct</span>
+                            </div>
+
+                            <div class="space-y-4">
+                                <!-- Consultation Item 1 -->
+                                <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100/60 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:shadow-xs transition-shadow">
+                                    <div class="flex items-center space-x-3.5">
+                                        <div class="w-11 h-11 rounded-2xl bg-leaf-green/10 text-leaf-green flex items-center justify-center font-bold text-sm font-poppins shadow-xs">PM</div>
+                                        <div>
+                                            <h5 class="text-sm font-bold text-gray-800">Paul Mbida</h5>
+                                            <p class="text-xs text-gray-400 font-semibold mt-0.5">Téléconsultation • Motif : Suivi Hypertension</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-3">
+                                        <div class="text-right">
+                                            <div class="text-xs font-extrabold text-medical-blue">14:00 (Aujourd'hui)</div>
+                                            <div class="text-[10px] font-bold text-leaf-green">Salle d'attente prêt</div>
+                                        </div>
+                                        <button type="button" onclick="alert('Démarrage de la visioconférence avec Paul Mbida...')" class="px-4 py-2.5 bg-leaf-green hover:bg-leaf-dark text-white text-xs font-bold rounded-xl transition-all shadow-xs uppercase tracking-wide">
+                                            Démarrer Visio
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Consultation Item 2 -->
+                                <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100/60 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:shadow-xs transition-shadow">
+                                    <div class="flex items-center space-x-3.5">
+                                        <div class="w-11 h-11 rounded-2xl bg-medical-blue/10 text-medical-blue flex items-center justify-center font-bold text-sm font-poppins shadow-xs">SN</div>
+                                        <div>
+                                            <h5 class="text-sm font-bold text-gray-800">Sarah Nguema</h5>
+                                            <p class="text-xs text-gray-400 font-semibold mt-0.5">Présentiel Cabinet • Motif : Pédiatrie / Fièvre enfant</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-3">
+                                        <div class="text-right">
+                                            <div class="text-xs font-bold text-gray-700">15:30 (Aujourd'hui)</div>
+                                            <div class="text-[10px] font-bold text-gray-400">Confirmé</div>
+                                        </div>
+                                        <button type="button" onclick="alert('Ouverture du dossier médical de Sarah Nguema...')" class="px-4 py-2.5 border border-gray-200 hover:border-medical-blue hover:text-medical-blue text-xs font-bold rounded-xl transition-all shadow-xs uppercase tracking-wide">
+                                            Dossier
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Consultation Item 3 -->
+                                <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100/60 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:shadow-xs transition-shadow">
+                                    <div class="flex items-center space-x-3.5">
+                                        <div class="w-11 h-11 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-sm font-poppins shadow-xs">AF</div>
+                                        <div>
+                                            <h5 class="text-sm font-bold text-gray-800">Alain Foko</h5>
+                                            <p class="text-xs text-gray-400 font-semibold mt-0.5">Téléconsultation • Motif : Renouvellement d'ordonnance</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-3">
+                                        <div class="text-right">
+                                            <div class="text-xs font-bold text-gray-700">17:00 (Aujourd'hui)</div>
+                                            <div class="text-[10px] font-bold text-gray-400">Programmé</div>
+                                        </div>
+                                        <button type="button" onclick="alert('Préparation du dossier d\'Alain Foko...')" class="px-4 py-2.5 border border-gray-200 hover:border-medical-blue hover:text-medical-blue text-xs font-bold rounded-xl transition-all shadow-xs uppercase tracking-wide">
+                                            Dossier
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Patient Dossiers -->
+                        <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-xs">
+                            <div class="flex items-center justify-between mb-5 border-b border-gray-50 pb-4">
+                                <h3 class="text-md font-bold text-gray-800 font-poppins flex items-center">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-leaf-green mr-2 shadow-xs"></span>
+                                    {% translate "Dossiers Patients Récents" %}
+                                </h3>
+                                <button type="button" onclick="alert('Affichage de la liste complète des patients...')" class="text-xs text-medical-blue hover:underline font-bold uppercase tracking-wide">
+                                    Voir tous les dossiers
+                                </button>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <!-- Patient File 1 -->
+                                <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100/60 flex items-center justify-between">
+                                    <div>
+                                        <h5 class="text-sm font-bold text-gray-800">Jeanne Abena</h5>
+                                        <p class="text-[10px] text-gray-400 font-semibold mt-0.5">Dernière visite : 12 Juillet 2026</p>
+                                        <span class="inline-block mt-1.5 bg-blue-50 text-medical-blue text-[9px] font-bold px-2 py-0.5 rounded-full">Groupe O+</span>
+                                    </div>
+                                    <button type="button" onclick="alert('Consulter le dossier de Jeanne Abena')" class="p-2 text-gray-400 hover:text-medical-blue">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <!-- Patient File 2 -->
+                                <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100/60 flex items-center justify-between">
+                                    <div>
+                                        <h5 class="text-sm font-bold text-gray-800">Marc Kouamé</h5>
+                                        <p class="text-[10px] text-gray-400 font-semibold mt-0.5">Dernière visite : 08 Juillet 2026</p>
+                                        <span class="inline-block mt-1.5 bg-green-50 text-leaf-green text-[9px] font-bold px-2 py-0.5 rounded-full">Groupe A+</span>
+                                    </div>
+                                    <button type="button" onclick="alert('Consulter le dossier de Marc Kouamé')" class="p-2 text-gray-400 hover:text-medical-blue">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Doctor Published Videos & Reactions Panel -->
+                        <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-xs select-none space-y-5">
+                            <div class="flex items-center justify-between border-b border-gray-50 pb-4">
+                                <div>
+                                    <h3 class="text-md font-bold text-gray-800 font-poppins flex items-center space-x-2">
+                                        <span class="text-purple-600">📹</span>
+                                        <span>Mes Publications Vidéos & Réactions Patients</span>
+                                    </h3>
+                                    <p class="text-xs text-gray-400 font-semibold mt-0.5">Consultez les réactions et commentaires reçus sous vos conseils de santé</p>
+                                </div>
+                                <button type="button" onclick="openPublishVideoModal()" class="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl shadow-xs uppercase tracking-wider">
+                                    + Publier Vidéo
+                                </button>
+                            </div>
+
+                            <!-- Video Card Item 1 -->
+                            <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100/60 space-y-3">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs shadow-xs">
+                                            🎬
+                                        </div>
+                                        <div>
+                                            <h4 class="text-sm font-bold text-gray-800">Don de Sang : Un geste qui sauve des vies</h4>
+                                            <p class="text-[10px] text-gray-400 font-semibold">Publié le 14 Juin 2026</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="bg-blue-50 text-medical-blue font-bold text-xs px-3 py-1 rounded-full">
+                                            👍 <span id="doc-reactions-count-1">2</span> Réactions
+                                        </span>
+                                        <span class="bg-purple-50 text-purple-700 font-bold text-xs px-3 py-1 rounded-full">
+                                            💬 <span id="doc-comments-count-1">1</span> Commentaire
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Comments list for doctor -->
+                                <div class="pt-2 border-t border-gray-200/50 space-y-2">
+                                    <span class="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block">Commentaires des Patients :</span>
+                                    <div class="bg-white p-3 rounded-xl border border-gray-100 text-xs space-y-1">
+                                        <div class="flex items-center justify-between font-bold text-gray-800">
+                                            <span>Patient Francis M.</span>
+                                            <span class="text-[9px] text-gray-400 font-normal">Hier à 16:20</span>
+                                        </div>
+                                        <p class="text-gray-600 font-medium">"Merci Dr. Dany pour cette vidéo explicative ! Comment se passe le bilan avant le don ?"</p>
+                                    </div>
+
+                                    <!-- Reply input -->
+                                    <div class="flex items-center space-x-2 pt-1">
+                                        <input type="text" id="doc-reply-input-1" placeholder="Répondre au patient..." class="flex-1 bg-white border border-gray-200 rounded-full px-3.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-600 font-medium">
+                                        <button type="button" onclick="addDoctorReply(1)" class="bg-medical-blue hover:bg-medical-dark text-white font-bold px-3 py-1.5 rounded-full text-xs transition-colors">Répondre</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Right: Quick Actions & Medical AI Assistant (4 Cols) -->
+                    <div class="lg:col-span-4 space-y-8">
+                        
+                        <!-- Quick Actions Grid -->
+                        <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-xs">
+                            <h3 class="text-md font-bold text-gray-800 font-poppins mb-5 border-b border-gray-50 pb-4">
+                                {% translate "Actions Médicales Rapides" %}
+                            </h3>
+                            <div class="grid grid-cols-1 gap-3">
+                                <button type="button" onclick="alert('Générateur d\'ordonnance électronique sécurisée...')" class="w-full flex items-center space-x-3 p-3.5 rounded-2xl bg-gray-50 border border-gray-100/50 hover:border-medical-blue hover:bg-medical-light/40 transition-all font-semibold text-xs text-gray-700 text-left">
+                                    <div class="w-8 h-8 rounded-xl bg-medical-blue/10 text-medical-blue flex items-center justify-center flex-shrink-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.83 20.013a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                                        </svg>
+                                    </div>
+                                    <span>Rédiger une Ordonnance</span>
+                                </button>
+
+                                <button type="button" onclick="alert('Ajout de créneau dans l\'agenda...')" class="w-full flex items-center space-x-3 p-3.5 rounded-2xl bg-gray-50 border border-gray-100/50 hover:border-leaf-green hover:bg-leaf-light/40 transition-all font-semibold text-xs text-gray-700 text-left">
+                                    <div class="w-8 h-8 rounded-xl bg-leaf-green/10 text-leaf-green flex items-center justify-center flex-shrink-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                        </svg>
+                                    </div>
+                                    <span>Ajouter un Créneau Horaire</span>
+                                </button>
+
+                                <button type="button" onclick="alert('Lien d\'invitation généré pour le patient...')" class="w-full flex items-center space-x-3 p-3.5 rounded-2xl bg-gray-50 border border-gray-100/50 hover:border-purple-400 hover:bg-purple-50/20 transition-all font-semibold text-xs text-gray-700 text-left">
+                                    <div class="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.765Z" />
+                                        </svg>
+                                    </div>
+                                    <span>Inviter un Nouveau Patient</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Medical AI Diagnostic Assistant Card -->
+                        <div class="bg-gradient-to-br from-medical-blue to-leaf-dark text-white rounded-3xl p-6 shadow-sm relative overflow-hidden select-none">
+                            <div class="absolute -top-12 -left-12 w-40 h-40 bg-white/10 rounded-full blur-xl"></div>
+                            <div class="space-y-4 z-10 relative">
+                                <span class="bg-white/15 text-white font-bold text-[9px] uppercase tracking-widest px-2.5 py-1 rounded-full inline-block border border-white/20">Support Médical IA</span>
+                                <h4 class="text-md font-bold font-poppins">Assistant IA pour Praticiens</h4>
+                                <p class="text-xs text-gray-100/90 leading-relaxed font-medium">
+                                    Vérifiez rapidement les interactions médicamenteuses, la posologie ou obtenez une synthèse d'antécédents cliniques en temps réel.
+                                </p>
+                                <a href="{% url 'ia_assistant:chat' %}" class="w-full text-center py-2.5 bg-white text-medical-blue font-bold text-xs uppercase tracking-wider rounded-xl block transition-transform transform active:scale-95 shadow-md">
+                                    Ouvrir l'IA Médicale
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- MODAL PUBLICATION VIDEO CONSEIL SANTE -->
+    <div id="modal-publish-video" class="fixed inset-0 z-50 overflow-y-auto hidden select-none">
+        <div class="flex items-center justify-center min-h-screen px-4 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" onclick="closePublishVideoModal()"><div class="absolute inset-0 bg-black/40 backdrop-blur-xs"></div></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+            <form action="{% url 'medecins:dashboard' %}" method="post" enctype="multipart/form-data" class="inline-block align-bottom bg-white rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full p-6 space-y-4">
+                {% csrf_token %}
+                <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                    <h4 class="text-md font-bold text-gray-900 font-poppins flex items-center space-x-2">
+                        <span class="text-purple-600">📹</span>
+                        <span>Publier un Conseil Vidéo Santé</span>
+                    </h4>
+                    <button type="button" onclick="closePublishVideoModal()" class="text-gray-400 hover:text-gray-600"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                </div>
+                <div class="space-y-3 text-xs">
+                    <div>
+                        <label class="text-gray-700 font-bold block mb-1">Titre de la capsule vidéo *</label>
+                        <input type="text" name="title" required placeholder="ex: 5 conseils pour prévenir l'hypertension" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-600 font-medium">
+                    </div>
+                    <div>
+                        <label class="text-gray-700 font-bold block mb-1">Fichier Vidéo (MP4, MOV)</label>
+                        <input type="file" name="video_file" accept="video/*" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none font-medium text-gray-500">
+                    </div>
+                    <div>
+                        <label class="text-gray-700 font-bold block mb-1">Légende & Hashtags</label>
+                        <textarea name="description" rows="3" placeholder="Description courte pour vos patients... #Prevention #Hypertension" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-600 font-medium"></textarea>
+                    </div>
+                </div>
+                <div class="pt-3 border-t border-gray-100">
+                    <button type="submit" class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs shadow-md uppercase tracking-wider">
+                        Publier sur le Feed Vidéos Santé 🚀
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JS Date Display Script & Video Engine -->
+    <script>
+        // DOM Elements
+        const dateField = document.getElementById('current-date-field');
+
+        // Date Display
+        if (dateField) {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const today = new Date();
+            let dateStr = today.toLocaleDateString('fr-FR', options);
+            dateField.innerText = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+        }
+
+        function openPublishVideoModal() {
+            document.getElementById('modal-publish-video').classList.remove('hidden');
+        }
+
+        function closePublishVideoModal() {
+            document.getElementById('modal-publish-video').classList.add('hidden');
+        }
+
+        function submitVideoCapsule() {
+            alert('🎉 Votre capsule vidéo de conseil médical a été publiée avec succès sur le feed des patients !');
+            closePublishVideoModal();
+        }
+
+        function addDoctorReply(videoId) {
+            const input = document.getElementById(`doc-reply-input-${videoId}`);
+            if (input && input.value.trim() !== '') {
+                alert(`Votre réponse en tant que Dr. {{ user.username }} a été envoyée au patient !`);
+                input.value = '';
+            }
+        }
+
+        function toggleDocNotificationsPanel() {
+            const panel = document.getElementById('doc-notifications-panel');
+            if (panel) panel.classList.toggle('hidden');
+        }
+
+        function markAllDocNotificationsAsRead() {
+            const list = document.getElementById('doc-notif-list-container');
+            const emptyState = document.getElementById('doc-notif-empty-state');
+            const badge = document.getElementById('doc-notif-badge');
+            const countBadge = document.getElementById('doc-notif-count-badge');
+
+            if (list) list.classList.add('hidden');
+            if (emptyState) emptyState.classList.remove('hidden');
+            if (badge) badge.classList.add('hidden');
+            if (countBadge) {
+                countBadge.innerText = '0 nouvelle';
+                countBadge.className = 'bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full text-[9px] font-bold';
+            }
+            alert('Toutes vos notifications praticien ont été marquées comme lues !');
+        }
+    </script>
+</body>
+</html>

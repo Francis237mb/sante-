@@ -1,0 +1,725 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% translate "Mon Espace Santé - Fransick" %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'medical-blue': '#1B5FA8',
+                        'medical-light': '#EBF3FC',
+                        'medical-dark': '#14467d',
+                        'leaf-green': '#6DBE45',
+                        'leaf-light': '#F0F9EB',
+                        'leaf-dark': '#559c30',
+                    },
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif'],
+                        'inter': ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* Snap Scroll Vertical container */
+        .snap-y-container {
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+        .snap-slide {
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+        }
+
+        /* Heart animation */
+        @keyframes heartPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        .heart-active {
+            animation: heartPulse 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            fill: #ef4444;
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body class="bg-gray-50/70 font-inter text-gray-800 antialiased overflow-hidden">
+
+    <!-- Toast Notification Popup -->
+    <div id="toast-notification" class="fixed top-5 right-5 z-50 transform -translate-y-16 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-gray-900 text-white text-xs font-semibold px-4 py-3 rounded-2xl shadow-xl flex items-center space-x-2 border border-gray-700">
+            <svg class="w-4 h-4 text-leaf-green" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+            <span id="toast-message">Notification</span>
+        </div>
+    </div>
+
+    <!-- App Shell Layout -->
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- ================= DESKTOP SIDEBAR ================= -->
+        <aside class="hidden lg:flex flex-col w-64 bg-white border-r border-gray-200/80 flex-shrink-0 sticky top-0 h-screen">
+            <!-- Sidebar Header / Logo -->
+            <div class="h-20 flex items-center px-6 border-b border-gray-100 select-none">
+                <a href="{% url 'core:home' %}" class="flex items-center space-x-2.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-8 h-8 text-medical-blue">
+                        <path d="M37 28 C20 28 15 48 30 65 C40 75 50 82 50 82 C50 82 60 75 70 65 C85 48 80 28 63 28" fill="none" stroke="#1B5FA8" stroke-width="6" stroke-linecap="round"/>
+                        <circle cx="37" cy="28" r="4.5" fill="#38BDF8" />
+                        <circle cx="63" cy="28" r="4.5" fill="#38BDF8" />
+                        <path d="M30 65 C22 55 15 55 12 60 C8 65 14 74 22 72" fill="none" stroke="#1B5FA8" stroke-width="6" stroke-linecap="round"/>
+                        <circle cx="22" cy="72" r="6" fill="#14467d" />
+                        <path d="M43 46 H57 M50 39 V53" stroke="#38BDF8" stroke-width="5.5" stroke-linecap="round" />
+                        <path d="M48 68 L58 60 L60 72 Z" fill="#15803d" />
+                        <path d="M50 82 C68 76 83 60 83 38 C83 55 70 70 50 82 Z" fill="#6DBE45" />
+                        <path d="M50 82 C55 70 65 60 83 38" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                    <span class="font-poppins font-bold text-xl text-medical-blue tracking-tight">Fransick</span>
+                </a>
+            </div>
+
+            <!-- Active User Profile Summary -->
+            <div class="px-5 py-6 border-b border-gray-100 flex items-center space-x-3.5 select-none">
+                {% if user.profile_picture %}
+                    <img class="h-11 w-11 rounded-full object-cover ring-2 ring-leaf-green/20" src="{{ user.profile_picture.url }}" alt="{{ user.username }}">
+                {% else %}
+                    <div class="h-11 w-11 rounded-xl bg-leaf-green text-white flex items-center justify-center font-bold font-poppins text-lg shadow-sm">{{ user.username|slice:":2"|upper }}</div>
+                {% endif %}
+                <div class="overflow-hidden">
+                    <h4 class="text-sm font-bold text-gray-800 truncate">{{ user.username }}</h4>
+                    <span class="inline-block bg-leaf-green/10 text-leaf-green font-bold text-[9px] uppercase tracking-wider px-2.5 py-0.5 rounded-full mt-1">
+                        {% translate "Patient" %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto custom-scrollbar select-none">
+                <!-- Accueil / Feed -->
+                <a href="{% url 'patients:dashboard' %}" class="flex items-center space-x-3 px-4 py-3 rounded-2xl bg-leaf-light text-leaf-green font-bold text-sm transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                    </svg>
+                    <span>{% translate "Accueil / Feed" %}</span>
+                </a>
+
+                <!-- Mon Suivi Médical (PAGE DÉDIÉE) -->
+                <a href="{% url 'patients:suivi' %}" class="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-leaf-green hover:bg-gray-50 font-semibold text-sm transition-all group">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 group-hover:scale-105 transition-transform">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801-1.206a2.25 2.25 0 0 0-3.479-.015m5.578-2.583a2.25 2.25 0 0 0-2.25 2.25v.003c0 .83.672 1.5 1.5 1.5h1.5a1.5 1.5 0 0 0 1.5-1.5V3a2.25 2.25 0 0 0-2.25-2.25h-.003Z" />
+                    </svg>
+                    <span>{% translate "Mon Suivi (RDV & Ordonnances)" %}</span>
+                </a>
+
+                <!-- Vidéos Conseils Santé -->
+                <button type="button" onclick="openVideoFeedModal()" class="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-leaf-green hover:bg-gray-50 font-semibold text-sm transition-all group text-left">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 text-purple-600 group-hover:scale-105 transition-transform">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+                    </svg>
+                    <span>{% translate "Vidéos Conseils Santé" %}</span>
+                </button>
+
+                <!-- Recherche de Médecins -->
+                <button type="button" onclick="openSearchMedecinsModal()" class="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-leaf-green hover:bg-gray-50 font-semibold text-sm transition-all group text-left">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 text-medical-blue group-hover:scale-105 transition-transform">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                    </svg>
+                    <span>{% translate "Trouver un Médecin" %}</span>
+                </button>
+
+                <!-- Assistant IA -->
+                <a href="{% url 'ia_assistant:chat' %}" class="flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-leaf-green hover:bg-gray-50 font-semibold text-sm transition-all group">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 text-medical-blue group-hover:scale-105 transition-transform">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 21l-.813-5.096L3 15l5.187-.813L9 9l.813 5.187L15 15l-5.187.813ZM18 7.5 17.25 12l-.75-4.5L12 6.75l4.5-.75.75-4.5.75 4.5 4.5.75-4.5.75-.75 4.5ZM3 3v2.25h2.25v1.5H3V9H1.5V6.75H0v-1.5h1.5V3H3Z" />
+                    </svg>
+                    <span>{% translate "Mon Assistant IA" %}</span>
+                </a>
+
+                <!-- Paramètres -->
+                <a href="{% url 'patients:settings' %}" class="flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-leaf-green hover:bg-gray-50 font-semibold text-sm transition-all group">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 group-hover:scale-105 transition-transform">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.43l-1.003.828c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255" />
+                    </svg>
+                    <span>{% translate "Paramètres" %}</span>
+                </a>
+            </nav>
+
+            <!-- Logout Button -->
+            <div class="p-4 border-t border-gray-100 select-none">
+                <form action="{% url 'accounts:logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-red-500 bg-red-50/20 border border-red-100 hover:bg-red-50 font-bold text-sm transition-all focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+                        </svg>
+                        <span>{% translate "Déconnexion" %}</span>
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- ================= MOBILE BOTTOM NAVIGATION ================= -->
+        <div class="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/95 backdrop-blur-md border-t border-gray-200/80 flex items-center justify-around px-2 z-40 shadow-lg select-none">
+            <a href="{% url 'patients:dashboard' %}" class="flex flex-col items-center justify-center flex-1 py-1 text-leaf-green font-bold transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                </svg>
+                <span class="text-[9px] mt-0.5 font-medium">{% translate "Accueil" %}</span>
+            </a>
+            
+            <a href="{% url 'patients:suivi' %}" class="flex flex-col items-center justify-center flex-1 py-1 text-gray-400 hover:text-leaf-green transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08" />
+                </svg>
+                <span class="text-[9px] mt-0.5 font-medium">{% translate "Suivi" %}</span>
+            </a>
+
+            <a href="{% url 'ia_assistant:chat' %}" class="flex flex-col items-center justify-center flex-1 py-1 text-gray-400 hover:text-leaf-green transition-all relative">
+                <div class="-mt-8 w-12 h-12 rounded-full bg-gradient-to-r from-medical-blue to-leaf-green text-white flex items-center justify-center shadow-md transform active:scale-95 transition-transform duration-200 border-4 border-gray-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 21l-.813-5.096L3 15l5.187-.813L9 9l.813 5.187L15 15l-5.187.813Z" />
+                    </svg>
+                </div>
+                <span class="text-[9px] mt-1 font-bold text-gray-600">{% translate "Assistant" %}</span>
+            </a>
+
+            <button type="button" onclick="openVideoFeedModal()" class="flex flex-col items-center justify-center flex-1 py-1 text-purple-600 hover:text-purple-700 font-bold transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-purple-600">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+                </svg>
+                <span class="text-[9px] mt-0.5 font-bold">{% translate "Vidéos" %}</span>
+            </button>
+
+            <a href="{% url 'patients:settings' %}" class="flex flex-col items-center justify-center flex-1 py-1 text-gray-400 hover:text-leaf-green transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.43l-1.003.828c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255" />
+                </svg>
+                <span class="text-[9px] mt-0.5 font-medium">{% translate "Paramètres" %}</span>
+            </a>
+        </div>
+
+        <!-- ================= MAIN LAYOUT SPACE ================= -->
+        <div class="flex-1 flex flex-col min-h-screen overflow-hidden">
+            
+            <!-- Dashboard Top Header Bar -->
+            <header class="h-20 bg-white border-b border-gray-200/80 px-4 md:px-8 flex items-center justify-between flex-shrink-0 z-30 select-none relative">
+                <!-- Mobile Logo -->
+                <div class="flex items-center space-x-3 lg:hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-8 h-8 text-leaf-green">
+                        <path d="M37 28 C20 28 15 48 30 65 C40 75 50 82 50 82 C50 82 60 75 70 65 C85 48 80 28 63 28" fill="none" stroke="#6DBE45" stroke-width="6" stroke-linecap="round"/>
+                        <circle cx="37" cy="28" r="4.5" fill="#38BDF8" />
+                        <circle cx="63" cy="28" r="4.5" fill="#38BDF8" />
+                        <path d="M30 65 C22 55 15 55 12 60 C8 65 14 74 22 72" fill="none" stroke="#6DBE45" stroke-width="6" stroke-linecap="round"/>
+                        <circle cx="22" cy="72" r="6" fill="#14467d" />
+                        <path d="M43 46 H57 M50 39 V53" stroke="#38BDF8" stroke-width="5.5" stroke-linecap="round" />
+                        <path d="M48 68 L58 60 L60 72 Z" fill="#15803d" />
+                        <path d="M50 82 C68 76 83 60 83 38 C83 55 70 70 50 82 Z" fill="#6DBE45" />
+                        <path d="M50 82 C55 70 65 60 83 38" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                    <span class="font-poppins font-bold text-lg text-leaf-green tracking-tight">Fransick</span>
+                </div>
+
+                <!-- Desktop Title -->
+                <div class="hidden lg:block">
+                    <h2 class="text-lg font-bold font-poppins text-gray-800">{% translate "Mon Espace Santé & Feed Vidéos" %}</h2>
+                    <p class="text-xs text-gray-400 font-semibold" id="current-date-field"></p>
+                </div>
+
+                <!-- Center Mobile Profile Avatar -->
+                <div class="lg:hidden absolute left-1/2 transform -translate-x-1/2">
+                    <a href="{% url 'patients:settings' %}" class="relative inline-block">
+                        {% if user.profile_picture %}
+                            <img class="h-10 w-10 rounded-full object-cover border border-gray-200" src="{{ user.profile_picture.url }}" alt="{{ user.username }}">
+                        {% else %}
+                            <div class="h-10 w-10 rounded-full bg-leaf-green text-white flex items-center justify-center font-bold text-sm">{{ user.username|slice:":2"|upper }}</div>
+                        {% endif %}
+                    </a>
+                </div>
+
+                <!-- Right Header Icons (Gift, Search Loupe, Bell Notification) -->
+                <div class="flex items-center space-x-3.5 relative">
+                    <button type="button" onclick="showToast('🎁 Parrainez un ami et gagnez des points Fransick !')" class="text-gray-500 hover:text-leaf-green transition-colors">
+                        <span class="text-xl">🎁</span>
+                    </button>
+                    
+                    <button type="button" onclick="openSearchMedecinsModal()" class="text-gray-500 hover:text-medical-blue transition-colors focus:outline-none relative group" title="Rechercher un médecin">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                        </svg>
+                    </button>
+
+                    <button type="button" onclick="toggleNotificationsPanel()" class="text-gray-500 hover:text-leaf-green transition-colors relative focus:outline-none" title="Notifications">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                        </svg>
+                        <span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center border-2 border-white shadow-xs">2</span>
+                    </button>
+
+                    <div id="notifications-panel" class="hidden absolute right-0 top-12 w-80 sm:w-96 bg-white border border-gray-100 rounded-3xl shadow-2xl z-50 overflow-hidden select-none">
+                        <div class="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                            <h4 class="text-xs font-bold font-poppins text-gray-800 flex items-center space-x-1.5">
+                                <span>Notifications</span>
+                                <span id="notif-count-badge" class="bg-red-100 text-red-600 px-2 py-0.5 rounded-full text-[9px] font-extrabold">2 nouvelles</span>
+                            </h4>
+                            <button type="button" onclick="markAllNotificationsAsRead()" class="text-[10px] text-leaf-green hover:underline font-bold">Tout marquer comme lu</button>
+                        </div>
+                        
+                        <div id="notif-list-container" class="max-h-72 overflow-y-auto custom-scrollbar p-2 space-y-2">
+                            <div class="p-3 rounded-2xl bg-leaf-light/40 border border-leaf-green/20 flex items-start space-x-3">
+                                <div class="w-8 h-8 rounded-xl bg-leaf-green text-white flex items-center justify-center flex-shrink-0 font-bold text-xs shadow-xs">🩺</div>
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <h5 class="text-xs font-bold text-gray-800">Rendez-vous Confirmé</h5>
+                                        <span class="text-[9px] text-gray-400 font-normal">Il y a 10 min</span>
+                                    </div>
+                                    <p class="text-[11px] text-gray-600 mt-0.5 leading-snug">Votre consultation vidéo avec le Dr. Marie Curie est programmée pour demain à 10:00.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="notif-empty-state" class="hidden p-8 text-center space-y-2">
+                            <div class="w-12 h-12 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mx-auto text-xl">🔔</div>
+                            <h5 class="text-xs font-bold text-gray-700">Aucune nouvelle notification</h5>
+                            <p class="text-[10px] text-gray-400">Vous êtes totalement à jour avec vos rappels de santé !</p>
+                        </div>
+                    </div>
+
+                </div>
+            </header>
+
+            <!-- Dashboard Content Scroll Area -->
+            <main class="flex-1 overflow-y-auto p-4 md:p-8 pb-24 lg:pb-8 custom-scrollbar">
+                
+                <!-- Welcome Widget -->
+                <div class="bg-gradient-to-r from-leaf-green to-leaf-dark text-white rounded-3xl p-6 md:p-8 shadow-sm flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0 relative overflow-hidden mb-8 select-none">
+                    <div class="absolute -top-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-2xl"></div>
+                    <div class="z-10 text-center md:text-left space-y-2">
+                        <h2 class="text-2xl md:text-3xl font-extrabold font-poppins leading-tight">
+                            Bonjour, {{ user.username }} !
+                        </h2>
+                        <p class="text-leaf-light/80 text-sm max-w-md font-medium">
+                            Découvrez les conseils santé de nos médecins et pharmacies certifiés ci-dessous.
+                        </p>
+                    </div>
+                    <div class="z-10 flex-shrink-0 flex items-center space-x-3">
+                        <a href="{% url 'patients:suivi' %}" class="bg-white/20 hover:bg-white/30 text-white font-bold text-xs uppercase tracking-wider px-5 py-3.5 rounded-2xl border border-white/30 transition-all">
+                            Mon Suivi Médical ➔
+                        </a>
+                        <a href="{% url 'ia_assistant:chat' %}" class="bg-white hover:bg-leaf-light text-leaf-green font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 block text-center">
+                            IA Assistant
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Main Grid Layout -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 max-w-6xl mx-auto">
+                    
+                    <!-- Center: Social Feed & Real Videos Published by Doctors (e.g. Dr. Wada) -->
+                    <div class="lg:col-span-8 space-y-6" id="feed-posts-section">
+                        
+                        <!-- DYNAMIC REAL VIDEOS PUBLISHED IN SQLITE BY DOCTORS (Dr. Wada) -->
+                        {% if videos_list %}
+                            {% for vid in videos_list %}
+                            <div class="bg-white border border-purple-100 rounded-3xl shadow-md overflow-hidden select-none" id="real-vid-card-{{ vid.id }}">
+                                <div class="p-4 flex items-center justify-between border-b border-gray-50 bg-purple-50/30">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-11 h-11 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold text-xs shadow-md border-2 border-purple-300">
+                                            Dr
+                                        </div>
+                                        <div>
+                                            <h4 class="text-sm font-extrabold text-purple-900 flex items-center space-x-1 font-poppins">
+                                                <span>Dr. {{ vid.author.username }}</span>
+                                                <svg class="w-4 h-4 text-leaf-green" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                            </h4>
+                                            <p class="text-[10px] text-purple-600 font-bold uppercase tracking-wider">Médecin Partenaire Certifié • {{ vid.created_at|date:"d M Y" }}</p>
+                                        </div>
+                                    </div>
+                                    <button type="button" onclick="sharePost('{{ vid.title }}')" class="text-purple-600 hover:text-purple-800 p-2 rounded-full hover:bg-purple-100 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.185Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" /></svg>
+                                    </button>
+                                </div>
+
+                                <div class="relative bg-gradient-to-br from-purple-950 via-slate-900 to-slate-950 w-full h-80 sm:h-96 flex flex-col items-center justify-center p-6 text-center group cursor-pointer overflow-hidden" onclick="openVideoFeedModal()">
+                                    <div class="w-20 h-20 rounded-full bg-purple-600/30 text-purple-400 flex items-center justify-center z-20 group-hover:scale-110 transition-transform shadow-2xl border border-purple-500/40 animate-pulse">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-10 h-10 ml-1 text-purple-400">
+                                          <path fill-rule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <span class="mt-4 bg-purple-600 text-white font-extrabold text-[10px] uppercase tracking-wider px-4 py-1.5 rounded-full z-20 shadow-lg border border-purple-400/50">
+                                        Regarder la capsule vidéo du Dr. {{ vid.author.username }} 📹
+                                    </span>
+                                    <h4 class="text-white font-bold text-lg mt-3 z-20 font-poppins max-w-md">{{ vid.title }}</h4>
+                                </div>
+
+                                <div class="p-4 space-y-2">
+                                    <h3 class="text-sm font-bold text-gray-900 font-poppins">{{ vid.title }}</h3>
+                                    <p class="text-xs text-gray-600 font-medium leading-relaxed">
+                                        {{ vid.description|default:"Capsule vidéo de prévention médicale publiée sur Fransick." }}
+                                    </p>
+                                </div>
+
+                                <div class="px-4 py-2 flex items-center justify-between text-xs text-gray-400 font-semibold border-t border-b border-gray-50 bg-purple-50/20">
+                                    <div class="flex items-center space-x-1.5 text-purple-700 font-bold">
+                                        <span class="w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center text-[10px]">❤️</span>
+                                        <span id="real-likes-{{ vid.id }}">{{ vid.likes_count }}</span> <span>Réactions</span>
+                                    </div>
+                                    <span class="text-purple-600 font-bold text-[10px]">Publié par Dr. {{ vid.author.username }}</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        <!-- DEMO POST 1 -->
+                        <div class="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden select-none" id="post-card-1">
+                            <div class="p-4 flex items-center justify-between border-b border-gray-50">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-full bg-leaf-light text-leaf-green flex items-center justify-center font-bold text-xs shadow-xs">F</div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-medical-blue flex items-center space-x-1">
+                                            <span>Fransick Officiel</span>
+                                        </h4>
+                                        <p class="text-[10px] text-gray-400 font-semibold">31 Mar 2026</p>
+                                    </div>
+                                </div>
+                                <button type="button" onclick="sharePost('Le médecin : Tout va bien..')" class="text-leaf-green hover:text-leaf-dark p-2 rounded-full hover:bg-leaf-light transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" /></svg>
+                                </button>
+                            </div>
+
+                            <div class="relative bg-slate-900 w-full h-80 sm:h-96 flex items-center justify-center group overflow-hidden cursor-pointer" onclick="openVideoFeedModal()">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10"></div>
+                                <div class="w-20 h-20 rounded-full bg-white/20 backdrop-blur-md text-white flex items-center justify-center z-20 group-hover:scale-110 transition-transform shadow-2xl">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-10 h-10 ml-1 text-leaf-green">
+                                      <path fill-rule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <span class="absolute top-4 right-4 bg-leaf-green text-white font-extrabold text-[10px] uppercase tracking-wider px-3 py-1 rounded-full z-20 shadow-md">
+                                    Lire en Plein Écran
+                                </span>
+                            </div>
+
+                            <div class="p-4 space-y-2">
+                                <h3 class="text-sm font-bold text-gray-900 font-poppins">Le médecin : 'Tout va bien'..</h3>
+                                <p class="text-xs text-gray-500 font-medium leading-relaxed">
+                                    Conseils pratiques du médecin pour réduire l'anxiété et maintenir un suivi de santé régulier sans stress.
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Right Column: Médecins Partenaires (avec BDD) -->
+                    <div class="lg:col-span-4 space-y-6">
+                        <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-xs select-none">
+                            <h3 class="text-md font-bold text-gray-800 font-poppins mb-5 border-b border-gray-50 pb-4">
+                                {% translate "Actions rapides" %}
+                            </h3>
+                            <div class="grid grid-cols-1 gap-3">
+                                <button type="button" onclick="openSearchMedecinsModal()" class="flex items-center space-x-3 p-3.5 rounded-2xl bg-gray-50 border border-gray-100/50 hover:border-leaf-green hover:bg-leaf-light/30 transition-all font-semibold text-xs text-gray-700 text-left">
+                                    <div class="w-8 h-8 rounded-xl bg-leaf-green/10 text-leaf-green flex items-center justify-center flex-shrink-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
+                                    </div>
+                                    <span>Rechercher un Médecin</span>
+                                </button>
+
+                                <a href="{% url 'patients:suivi' %}" class="flex items-center space-x-3 p-3.5 rounded-2xl bg-gray-50 border border-gray-100/50 hover:border-medical-blue hover:bg-medical-light/40 transition-all font-semibold text-xs text-gray-700 text-left">
+                                    <div class="w-8 h-8 rounded-xl bg-medical-blue/10 text-medical-blue flex items-center justify-center flex-shrink-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18" /></svg>
+                                    </div>
+                                    <span>Page Mon Suivi Médical</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Doctors Network -->
+                        <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-xs select-none">
+                            <div class="flex items-center justify-between mb-4 border-b border-gray-50 pb-3">
+                                <h3 class="text-sm font-bold text-gray-800 font-poppins">Médecins Inscrits</h3>
+                                <button type="button" onclick="openSearchMedecinsModal()" class="text-[10px] text-medical-blue hover:underline font-bold">Chercher 🔍</button>
+                            </div>
+                            
+                            <div class="space-y-3">
+                                {% if medecins_list %}
+                                    {% for doc in medecins_list %}
+                                    <div class="p-3 rounded-2xl bg-purple-50/40 border border-purple-100 flex items-center justify-between">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-9 h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                                                Dr
+                                            </div>
+                                            <div>
+                                                <h5 class="text-xs font-bold text-gray-900">Dr. {{ doc.username }}</h5>
+                                                <p class="text-[9px] text-purple-600 font-bold">Praticien Certifié</p>
+                                            </div>
+                                        </div>
+                                        <button type="button" onclick="showToast('Prise de rendez-vous avec le Dr. {{ doc.username }}')" class="px-2.5 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-[9px] font-bold rounded-lg uppercase">RDV</button>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-xs text-gray-400 font-medium text-center py-2">Aucun médecin inscrit pour l'instant.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- ================= MODAL LECTEUR VIDEO DYNAMIQUE (AVEC VIDEOS DR. WADA EN PREMIER) ================= -->
+    <div id="modal-video-feed" class="fixed inset-0 z-50 overflow-hidden hidden bg-black/95 backdrop-blur-md">
+        <div class="relative w-full h-full flex items-center justify-center">
+            
+            <button type="button" onclick="closeVideoFeedModal()" class="absolute top-5 right-5 text-white/80 hover:text-white bg-black/50 p-3 rounded-full backdrop-blur-md z-50 focus:outline-none shadow-lg border border-white/20">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+
+            <div class="relative w-full max-w-sm h-full max-h-[850px] bg-slate-950 sm:rounded-3xl overflow-hidden shadow-2xl border border-gray-800 flex flex-col">
+                
+                <div id="video-snap-container" class="w-full h-full overflow-y-auto snap-y-container custom-scrollbar relative">
+                    
+                    <!-- REAL VIDEOS PUBLISHED IN BDD BY DR. WADA DISPLAYED FIRST -->
+                    {% if videos_list %}
+                        {% for vid in videos_list %}
+                        <div class="snap-slide relative w-full h-full flex-shrink-0 flex flex-col justify-between p-5 bg-gradient-to-br from-purple-950 via-slate-900 to-slate-950 border-b border-gray-800">
+                            
+                            <div class="my-auto text-center space-y-4 z-10 px-4">
+                                <div class="w-20 h-20 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center mx-auto animate-pulse">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-10 h-10">
+                                      <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+                                    </svg>
+                                </div>
+                                <span class="bg-purple-600/40 text-purple-300 font-extrabold text-[10px] uppercase tracking-wider px-3.5 py-1 rounded-full inline-block border border-purple-500/40">
+                                    Capsule du Dr. {{ vid.author.username }}
+                                </span>
+                                <h4 class="text-white font-bold font-poppins text-lg leading-snug">{{ vid.title }}</h4>
+                                <p class="text-xs text-gray-300 font-medium leading-relaxed max-w-xs mx-auto">
+                                    {{ vid.description }}
+                                </p>
+
+                                <div class="pt-4 flex flex-col items-center justify-center text-purple-300 text-xs animate-bounce">
+                                    <span class="font-bold">Glissez vers le bas pour la vidéo suivante ⬇️</span>
+                                </div>
+                            </div>
+
+                            <div class="absolute right-3 bottom-20 z-30 flex flex-col items-center space-y-5 text-white select-none">
+                                <div class="relative mb-1">
+                                    <div class="w-11 h-11 rounded-full border-2 border-purple-400 bg-purple-600 text-white font-bold text-xs flex items-center justify-center shadow-lg">
+                                        Dr
+                                    </div>
+                                </div>
+                                <button type="button" onclick="toggleFeedLike('real-{{ vid.id }}')" class="flex flex-col items-center space-y-1 focus:outline-none">
+                                    <div class="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white shadow-md">
+                                        <svg id="feed-heart-real-{{ vid.id }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                                        </svg>
+                                    </div>
+                                    <span id="feed-likes-count-real-{{ vid.id }}" class="text-[10px] font-bold">{{ vid.likes_count }}</span>
+                                </button>
+                            </div>
+
+                            <div class="relative z-20 text-white select-none pr-14 pb-4">
+                                <h4 class="font-bold text-sm text-purple-300">@dr_{{ vid.author.username|lower }}</h4>
+                                <p class="text-xs text-gray-200 font-medium truncate">{{ vid.title }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- Fallback Video 1 -->
+                    <div class="snap-slide relative w-full h-full flex-shrink-0 flex flex-col justify-between p-5 bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900">
+                        <div class="my-auto text-center space-y-4 z-10">
+                            <div class="w-20 h-20 rounded-full bg-leaf-green/20 text-leaf-green flex items-center justify-center mx-auto animate-pulse">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-10 h-10">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+                                </svg>
+                            </div>
+                            <h4 class="text-white font-bold font-poppins text-lg leading-snug">Le médecin : 'Tout va bien'..</h4>
+                        </div>
+
+                        <div class="relative z-20 text-white select-none pr-14 pb-4">
+                            <h4 class="font-bold text-sm text-leaf-green">@fransick_officiel</h4>
+                            <p class="text-xs text-gray-200 font-medium">Conseils pratiques du médecin pour réduire l'anxiété.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL RECHERCHE MEDECINS -->
+    <div id="search-medecins-modal" class="fixed inset-0 z-50 overflow-y-auto hidden select-none">
+        <div class="flex items-center justify-center min-h-screen px-4 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" onclick="closeSearchMedecinsModal()"><div class="absolute inset-0 bg-black/40 backdrop-blur-xs"></div></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-xl sm:w-full p-6 space-y-5">
+                <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                    <h4 class="text-md font-bold text-gray-900 font-poppins flex items-center space-x-2">
+                        <span class="text-medical-blue">🔍</span>
+                        <span>Rechercher un Médecin Praticien</span>
+                    </h4>
+                    <button type="button" onclick="closeSearchMedecinsModal()" class="text-gray-400 hover:text-gray-600"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                </div>
+                <div class="relative">
+                    <input type="text" id="search-doc-input" onkeyup="filterMedecinsList()" placeholder="Tapez un nom de médecin (ex: Wada, Jean, Marie)..." class="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-11 pr-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-medical-blue font-medium shadow-xs">
+                    <svg class="w-5 h-5 text-gray-400 absolute left-3.5 top-3" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+                </div>
+                <div id="search-results-list" class="max-h-72 overflow-y-auto custom-scrollbar space-y-2.5">
+                    {% for doc in medecins_list %}
+                    <div class="doc-search-item p-3.5 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between hover:border-medical-blue transition-all" data-doc-name="{{ doc.username|lower }}">
+                        <div class="flex items-center space-x-3.5">
+                            <div class="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">Dr</div>
+                            <div>
+                                <h5 class="text-xs font-bold text-gray-800">Dr. {{ doc.username }}</h5>
+                                <p class="text-[10px] text-gray-400 font-semibold">Médecin Partenaire Certifié</p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="showToast('Prise de rendez-vous avec le Dr. {{ doc.username }}')" class="px-3 py-2 bg-leaf-green hover:bg-leaf-dark text-white font-bold text-xs rounded-xl shadow-xs uppercase tracking-wide">Prendre RDV</button>
+                    </div>
+                    {% empty %}
+                    <p class="text-xs text-gray-400 font-medium text-center py-4">Aucun médecin inscrit pour le moment.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS ENGINE -->
+    <script>
+        function openSearchMedecinsModal() {
+            const modal = document.getElementById('search-medecins-modal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeSearchMedecinsModal() {
+            const modal = document.getElementById('search-medecins-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function filterMedecinsList() {
+            const input = document.getElementById('search-doc-input');
+            const filter = input.value.toLowerCase().trim();
+            const items = document.querySelectorAll('.doc-search-item');
+
+            items.forEach(item => {
+                const docName = item.getAttribute('data-doc-name');
+                if (docName && docName.includes(filter)) {
+                    item.classList.remove('hidden');
+                } else {
+                    item.classList.add('hidden');
+                }
+            });
+        }
+
+        function toggleNotificationsPanel() {
+            const panel = document.getElementById('notifications-panel');
+            if (panel) panel.classList.toggle('hidden');
+        }
+
+        function markAllNotificationsAsRead() {
+            const list = document.getElementById('notif-list-container');
+            const emptyState = document.getElementById('notif-empty-state');
+            const badge = document.getElementById('notif-badge');
+            const countBadge = document.getElementById('notif-count-badge');
+
+            if (list) list.classList.add('hidden');
+            if (emptyState) emptyState.classList.remove('hidden');
+            if (badge) badge.classList.add('hidden');
+            if (countBadge) {
+                countBadge.innerText = '0 nouvelle';
+                countBadge.className = 'bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full text-[9px] font-bold';
+            }
+            showToast('Toutes les notifications ont été marquées comme lues !');
+        }
+
+        function openVideoFeedModal() {
+            const modal = document.getElementById('modal-video-feed');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeVideoFeedModal() {
+            const modal = document.getElementById('modal-video-feed');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        // Auto-open videos modal if URL has ?open_videos=true
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('open_videos') === 'true') {
+                openVideoFeedModal();
+            }
+        });
+
+        function toggleFeedLike(postId) {
+            const heart = document.getElementById(`feed-heart-${postId}`);
+            const count = document.getElementById(`feed-likes-count-${postId}`);
+            if (heart && count) {
+                let val = parseInt(count.innerText) || 0;
+                if (!heart.classList.contains('heart-active')) {
+                    heart.classList.add('heart-active');
+                    count.innerText = val + 1;
+                    showToast('❤️ Vous avez aimé cette vidéo conseil !');
+                } else {
+                    heart.classList.remove('heart-active');
+                    count.innerText = Math.max(0, val - 1);
+                }
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast-notification');
+            const toastMsg = document.getElementById('toast-message');
+            if (toast && toastMsg) {
+                toastMsg.innerText = message;
+                toast.classList.remove('-translate-y-16', 'opacity-0', 'pointer-events-none');
+                toast.classList.add('translate-y-4', 'opacity-100');
+                
+                setTimeout(() => {
+                    toast.classList.remove('translate-y-4', 'opacity-100');
+                    toast.classList.add('-translate-y-16', 'opacity-0', 'pointer-events-none');
+                }, 3000);
+            }
+        }
+
+        function sharePost(title) {
+            navigator.clipboard.writeText(window.location.href);
+            showToast(`Lien de "${title}" copié ! Vous pouvez le partager.`);
+        }
+
+        const dateField = document.getElementById('current-date-field');
+        if (dateField) {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const today = new Date();
+            let dateStr = today.toLocaleDateString('fr-FR', options);
+            dateField.innerText = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+        }
+    </script>
+</body>
+</html>
