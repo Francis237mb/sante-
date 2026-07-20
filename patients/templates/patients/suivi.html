@@ -224,10 +224,40 @@
                         </button>
                     </div>
 
-                    <!-- TAB CONTENT 1: MES RENDEZ-VOUS -->
+                    <!-- TAB CONTENT 1: MES RENDEZ-VOUS (BDD SQLITE DYNAMIQUE) -->
                     <div id="page-content-rdv" class="space-y-4">
                         
-                        <!-- RDV Item 1 -->
+                        {% if user_rdv_list %}
+                            {% for rdv in user_rdv_list %}
+                            <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                                <div class="flex items-start space-x-4">
+                                    <div class="w-14 h-14 rounded-2xl bg-leaf-light text-leaf-green flex items-center justify-center font-bold font-poppins text-lg flex-shrink-0">
+                                        Dr
+                                    </div>
+                                    <div class="space-y-1">
+                                        <span class="bg-leaf-light text-leaf-green text-[9px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full inline-block">
+                                            {{ rdv.get_consultation_type_display }}
+                                        </span>
+                                        <h4 class="text-base font-bold text-gray-900">Dr. {{ rdv.doctor.username }}</h4>
+                                        <p class="text-xs text-gray-500 font-medium">Motif : {{ rdv.reason }}</p>
+                                        <p class="text-xs font-bold text-leaf-green">📅 {{ rdv.date|date:"d M Y" }} à {{ rdv.time_slot }}</p>
+                                    </div>
+                                </div>
+                                <div class="w-full md:w-auto flex flex-col sm:flex-row gap-2.5">
+                                    {% if rdv.consultation_type == 'video' or rdv.consultation_type == 'audio' %}
+                                        <button type="button" onclick="showToast('Connexion à la salle d\'attente visio avec le Dr. {{ rdv.doctor.username }}...')" class="px-5 py-3 bg-leaf-green hover:bg-leaf-dark text-white font-bold rounded-2xl text-xs uppercase tracking-wider shadow-md">
+                                            Rejoindre Visio 🎥
+                                        </button>
+                                    {% endif %}
+                                    <button type="button" onclick="openDetailRDV('Dr. {{ rdv.doctor.username }}', '{{ rdv.get_consultation_type_display }}', '{{ rdv.date|date:"d M Y" }} à {{ rdv.time_slot }}', '{{ rdv.reason }}')" class="px-4 py-3 border border-gray-200 text-gray-700 font-bold rounded-2xl text-xs hover:border-medical-blue hover:text-medical-blue transition-colors">
+                                        Détails
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        <!-- RDV Démo 1 -->
                         <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                             <div class="flex items-start space-x-4">
                                 <div class="w-14 h-14 rounded-2xl bg-medical-blue/10 text-medical-blue flex items-center justify-center font-bold font-poppins text-lg flex-shrink-0">

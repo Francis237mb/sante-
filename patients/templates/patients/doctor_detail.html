@@ -118,12 +118,12 @@
         <!-- ================= MAIN LAYOUT SPACE ================= -->
         <div class="flex-1 flex flex-col min-h-screen overflow-hidden">
             
-            <!-- Header Bar avec Bouton Retour et Partager -->
+            <!-- Header Bar -->
             <header class="h-20 bg-white border-b border-gray-200/80 px-4 md:px-8 flex items-center justify-between flex-shrink-0 z-30 select-none relative">
                 <div class="flex items-center space-x-4">
                     <a href="{% url 'patients:dashboard' %}" class="p-2.5 rounded-2xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-sm transition-all flex items-center space-x-1.5">
                         <span>←</span>
-                        <span class="hidden sm:inline">Retour</span>
+                        <span class="hidden sm:inline">Retour au Feed</span>
                     </a>
                     <div>
                         <h2 class="text-base sm:text-lg font-bold font-poppins text-gray-800">
@@ -141,11 +141,11 @@
                 </button>
             </header>
 
-            <!-- Main Scrollable Content (Page Dédiée Waspito avec Données Réelles) -->
+            <!-- Main Scrollable Content -->
             <main class="flex-1 overflow-y-auto p-4 md:p-8 pb-24 lg:pb-8 custom-scrollbar">
                 <div class="max-w-3xl mx-auto space-y-6">
                     
-                    <!-- Card Principale du Médecin (Sans certification fictive) -->
+                    <!-- Card Principale du Médecin -->
                     <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm space-y-6">
                         
                         <!-- Top Info -->
@@ -162,7 +162,6 @@
                             </div>
 
                             <div class="space-y-1.5 flex-1">
-                                <!-- SANS BADGE DE CERTIFICATION SUR LES MEDECINS -->
                                 <h1 class="text-2xl font-extrabold text-gray-900 font-poppins">
                                     Dr. {{ doctor.username }}
                                 </h1>
@@ -175,7 +174,6 @@
                                     <p class="text-xs text-gray-400 font-semibold">License No.: {{ profile.license_number }}</p>
                                 {% endif %}
 
-                                <!-- Abonnés & Note réelle -->
                                 <div class="flex items-center justify-center sm:justify-start space-x-4 pt-2">
                                     <span class="text-sm font-extrabold text-gray-800" id="subscribers-count-display">
                                         {{ subscribers_count }} Subscriber{% if subscribers_count > 1 %}s{% endif %}
@@ -190,20 +188,32 @@
                             </div>
                         </div>
 
-                        <!-- Action Buttons (Consultation & S'abonner) -->
-                        <div class="flex flex-col sm:flex-row items-center gap-3 pt-2 border-t border-gray-100">
-                            <button type="button" onclick="showToast('Prise de rendez-vous et consultation avec le Dr. {{ doctor.username }}')" class="w-full sm:flex-1 py-3.5 bg-leaf-green hover:bg-leaf-dark text-white font-extrabold rounded-2xl text-xs shadow-md flex items-center justify-center space-x-2 uppercase tracking-wider">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>
-                                <span>Consult / RDV</span>
+                        <!-- DEUX BOUTONS SEPARÉS & CLAIRS : 📞 CONSULTATION DIRECTE & 📅 PRENDRE UN RENDEZ-VOUS -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-gray-100">
+                            
+                            <!-- 1. BOUTON CONSULTATION DIRECTE (APPEL VIDEO / AUDIO INSTANTANE) -->
+                            <button type="button" onclick="openDirectCallModal()" class="py-3.5 px-4 bg-medical-blue hover:bg-medical-dark text-white font-extrabold rounded-2xl text-xs shadow-md flex items-center justify-center space-x-2 uppercase tracking-wide transition-all">
+                                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
+                                <span>📞 Consult Direct (Vidéo / Audio)</span>
                             </button>
 
-                            <button type="button" id="subscribe-action-btn" onclick="toggleSubscription('{{ doctor.id }}')" class="w-full sm:w-auto px-6 py-3.5 {% if is_subscribed %}bg-leaf-green text-white{% else %}bg-leaf-light text-leaf-green hover:bg-leaf-green hover:text-white{% endif %} font-extrabold rounded-2xl text-xs border border-leaf-green/30 shadow-xs transition-all flex items-center justify-center space-x-1.5">
-                                <span>{% if is_subscribed %}✓ Abonné{% else %}+ S'abonner{% endif %}</span>
+                            <!-- 2. BOUTON PRENDRE UN RENDEZ-VOUS (FORMULAIRE DE PRESERVATION RDV) -->
+                            <button type="button" onclick="openBookAppointmentModal()" class="py-3.5 px-4 bg-leaf-green hover:bg-leaf-dark text-white font-extrabold rounded-2xl text-xs shadow-md flex items-center justify-center space-x-2 uppercase tracking-wide transition-all">
+                                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" /></svg>
+                                <span>📅 Prendre un RDV</span>
                             </button>
                         </div>
+
+                        <!-- Bouton d'Abonnement -->
+                        <div class="pt-1">
+                            <button type="button" id="subscribe-action-btn" onclick="toggleSubscription('{{ doctor.id }}')" class="w-full py-3 px-6 {% if is_subscribed %}bg-leaf-green text-white{% else %}bg-leaf-light text-leaf-green hover:bg-leaf-green hover:text-white{% endif %} font-extrabold rounded-2xl text-xs border border-leaf-green/30 shadow-xs transition-all flex items-center justify-center space-x-1.5">
+                                <span>{% if is_subscribed %}✓ Abonné{% else %}+ S'abonner au Dr. {{ doctor.username }}{% endif %}</span>
+                            </button>
+                        </div>
+
                     </div>
 
-                    <!-- Schedule Section (Horaires réels) -->
+                    <!-- Schedule Section -->
                     {% if profile and profile.schedule %}
                     <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm space-y-3">
                         <h3 class="text-sm font-bold font-poppins text-gray-900 flex items-center space-x-2">
@@ -216,7 +226,7 @@
                     </div>
                     {% endif %}
 
-                    <!-- About Section (Présentation / Biographie réelles) -->
+                    <!-- About Section -->
                     {% if profile and profile.about %}
                     <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm space-y-3">
                         <h3 class="text-sm font-bold font-poppins text-gray-900 flex items-center space-x-2">
@@ -229,7 +239,7 @@
                     </div>
                     {% endif %}
 
-                    <!-- Expérience & Patient Stats (Données réelles) -->
+                    <!-- Expérience & Patient Stats -->
                     {% if profile and profile.years_of_experience or profile and profile.consulted_patients_count %}
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {% if profile.years_of_experience %}
@@ -274,8 +284,135 @@
         </div>
     </div>
 
+    <!-- ================= MODAL 1: CONSULTATION DIRECTE (APPEL VIDEO / AUDIO INSTANTANE) ================= -->
+    <div id="modal-direct-call" class="fixed inset-0 z-50 overflow-y-auto hidden select-none bg-black/80 backdrop-blur-md">
+        <div class="flex items-center justify-center min-h-screen p-4 text-center">
+            <div class="fixed inset-0" onclick="closeDirectCallModal()"><div class="absolute inset-0 bg-black/50"></div></div>
+            
+            <div class="inline-block bg-slate-900 text-white rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full p-6 space-y-6 relative z-10 border border-slate-700">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <h4 class="text-sm font-bold font-poppins text-white flex items-center space-x-2">
+                        <span class="w-3 h-3 rounded-full bg-red-500 animate-ping"></span>
+                        <span>Téléconsultation Directe</span>
+                    </h4>
+                    <button type="button" onclick="closeDirectCallModal()" class="text-gray-400 hover:text-white">✕</button>
+                </div>
+
+                <div class="text-center space-y-4 py-2">
+                    <div class="w-24 h-24 rounded-full bg-medical-blue text-white font-extrabold text-3xl flex items-center justify-center mx-auto shadow-2xl border-4 border-medical-light/30 relative">
+                        Dr
+                        <span class="w-5 h-5 rounded-full bg-leaf-green border-2 border-slate-900 absolute bottom-0 right-0"></span>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white font-poppins">Dr. {{ doctor.username }}</h3>
+                        <p class="text-xs text-medical-light font-semibold">Médecin en ligne • Consultation Immédiate</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 pt-2">
+                    <button type="button" onclick="startCall('vidéo')" class="py-4 bg-leaf-green hover:bg-leaf-dark text-white font-bold rounded-2xl text-xs flex flex-col items-center justify-center space-y-2 shadow-lg transition-transform active:scale-95">
+                        <span class="text-2xl">🎥</span>
+                        <span>Appel Vidéo HD</span>
+                    </button>
+                    <button type="button" onclick="startCall('audio')" class="py-4 bg-medical-blue hover:bg-medical-dark text-white font-bold rounded-2xl text-xs flex flex-col items-center justify-center space-y-2 shadow-lg transition-transform active:scale-95">
+                        <span class="text-2xl">🎙️</span>
+                        <span>Appel Audio HQ</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL 2: FORMULAIRE DE PRISE DE RENDEZ-VOUS COMPLET ================= -->
+    <div id="modal-book-appointment" class="fixed inset-0 z-50 overflow-y-auto hidden select-none bg-black/60 backdrop-blur-sm">
+        <div class="flex items-center justify-center min-h-screen p-4 text-center">
+            <div class="fixed inset-0" onclick="closeBookAppointmentModal()"><div class="absolute inset-0 bg-black/40"></div></div>
+            
+            <div class="inline-block bg-white text-gray-800 rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full p-6 space-y-5 relative z-10 border border-gray-100">
+                <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                    <h4 class="text-base font-extrabold font-poppins text-gray-900 flex items-center space-x-2">
+                        <span class="text-leaf-green">📅</span>
+                        <span>Prendre un Rendez-vous Médical</span>
+                    </h4>
+                    <button type="button" onclick="closeBookAppointmentModal()" class="text-gray-400 hover:text-gray-600 font-bold">✕</button>
+                </div>
+
+                <!-- FORMULAIRE POST VERS BookAppointmentView -->
+                <form action="{% url 'patients:book_appointment' doctor.id %}" method="post" class="space-y-4 text-xs font-medium">
+                    {% csrf_token %}
+                    
+                    <div>
+                        <label class="block text-gray-700 font-bold uppercase tracking-wider mb-1">Praticien Sélectionné</label>
+                        <input type="text" readonly value="Dr. {{ doctor.username }} ({% if profile and profile.speciality %}{{ profile.speciality }}{% else %}Médecin{% endif %})" class="w-full bg-gray-100 border border-gray-200 rounded-xl px-3.5 py-2.5 text-gray-700 font-bold">
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-700 font-bold uppercase tracking-wider mb-1">Mode de Consultation</label>
+                        <select name="consultation_type" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-leaf-green">
+                            <option value="video">🎥 Téléconsultation Vidéo en Ligne</option>
+                            <option value="audio">🎙️ Téléconsultation Audio</option>
+                            <option value="cabinet">🏥 Consultation en Cabinet Médical</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-gray-700 font-bold uppercase tracking-wider mb-1">Date du RDV</label>
+                            <input type="date" name="date" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-leaf-green">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-bold uppercase tracking-wider mb-1">Créneau Horaire</label>
+                            <select name="time_slot" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-leaf-green">
+                                <option value="09:00">09:00 AM</option>
+                                <option value="10:30">10:30 AM</option>
+                                <option value="14:00">02:00 PM</option>
+                                <option value="16:30">04:30 PM</option>
+                                <option value="18:00">06:00 PM</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-700 font-bold uppercase tracking-wider mb-1">Motif du Rendez-vous</label>
+                        <input type="text" name="reason" placeholder="Ex: Consultation générale, Bilan annuel, Suivi de traitement..." required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-leaf-green">
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-700 font-bold uppercase tracking-wider mb-1">Symptômes & Remarques (Optionnel)</label>
+                        <textarea name="notes" rows="2" placeholder="Décrivez vos symptômes ou informations utiles pour le docteur..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-leaf-green"></textarea>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" class="w-full py-3.5 bg-leaf-green hover:bg-leaf-dark text-white font-extrabold rounded-2xl text-xs uppercase tracking-wider shadow-md transition-all">
+                            Confirmer mon Rendez-vous ➔
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- JS ENGINE -->
     <script>
+        function openDirectCallModal() {
+            document.getElementById('modal-direct-call').classList.remove('hidden');
+        }
+        function closeDirectCallModal() {
+            document.getElementById('modal-direct-call').classList.add('hidden');
+        }
+
+        function openBookAppointmentModal() {
+            document.getElementById('modal-book-appointment').classList.remove('hidden');
+        }
+        function closeBookAppointmentModal() {
+            document.getElementById('modal-book-appointment').classList.add('hidden');
+        }
+
+        function startCall(mode) {
+            closeDirectCallModal();
+            showToast(`📞 Connexion à la salle d'attente pour l'appel ${mode} avec le Dr. {{ doctor.username }}...`);
+        }
+
         function toggleSubscription(doctorId) {
             fetch(`/patients/medecin/${doctorId}/subscribe/`, {
                 method: 'POST',
@@ -288,18 +425,15 @@
             .then(data => {
                 if (data.status === 'subscribed') {
                     document.getElementById('subscribe-action-btn').innerHTML = '<span>✓ Abonné</span>';
-                    document.getElementById('subscribe-action-btn').className = 'w-full sm:w-auto px-6 py-3.5 bg-leaf-green text-white font-extrabold rounded-2xl text-xs border border-leaf-green/30 shadow-xs transition-all flex items-center justify-center space-x-1.5';
+                    document.getElementById('subscribe-action-btn').className = 'w-full py-3 px-6 bg-leaf-green text-white font-extrabold rounded-2xl text-xs border border-leaf-green/30 shadow-xs transition-all flex items-center justify-center space-x-1.5';
                     document.getElementById('subscribers-count-display').innerText = `${data.count} Subscriber${data.count > 1 ? 's' : ''}`;
                     showToast('🎉 Vous êtes désormais abonné à ce médecin !');
                 } else if (data.status === 'unsubscribed') {
-                    document.getElementById('subscribe-action-btn').innerHTML = '<span>+ S\'abonner</span>';
-                    document.getElementById('subscribe-action-btn').className = 'w-full sm:w-auto px-6 py-3.5 bg-leaf-light text-leaf-green hover:bg-leaf-green hover:text-white font-extrabold rounded-2xl text-xs border border-leaf-green/30 shadow-xs transition-all flex items-center justify-center space-x-1.5';
+                    document.getElementById('subscribe-action-btn').innerHTML = '<span>+ S\'abonner au Dr. {{ doctor.username }}</span>';
+                    document.getElementById('subscribe-action-btn').className = 'w-full py-3 px-6 bg-leaf-light text-leaf-green hover:bg-leaf-green hover:text-white font-extrabold rounded-2xl text-xs border border-leaf-green/30 shadow-xs transition-all flex items-center justify-center space-x-1.5';
                     document.getElementById('subscribers-count-display').innerText = `${data.count} Subscriber${data.count > 1 ? 's' : ''}`;
                     showToast('Vous vous êtes désabonné de ce médecin.');
                 }
-            })
-            .catch(err => {
-                showToast('Erreur lors de la mise à jour de l\'abonnement.');
             });
         }
 

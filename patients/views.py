@@ -7,6 +7,7 @@ from django.contrib.auth import update_session_auth_hash, get_user_model
 from django.contrib.auth.forms import PasswordChangeForm
 from .forms import PatientProfileForm
 from medecins.models import HealthVideo, DoctorProfile, DoctorSubscription
+from consultations.models import RendezVous
 
 User = get_user_model()
 
@@ -26,6 +27,8 @@ class PatientSuiviView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context['medecins_list'] = User.objects.filter(role='medecin')
         context['videos_list'] = HealthVideo.objects.all()
+        # Vrais rendez-vous du patient en BDD SQLite
+        context['user_rdv_list'] = RendezVous.objects.filter(patient=self.request.user)
         return context
 
 class DoctorDetailView(LoginRequiredMixin, DetailView):
@@ -39,13 +42,36 @@ class DoctorDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         doctor = self.get_object()
-        # Récupération du profil médecin si renseigné
         context['profile'] = getattr(doctor, 'doctor_profile', None)
-        # Calcul du nombre réel d'abonnés
         context['subscribers_count'] = DoctorSubscription.objects.filter(doctor=doctor).count()
-        # Statut de l'abonnement du patient connecté
         context['is_subscribed'] = DoctorSubscription.objects.filter(patient=self.request.user, doctor=doctor).exists()
         return context
+
+class BookAppointmentView(LoginRequiredMixin, View):
+    def post(self, request, pk, *args, **kwargs):
+        doctor = get_object_or_404(User, pk=pk, role='medecin')
+        consultation_type = request.POST.get('consultation_type', 'video')
+        date = request.POST.get('date')
+        time_slot = request.POST.get('time_slot', '10:00')
+        reason = request.POST.get('reason', 'Consultation médicale')
+        notes = request.POST.get('notes', '')
+
+        if date:
+            rdv = RendezVous.objects.create(
+                patient=request.user,
+                doctor=doctor,
+                consultation_type=consultation_type,
+                date=date,
+                time_slot=time_slot,
+                reason=reason,
+                notes=notes,
+                status='confirmed'
+            )
+            messages.success(request, f"Votre rendez-vous du {date} à {time_slot} avec le Dr. {doctor.username} a été enregistré avec succès !")
+            return redirect('patients:suivi')
+        else:
+            messages.error(request, "Veuillez sélectionner une date valide pour votre rendez-vous.")
+            return redirect('patients:doctor_detail', pk=doctor.pk)
 
 class DoctorSubscribeToggleView(LoginRequiredMixin, View):
     def post(self, request, pk, *args, **kwargs):
