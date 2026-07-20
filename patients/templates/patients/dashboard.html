@@ -131,7 +131,7 @@
                     <span>{% translate "Mon Suivi (RDV & Ordonnances)" %}</span>
                 </a>
 
-                <button type="button" onclick="openVideoFeedModal()" class="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-leaf-green hover:bg-gray-50 font-semibold text-sm transition-all group text-left">
+                <button type="button" onclick="openVideoFeedModal()" class="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-purple-600 hover:bg-purple-50/50 font-semibold text-sm transition-all group text-left">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 text-purple-600 group-hover:scale-105 transition-transform">
                       <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
                     </svg>
@@ -259,11 +259,10 @@
                         </svg>
                     </button>
 
-                    <button type="button" onclick="toggleNotificationsPanel()" class="text-gray-500 hover:text-leaf-green transition-colors relative focus:outline-none" title="Notifications">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                    <button type="button" onclick="openVideoFeedModal()" class="text-purple-600 hover:text-purple-800 transition-colors focus:outline-none relative" title="Vidéos Conseils Santé">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
                         </svg>
-                        <span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center border-2 border-white shadow-xs">2</span>
                     </button>
                 </div>
             </header>
@@ -286,9 +285,9 @@
                         <a href="{% url 'patients:suivi' %}" class="bg-white/20 hover:bg-white/30 text-white font-bold text-xs uppercase tracking-wider px-5 py-3.5 rounded-2xl border border-white/30 transition-all">
                             Mon Suivi Médical ➔
                         </a>
-                        <a href="{% url 'ia_assistant:chat' %}" class="bg-white hover:bg-leaf-light text-leaf-green font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 block text-center">
-                            IA Assistant
-                        </a>
+                        <button type="button" onclick="openVideoFeedModal()" class="bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs uppercase tracking-wider px-5 py-3.5 rounded-2xl shadow-md transition-all flex items-center space-x-2">
+                            <span>Vidéos 📹</span>
+                        </button>
                     </div>
                 </div>
 
@@ -303,13 +302,11 @@
                             {% for vid in videos_list %}
                             <div class="bg-white border border-purple-100 rounded-3xl shadow-md overflow-hidden select-none" id="real-vid-card-{{ vid.id }}">
                                 <div class="p-4 flex items-center justify-between border-b border-gray-50 bg-purple-50/30">
-                                    <!-- Clic sur le médecin redirige vers la PAGE DÉDIÉE AUTONOME (patients:doctor_detail) -->
                                     <a href="{% url 'patients:doctor_detail' vid.author.id %}" class="flex items-center space-x-3 group">
                                         <div class="w-11 h-11 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold text-xs shadow-md border-2 border-purple-300">
                                             Dr
                                         </div>
                                         <div>
-                                            <!-- SANS BADGE DE CERTIFICATION SUR LES MEDECINS -->
                                             <h4 class="text-sm font-extrabold text-purple-900 font-poppins group-hover:underline">
                                                 Dr. {{ vid.author.username }}
                                             </h4>
@@ -351,13 +348,12 @@
                             {% endfor %}
                         {% endif %}
 
-                        <!-- DEMO POST 1 (SEULE PAGE CERTIFIEE : FRANSICK OFFICIEL) -->
+                        <!-- DEMO POST 1 -->
                         <div class="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden select-none" id="post-card-1">
                             <div class="p-4 flex items-center justify-between border-b border-gray-50">
                                 <div class="flex items-center space-x-3">
                                     <div class="w-10 h-10 rounded-full bg-leaf-light text-leaf-green flex items-center justify-center font-bold text-xs shadow-xs">F</div>
                                     <div>
-                                        <!-- BADGE DE CERTIFICATION CONSERVÉ UNIQUEMENT POUR FRANSICK OFFICIEL -->
                                         <h4 class="text-sm font-bold text-medical-blue flex items-center space-x-1">
                                             <span>Fransick Officiel</span>
                                             <svg class="w-4 h-4 text-leaf-green" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
@@ -370,7 +366,7 @@
 
                     </div>
 
-                    <!-- Right Column: Médecins Inscrits (avec lien direct vers leur page complète) -->
+                    <!-- Right Column: Médecins Inscrits -->
                     <div class="lg:col-span-4 space-y-6">
                         <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-xs select-none">
                             <div class="flex items-center justify-between mb-4 border-b border-gray-50 pb-3">
@@ -382,13 +378,11 @@
                                 {% if medecins_list %}
                                     {% for doc in medecins_list %}
                                     <div class="p-3 rounded-2xl bg-purple-50/40 border border-purple-100 flex items-center justify-between hover:border-purple-300 transition-colors">
-                                        <!-- LIEN VERS LA PAGE DÉDIÉE AUTONOME DU MÉDECIN -->
                                         <a href="{% url 'patients:doctor_detail' doc.id %}" class="flex items-center space-x-3 group">
                                             <div class="w-9 h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">
                                                 Dr
                                             </div>
                                             <div>
-                                                <!-- SANS BADGE DE CERTIFICATION -->
                                                 <h5 class="text-xs font-bold text-gray-900 group-hover:underline">Dr. {{ doc.username }}</h5>
                                                 <p class="text-[9px] text-purple-600 font-bold">Voir la page complète ➔</p>
                                             </div>
@@ -406,6 +400,79 @@
                 </div>
 
             </main>
+        </div>
+    </div>
+
+    <!-- ================= MODAL LECTEUR VIDEO DYNAMIQUE (REPONDU & PLEIN ECRAN DYNAMIQUE) ================= -->
+    <div id="modal-video-feed" class="fixed inset-0 z-50 overflow-hidden hidden bg-black/95 backdrop-blur-md">
+        <div class="relative w-full h-full flex items-center justify-center">
+            
+            <button type="button" onclick="closeVideoFeedModal()" class="absolute top-5 right-5 text-white/80 hover:text-white bg-black/50 p-3 rounded-full backdrop-blur-md z-50 focus:outline-none shadow-lg border border-white/20">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+
+            <div class="relative w-full max-w-sm h-full max-h-[850px] bg-slate-950 sm:rounded-3xl overflow-hidden shadow-2xl border border-gray-800 flex flex-col">
+                
+                <div id="video-snap-container" class="w-full h-full overflow-y-auto snap-y-container custom-scrollbar relative">
+                    
+                    {% if videos_list %}
+                        {% for vid in videos_list %}
+                        <div class="snap-slide relative w-full h-full flex-shrink-0 flex flex-col justify-between p-5 bg-gradient-to-br from-purple-950 via-slate-900 to-slate-950 border-b border-gray-800">
+                            
+                            <div class="my-auto text-center space-y-4 z-10 px-4">
+                                <div class="w-20 h-20 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center mx-auto animate-pulse">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-10 h-10">
+                                      <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+                                    </svg>
+                                </div>
+                                <span class="bg-purple-600/40 text-purple-300 font-extrabold text-[10px] uppercase tracking-wider px-3.5 py-1 rounded-full inline-block border border-purple-500/40">
+                                    Capsule du Dr. {{ vid.author.username }}
+                                </span>
+                                <h4 class="text-white font-bold font-poppins text-lg leading-snug">{{ vid.title }}</h4>
+                                <p class="text-xs text-gray-300 font-medium leading-relaxed max-w-xs mx-auto">
+                                    {{ vid.description }}
+                                </p>
+
+                                <div class="pt-4 flex flex-col items-center justify-center text-purple-300 text-xs animate-bounce">
+                                    <span class="font-bold">Glissez vers le bas pour la vidéo suivante ⬇️</span>
+                                </div>
+                            </div>
+
+                            <div class="absolute right-3 bottom-20 z-30 flex flex-col items-center space-y-5 text-white select-none">
+                                <a href="{% url 'patients:doctor_detail' vid.author.id %}" class="relative mb-1">
+                                    <div class="w-11 h-11 rounded-full border-2 border-purple-400 bg-purple-600 text-white font-bold text-xs flex items-center justify-center shadow-lg">
+                                        Dr
+                                    </div>
+                                </a>
+                                <button type="button" onclick="toggleFeedLike('real-{{ vid.id }}')" class="flex flex-col items-center space-y-1 focus:outline-none">
+                                    <div class="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white shadow-md">
+                                        <svg id="feed-heart-real-{{ vid.id }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                                        </svg>
+                                    </div>
+                                    <span id="feed-likes-count-real-{{ vid.id }}" class="text-[10px] font-bold">{{ vid.likes_count }}</span>
+                                </button>
+                            </div>
+
+                            <div class="relative z-20 text-white select-none pr-14 pb-4">
+                                <a href="{% url 'patients:doctor_detail' vid.author.id %}" class="font-bold text-sm text-purple-300 hover:underline">@dr_{{ vid.author.username|lower }}</a>
+                                <p class="text-xs text-gray-200 font-medium truncate">{{ vid.title }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="snap-slide relative w-full h-full flex-shrink-0 flex flex-col justify-between p-5 bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900">
+                            <div class="my-auto text-center space-y-4 z-10">
+                                <div class="w-20 h-20 rounded-full bg-leaf-green/20 text-leaf-green flex items-center justify-center mx-auto animate-pulse">
+                                    📹
+                                </div>
+                                <h4 class="text-white font-bold font-poppins text-lg leading-snug">Aucune vidéo publiée pour le moment</h4>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                </div>
+            </div>
         </div>
     </div>
 
@@ -448,6 +515,24 @@
 
     <!-- JS ENGINE -->
     <script>
+        function openVideoFeedModal() {
+            const modal = document.getElementById('modal-video-feed');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeVideoFeedModal() {
+            const modal = document.getElementById('modal-video-feed');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        // Auto-open videos if URL parameter ?open_videos=true is present
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('open_videos') === 'true') {
+                openVideoFeedModal();
+            }
+        });
+
         function openSearchMedecinsModal() {
             const modal = document.getElementById('search-medecins-modal');
             if (modal) modal.classList.remove('hidden');
@@ -471,6 +556,22 @@
                     item.classList.add('hidden');
                 }
             });
+        }
+
+        function toggleFeedLike(postId) {
+            const heart = document.getElementById(`feed-heart-${postId}`);
+            const count = document.getElementById(`feed-likes-count-${postId}`);
+            if (heart && count) {
+                let val = parseInt(count.innerText) || 0;
+                if (!heart.classList.contains('heart-active')) {
+                    heart.classList.add('heart-active');
+                    count.innerText = val + 1;
+                    showToast('❤️ Vous avez aimé cette vidéo conseil !');
+                } else {
+                    heart.classList.remove('heart-active');
+                    count.innerText = Math.max(0, val - 1);
+                }
+            }
         }
 
         function showToast(message) {
