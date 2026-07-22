@@ -136,8 +136,9 @@ CORS_ALLOW_ALL_ORIGINS = env('CORS_ALLOW_ALL_ORIGINS')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Session settings
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Déconnecte l'utilisateur à la fermeture du navigateur
-SESSION_COOKIE_AGE = 1800  # Déconnexion automatique après 30 minutes d'inactivité (en secondes)
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Conserver la session ouverte
+SESSION_COOKIE_AGE = 86400  # Déconnexion après 24 heures d'inactivité (au lieu de 30 min)
+
 
 # Auth URLs & Redirections
 LOGIN_URL = '/accounts/login/patient/'
