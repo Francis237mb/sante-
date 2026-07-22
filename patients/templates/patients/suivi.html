@@ -33,17 +33,71 @@
     </script>
     <style>
         .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
+            width: 5px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
             background: transparent;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
             background: #cbd5e1;
-            border-radius: 3px;
+            border-radius: 4px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
+        }
+
+        /* CURVED MOBILE BOTTOM NAVIGATION STYLES (EXACTLY AS IMAGE 2) */
+        .curved-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 76px;
+            background: #ffffff;
+            box-shadow: 0 -15px 40px rgba(0, 0, 0, 0.08);
+            border-top-left-radius: 2.25rem;
+            border-top-right-radius: 2.25rem;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 40;
+            padding: 0 0.5rem;
+        }
+
+        .curved-nav-center-btn {
+            position: absolute;
+            top: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 58px;
+            height: 58px;
+            background: linear-gradient(135deg, #1B5FA8 0%, #3b82f6 100%);
+            border-radius: 50%;
+            box-shadow: 0 10px 25px rgba(27, 95, 168, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            border: 4px solid #ffffff;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .curved-nav-center-btn:active {
+            transform: translateX(-50%) scale(0.92);
+        }
+
+        .curved-bottom-nav-cutout {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 82px;
+            height: 41px;
+            background: #f9fafb; /* Match body backdrop */
+            border-bottom-left-radius: 41px;
+            border-bottom-right-radius: 41px;
+            z-index: -1;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02) inset;
         }
     </style>
 </head>
@@ -58,146 +112,127 @@
     </div>
 
     <!-- App Shell Layout -->
-    <div class="flex h-screen overflow-hidden">
+    <div class="flex h-screen overflow-hidden bg-gray-50/50">
         
         <!-- ================= DESKTOP SIDEBAR ================= -->
-        <aside class="hidden lg:flex flex-col w-64 bg-white border-r border-gray-200/80 flex-shrink-0 sticky top-0 h-screen">
-            <!-- Sidebar Header / Logo -->
-            <div class="h-20 flex items-center px-6 border-b border-gray-100 select-none">
-                <a href="{% url 'core:home' %}" class="flex items-center space-x-2.5">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-8 h-8 text-medical-blue">
-                        <path d="M37 28 C20 28 15 48 30 65 C40 75 50 82 50 82 C50 82 60 75 70 65 C85 48 80 28 63 28" fill="none" stroke="#1B5FA8" stroke-width="6" stroke-linecap="round"/>
-                        <circle cx="37" cy="28" r="4.5" fill="#38BDF8" />
-                        <circle cx="63" cy="28" r="4.5" fill="#38BDF8" />
-                        <path d="M30 65 C22 55 15 55 12 60 C8 65 14 74 22 72" fill="none" stroke="#1B5FA8" stroke-width="6" stroke-linecap="round"/>
-                        <circle cx="22" cy="72" r="6" fill="#14467d" />
-                        <path d="M43 46 H57 M50 39 V53" stroke="#38BDF8" stroke-width="5.5" stroke-linecap="round" />
-                        <path d="M48 68 L58 60 L60 72 Z" fill="#15803d" />
-                        <path d="M50 82 C68 76 83 60 83 38 C83 55 70 70 50 82 Z" fill="#6DBE45" />
-                        <path d="M50 82 C55 70 65 60 83 38" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
-                    </svg>
-                    <span class="font-poppins font-bold text-xl text-medical-blue tracking-tight">Fransick</span>
-                </a>
-            </div>
+        <aside class="hidden lg:flex flex-col w-[270px] bg-white/75 backdrop-blur-xl border border-white/50 flex-shrink-0 sticky my-4 ml-4 h-[calc(100vh-2rem)] rounded-[2.5rem] shadow-2xl p-5 select-none justify-between z-30">
+            <div>
+                <!-- Red, Yellow, Green macOS Control Dots -->
+                <div class="flex items-center space-x-1.5 mb-6 pl-1.5">
+                    <span class="w-3 h-3 rounded-full bg-[#ff5f56] inline-block shadow-sm"></span>
+                    <span class="w-3 h-3 rounded-full bg-[#ffbd2e] inline-block shadow-sm"></span>
+                    <span class="w-3 h-3 rounded-full bg-[#27c93f] inline-block shadow-sm"></span>
+                </div>
 
-            <!-- Active User Profile Summary -->
-            <div class="px-5 py-6 border-b border-gray-100 flex items-center space-x-3.5 select-none">
-                {% if user.profile_picture %}
-                    <img class="h-11 w-11 rounded-full object-cover ring-2 ring-leaf-green/20" src="{{ user.profile_picture.url }}" alt="{{ user.username }}">
-                {% else %}
-                    <div class="h-11 w-11 rounded-xl bg-leaf-green text-white flex items-center justify-center font-bold font-poppins text-lg shadow-sm">{{ user.username|slice:":2"|upper }}</div>
-                {% endif %}
-                <div class="overflow-hidden">
-                    <h4 class="text-sm font-bold text-gray-800 truncate">{{ user.username }}</h4>
-                    <span class="inline-block bg-leaf-green/10 text-leaf-green font-bold text-[9px] uppercase tracking-wider px-2.5 py-0.5 rounded-full mt-1">
-                        {% translate "Patient" %}
-                    </span>
+                <!-- User Profile Info -->
+                <div class="flex items-center space-x-3.5 mb-6 pl-1.5 pb-5 border-b border-gray-100/50">
+                    {% if user.profile_picture %}
+                        <img class="h-11 w-11 rounded-full object-cover ring-2 ring-white shadow-md" src="{{ user.profile_picture.url }}" alt="{{ user.username }}">
+                    {% else %}
+                        <div class="h-11 w-11 rounded-xl bg-leaf-green text-white flex items-center justify-center font-bold font-poppins text-base shadow-md">{{ user.username|slice:":2"|upper }}</div>
+                    {% endif %}
+                    <div class="overflow-hidden">
+                        <p class="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Good Day 👋</p>
+                        <h4 class="text-xs font-extrabold text-gray-800 truncate">{{ user.username }}</h4>
+                    </div>
+                </div>
+
+                <!-- Section: Menu -->
+                <div class="space-y-1">
+                    <span class="text-[9px] font-extrabold text-gray-400 uppercase tracking-widest pl-2.5 block mb-2.5">Menu</span>
+                    
+                    <a href="{% url 'patients:dashboard' %}" class="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-gray-800 hover:bg-gray-100/50 font-bold text-xs transition-all">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                        <span>{% translate "Accueil / Feed" %}</span>
+                    </a>
+
+                    <a href="{% url 'patients:suivi' %}" class="flex items-center space-x-3 px-4 py-3 rounded-2xl bg-gradient-to-r from-medical-blue to-blue-500 text-white font-extrabold text-xs shadow-md shadow-blue-500/20 transition-all">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        <span>{% translate "Mon Suivi (RDV)" %}</span>
+                    </a>
+
+                    <button type="button" onclick="openVideoFeedModal(); window.location.href='{% url 'patients:dashboard' %}?open_videos=true';" class="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-purple-600 hover:bg-purple-50/50 font-bold text-xs transition-all text-left">
+                        <svg class="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                        <span>{% translate "Vidéos Conseils" %}</span>
+                    </button>
+                </div>
+
+                <!-- Section: Services -->
+                <div class="bg-white/80 border border-gray-100/50 rounded-3xl p-3.5 shadow-sm space-y-2 mt-5">
+                    <span class="text-[9px] font-extrabold text-gray-400 uppercase tracking-widest block mb-2">Services</span>
+                    
+                    <button type="button" onclick="openSearchMedecinsModal()" class="w-full flex items-center space-x-2.5 p-2 rounded-xl hover:bg-gray-50 text-gray-600 hover:text-medical-blue font-bold text-[11px] transition-all text-left">
+                        <span class="w-6 h-6 rounded-lg bg-blue-50 text-medical-blue flex items-center justify-center font-bold">🩺</span>
+                        <span>{% translate "Trouver un Médecin" %}</span>
+                    </button>
+
+                    <button type="button" onclick="openPharmacyModuleModal()" class="w-full flex items-center space-x-2.5 p-2 rounded-xl hover:bg-gray-50 text-gray-600 hover:text-leaf-green font-bold text-[11px] transition-all text-left">
+                        <span class="w-6 h-6 rounded-lg bg-leaf-light text-leaf-green flex items-center justify-center font-bold">🏥</span>
+                        <span>{% translate "Pharmacies & Médicaments" %}</span>
+                    </button>
                 </div>
             </div>
 
-            <!-- Navigation Links (INCLUANT LE MODULE VIDEOS) -->
-            <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto custom-scrollbar select-none">
-                <!-- Accueil / Feed -->
-                <a href="{% url 'patients:dashboard' %}" class="flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-leaf-green hover:bg-gray-50 font-semibold text-sm transition-all group">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 group-hover:scale-105 transition-transform">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                    </svg>
-                    <span>{% translate "Accueil / Feed" %}</span>
-                </a>
+            <!-- Settings / Raccourcis & Bouton d'Action -->
+            <div class="space-y-3.5">
+                <!-- Raccourcis Horizontaux -->
+                <div class="flex items-center justify-around bg-gray-50/50 border border-gray-100/50 rounded-2xl p-2 select-none">
+                    <a href="{% url 'patients:settings' %}" class="p-2 text-gray-400 hover:text-leaf-green hover:bg-white rounded-xl transition-all" title="Paramètres">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    </a>
+                    <form action="{% url 'accounts:logout' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="p-2 text-red-400 hover:text-red-600 hover:bg-white rounded-xl transition-all" title="Déconnexion">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                        </button>
+                    </form>
+                </div>
 
-                <!-- Mon Suivi Médical (ACTIVE PAGE) -->
-                <a href="{% url 'patients:suivi' %}" class="flex items-center space-x-3 px-4 py-3 rounded-2xl bg-leaf-light text-leaf-green font-bold text-sm transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801-1.206a2.25 2.25 0 0 0-3.479-.015m5.578-2.583a2.25 2.25 0 0 0-2.25 2.25v.003c0 .83.672 1.5 1.5 1.5h1.5a1.5 1.5 0 0 0 1.5-1.5V3a2.25 2.25 0 0 0-2.25-2.25h-.003Z" />
-                    </svg>
-                    <span>{% translate "Mon Suivi (RDV & Ordonnances)" %}</span>
-                </a>
-
-                <!-- Vidéos Conseils Santé (MODULE VIDEOS EN SIDEBAR) -->
-                <a href="{% url 'patients:dashboard' %}?open_videos=true" class="flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-purple-600 hover:bg-purple-50/50 font-semibold text-sm transition-all group">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 text-purple-600 group-hover:scale-105 transition-transform">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
-                    </svg>
-                    <span>{% translate "Vidéos Conseils Santé" %}</span>
-                </a>
-
-                <!-- Pharmacies & Médicaments -->
-                <button type="button" onclick="openPharmacyModuleModal()" class="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-leaf-green hover:bg-gray-50 font-semibold text-sm transition-all group text-left">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 text-leaf-green group-hover:scale-105 transition-transform">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.33L12 5.5l-7.5 4.83V21h15Z" />
-                    </svg>
-                    <span>{% translate "Pharmacies & Médicaments" %}</span>
-                </button>
-
-                <!-- Assistant IA -->
-                <a href="{% url 'ia_assistant:chat' %}" class="flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-leaf-green hover:bg-gray-50 font-semibold text-sm transition-all group">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 text-medical-blue group-hover:scale-105 transition-transform">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 21l-.813-5.096L3 15l5.187-.813L9 9l.813 5.187L15 15l-5.187.813ZM18 7.5 17.25 12l-.75-4.5L12 6.75l4.5-.75.75-4.5.75 4.5 4.5.75-4.5.75-.75 4.5ZM3 3v2.25h2.25v1.5H3V9H1.5V6.75H0v-1.5h1.5V3H3Z" />
-                    </svg>
-                    <span>{% translate "Mon Assistant IA" %}</span>
-                </a>
-
-                <!-- Paramètres -->
-                <a href="{% url 'patients:settings' %}" class="flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-leaf-green hover:bg-gray-50 font-semibold text-sm transition-all group">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 group-hover:scale-105 transition-transform">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.43l-1.003.828c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255" />
-                    </svg>
-                    <span>{% translate "Paramètres" %}</span>
-                </a>
-            </nav>
-
-            <!-- Logout Button -->
-            <div class="p-4 border-t border-gray-100 select-none">
-                <form action="{% url 'accounts:logout' %}" method="post">
-                    {% csrf_token %}
-                    <button type="submit" class="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-red-500 bg-red-50/20 border border-red-100 hover:bg-red-50 font-bold text-sm transition-all focus:outline-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
-                        </svg>
-                        <span>{% translate "Déconnexion" %}</span>
+                <!-- White Task / RDV Action Card -->
+                <div class="bg-white/80 border border-gray-150 rounded-[2rem] p-4 text-center shadow-md flex flex-col items-center space-y-3">
+                    <button onclick="openSearchMedecinsModal()" class="w-11 h-11 rounded-full bg-gradient-to-r from-medical-blue to-blue-500 text-white flex items-center justify-center font-bold text-lg shadow-lg shadow-blue-500/35 transition-transform active:scale-95">
+                        +
                     </button>
-                </form>
+                    <div class="space-y-0.5">
+                        <p class="text-[10px] font-extrabold text-gray-800 uppercase tracking-wider">Trouver un médecin</p>
+                        <span class="text-[9px] text-gray-400 font-bold">Prendre RDV</span>
+                    </div>
+                </div>
             </div>
         </aside>
-
-        <!-- ================= MOBILE BOTTOM NAVIGATION (INCLUANT LE MODULE VIDEOS) ================= -->
-        <div class="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/95 backdrop-blur-md border-t border-gray-200/80 flex items-center justify-around px-2 z-40 shadow-lg select-none">
-            <a href="{% url 'patients:dashboard' %}" class="flex flex-col items-center justify-center flex-1 py-1 text-gray-400 hover:text-leaf-green transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                </svg>
-                <span class="text-[9px] mt-0.5 font-medium">{% translate "Accueil" %}</span>
+        <!-- ================= CURVED MOBILE BOTTOM NAVIGATION ================= -->
+        <div class="lg:hidden curved-bottom-nav">
+            <div class="curved-bottom-nav-cutout"></div>
+            
+            <!-- Accueil -->
+            <a href="{% url 'patients:dashboard' %}" class="flex flex-col items-center justify-center text-gray-400 hover:text-leaf-green flex-1 py-1">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                <span class="text-[8px] mt-0.5 font-bold uppercase tracking-wider">Accueil</span>
             </a>
             
-            <a href="{% url 'patients:suivi' %}" class="flex flex-col items-center justify-center flex-1 py-1 text-leaf-green font-bold transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08" />
-                </svg>
-                <span class="text-[9px] mt-0.5 font-medium">{% translate "Suivi" %}</span>
+            <!-- Suivi (Actif) -->
+            <a href="{% url 'patients:suivi' %}" class="flex flex-col items-center justify-center text-leaf-green font-bold flex-1 py-1">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                <span class="text-[8px] mt-0.5 font-bold uppercase tracking-wider">Suivi</span>
             </a>
 
-            <a href="{% url 'ia_assistant:chat' %}" class="flex flex-col items-center justify-center flex-1 py-1 text-gray-400 hover:text-leaf-green transition-all relative">
-                <div class="-mt-8 w-12 h-12 rounded-full bg-gradient-to-r from-medical-blue to-leaf-green text-white flex items-center justify-center shadow-md transform active:scale-95 transition-transform duration-200 border-4 border-gray-50">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 21l-.813-5.096L3 15l5.187-.813L9 9l.813 5.187L15 15l-5.187.813Z" />
-                    </svg>
-                </div>
-                <span class="text-[9px] mt-1 font-bold text-gray-600">{% translate "Assistant" %}</span>
+            <!-- Central Float Button (Assistant IA) -->
+            <a href="{% url 'ia_assistant:chat' %}" class="curved-nav-center-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 text-white">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 21l-.813-5.096L3 15l5.187-.813L9 9l.813 5.187L15 15l-5.187.813z" />
+                </svg>
             </a>
 
-            <!-- MODULE VIDEOS MOBILE -->
-            <a href="{% url 'patients:dashboard' %}?open_videos=true" class="flex flex-col items-center justify-center flex-1 py-1 text-purple-600 hover:text-purple-700 font-bold transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-purple-600">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
-                </svg>
-                <span class="text-[9px] mt-0.5 font-bold">{% translate "Vidéos" %}</span>
-            </a>
+            <!-- Pharmacies -->
+            <button type="button" onclick="openPharmacyModuleModal()" class="flex flex-col items-center justify-center text-gray-400 hover:text-leaf-green flex-1 py-1 focus:outline-none">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                <span class="text-[8px] mt-0.5 font-bold uppercase tracking-wider">Pharmacie</span>
+            </button>
 
-            <button type="button" onclick="openPharmacyModuleModal()" class="flex flex-col items-center justify-center flex-1 py-1 text-gray-400 hover:text-leaf-green transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 text-leaf-green">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.33L12 5.5l-7.5 4.83V21h15Z" />
-                </svg>
-                <span class="text-[9px] mt-0.5 font-bold">{% translate "Pharmacies" %}</span>
+            <!-- Vidéos -->
+            <button type="button" onclick="openPharmacyModuleModal(); window.location.href='{% url 'patients:dashboard' %}?open_videos=true';" class="flex flex-col items-center justify-center text-gray-400 hover:text-leaf-green flex-1 py-1 focus:outline-none">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                <span class="text-[8px] mt-0.5 font-bold uppercase tracking-wider">Vidéos</span>
             </button>
         </div>
 
