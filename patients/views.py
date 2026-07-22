@@ -8,6 +8,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from .forms import PatientProfileForm
 from medecins.models import HealthVideo, DoctorProfile, DoctorSubscription
 from consultations.models import RendezVous
+from pharmacies.models import PharmacyProfile, Medicament
 
 User = get_user_model()
 
@@ -18,6 +19,9 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context['medecins_list'] = User.objects.filter(role='medecin')
         context['videos_list'] = HealthVideo.objects.all()
+        # Pharmacies et Médicaments pour la recherche globale
+        context['pharmacies_list'] = User.objects.filter(role='pharmacie')
+        context['medicaments_list'] = Medicament.objects.all()
         return context
 
 class PatientSuiviView(LoginRequiredMixin, TemplateView):
@@ -27,6 +31,8 @@ class PatientSuiviView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context['medecins_list'] = User.objects.filter(role='medecin')
         context['videos_list'] = HealthVideo.objects.all()
+        context['pharmacies_list'] = User.objects.filter(role='pharmacie')
+        context['medicaments_list'] = Medicament.objects.all()
         # Vrais rendez-vous du patient en BDD SQLite
         context['user_rdv_list'] = RendezVous.objects.filter(patient=self.request.user)
         return context
@@ -45,6 +51,9 @@ class DoctorDetailView(LoginRequiredMixin, DetailView):
         context['profile'] = getattr(doctor, 'doctor_profile', None)
         context['subscribers_count'] = DoctorSubscription.objects.filter(doctor=doctor).count()
         context['is_subscribed'] = DoctorSubscription.objects.filter(patient=self.request.user, doctor=doctor).exists()
+        context['pharmacies_list'] = User.objects.filter(role='pharmacie')
+        context['medicaments_list'] = Medicament.objects.all()
+        context['medecins_list'] = User.objects.filter(role='medecin')
         return context
 
 class BookAppointmentView(LoginRequiredMixin, View):
