@@ -255,16 +255,51 @@
                             {% if profile and profile.speciality %}{{ profile.speciality }}{% else %}Praticien Médical{% endif %}
                         </p>
                     </div>
+                  </div>
+ 
+                <div class="flex items-center space-x-3.5 relative">
+                    <button type="button" onclick="openSearchMedecinsModal()" class="text-gray-500 hover:text-medical-blue transition-colors focus:outline-none relative group" title="Rechercher">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                        </svg>
+                    </button>
+                    
+                    <!-- Paramètres -->
+                    <a href="{% url 'patients:settings' %}" class="text-gray-500 hover:text-leaf-green transition-colors relative focus:outline-none" title="Paramètres">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.43l-1.003.828c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255" />
+                        </svg>
+                    </a>
+
+                    <!-- Notification Bell Trigger -->
+                    <button type="button" onclick="toggleNotificationsPanel()" class="text-gray-500 hover:text-leaf-green transition-colors relative focus:outline-none" title="Notifications">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                        </svg>
+                        <span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center border-2 border-white shadow-xs">2</span>
+                    </button>
+                    
+                    <button type="button" onclick="shareProfile()" class="flex items-center space-x-1.5 px-4 py-2.5 bg-leaf-light text-leaf-green hover:bg-leaf-green hover:text-white font-bold text-xs rounded-2xl transition-all border border-leaf-green/20 shadow-xs">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+                        <span>Partager</span>
+                    </button>
                 </div>
-
-                <button type="button" onclick="shareProfile()" class="flex items-center space-x-1.5 px-4 py-2.5 bg-leaf-light text-leaf-green hover:bg-leaf-green hover:text-white font-bold text-xs rounded-2xl transition-all border border-leaf-green/20 shadow-xs">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
-                    <span>Partager</span>
-                </button>
             </header>
-
+ 
             <!-- Main Scrollable Content -->
             <main class="flex-1 overflow-y-auto p-4 md:p-8 pb-24 lg:pb-8 custom-scrollbar">
+                
+                <!-- Unified Global Search Bar (Premium Look) -->
+                <div class="mb-6 max-w-xl mx-auto lg:mx-0 select-none">
+                    <div onclick="openSearchMedecinsModal()" class="w-full bg-white border border-gray-250/70 rounded-full pl-5 pr-5 py-3.5 text-xs focus:outline-none font-medium shadow-xs hover:border-medical-blue transition-all cursor-pointer flex items-center justify-between text-gray-400">
+                        <div class="flex items-center space-x-3.5">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+                            <span class="text-gray-500 font-semibold text-[11px]">Rechercher un médecin, médicament, pharmacie...</span>
+                        </div>
+                        <!-- Filter icon on the right -->
+                        <svg class="w-4.5 h-4.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                    </div>
+                </div>
                 <div class="max-w-3xl mx-auto space-y-6">
                     
                     <!-- Card Principale du Médecin -->
