@@ -294,16 +294,13 @@
                     </a>
                 </div>
 
-                <div class="flex items-center space-x-3.5 relative">
-                    <button type="button" onclick="showToast('🎁 Parrainez un ami et gagnez des points Fransick !')" class="text-gray-500 hover:text-leaf-green transition-colors">
-                        <span class="text-xl">🎁</span>
-                    </button>
-                    
-                    <button type="button" onclick="openSearchMedecinsModal()" class="text-gray-500 hover:text-medical-blue transition-colors focus:outline-none relative group" title="Rechercher un médecin">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                      <div class="flex items-center space-x-3.5 relative">
+                    <!-- Paramètres -->
+                    <a href="{% url 'patients:settings' %}" class="text-gray-500 hover:text-leaf-green transition-colors relative focus:outline-none" title="Paramètres">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.43l-1.003.828c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255" />
                         </svg>
-                    </button>
+                    </a>
 
                     <!-- Notification Bell Trigger -->
                     <button type="button" onclick="toggleNotificationsPanel()" class="text-gray-500 hover:text-leaf-green transition-colors relative focus:outline-none" title="Notifications">
@@ -355,7 +352,7 @@
                             <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
                             <span class="text-gray-400 font-medium text-xs truncate">Rechercher un médecin, médicament, pharmacie...</span>
                         </div>
-                        <svg class="w-4.5 h-4.5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                        <svg class="w-4.5 h-4.5 text-gray-400 flex-shrink-0" style="width: 18px; height: 18px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
                     </div>
                 </div>
 
