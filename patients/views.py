@@ -105,6 +105,11 @@ class DoctorSubscribeToggleView(LoginRequiredMixin, View):
 class PatientSettingsView(LoginRequiredMixin, TemplateView):
     template_name = 'patients/settings.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['pharmacies_list'] = User.objects.filter(role='pharmacie')
+        return context
+
     def get(self, request, *args, **kwargs):
         profile_form = PatientProfileForm(instance=request.user)
         password_form = PasswordChangeForm(user=request.user)
@@ -120,7 +125,9 @@ class PatientSettingsView(LoginRequiredMixin, TemplateView):
         profile_form = PatientProfileForm(instance=request.user)
         password_form = PasswordChangeForm(user=request.user)
 
-        if 'update_profile' in request.POST:
+        action = request.POST.get('action')
+
+        if 'update_profile' in request.POST or action == 'update_profile':
             profile_form = PatientProfileForm(request.POST, request.FILES, instance=request.user)
             if profile_form.is_valid():
                 profile_form.save()
@@ -130,7 +137,7 @@ class PatientSettingsView(LoginRequiredMixin, TemplateView):
                 messages.error(request, "Veuillez corriger les erreurs ci-dessous.")
                 active_tab = 'profile'
 
-        elif 'change_password' in request.POST:
+        elif 'change_password' in request.POST or action == 'change_password':
             password_form = PasswordChangeForm(user=request.user, data=request.POST)
             if password_form.is_valid():
                 user = password_form.save()
