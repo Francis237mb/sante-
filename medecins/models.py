@@ -59,3 +59,25 @@ class HealthVideo(models.Model):
 
     def __str__(self):
         return f"{self.title} par {self.author.username}"
+
+
+class VideoComment(models.Model):
+    video = models.ForeignKey(
+        HealthVideo, 
+        on_delete=models.CASCADE, 
+        related_name='comments'
+    )
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='video_comments'
+    )
+    text = models.TextField(verbose_name="Commentaire")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date du commentaire")
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"Commentaire de {self.author.username} sur {self.video.title}"
+

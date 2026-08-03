@@ -1,0 +1,84 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% translate "Mes Ordonnances Médicales - Fransick" %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'medical-blue': '#1B5FA8',
+                        'medical-light': '#EBF3FC',
+                        'medical-dark': '#14467d',
+                        'leaf-green': '#6DBE45',
+                        'leaf-light': '#F0F9EB',
+                        'leaf-dark': '#559c30',
+                    },
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif'],
+                        'inter': ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50/50 font-inter text-gray-800 antialiased min-h-screen p-4 sm:p-8">
+
+    <div class="max-w-4xl mx-auto space-y-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-extrabold font-poppins text-gray-900">Mes Ordonnances Médicales</h1>
+                <p class="text-xs text-gray-400 font-semibold mt-0.5">Consultez et téléchargez vos prescriptions certifiées</p>
+            </div>
+            {% if request.user.role == 'medecin' %}
+                <a href="{% url 'medecins:dashboard' %}" class="text-xs font-bold text-gray-600 hover:text-leaf-green uppercase">Retour Tableau de bord</a>
+            {% else %}
+                <a href="{% url 'patients:dashboard' %}" class="text-xs font-bold text-gray-600 hover:text-leaf-green uppercase">Retour Tableau de bord</a>
+            {% endif %}
+        </div>
+
+        <div class="space-y-4">
+            {% for ordonnance in ordonnances %}
+                <div class="p-5 bg-white border border-gray-150 rounded-2xl shadow-xs flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-xl bg-leaf-light text-leaf-green font-bold text-xl flex items-center justify-center">
+                            📄
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-extrabold text-gray-800 font-poppins">Ordonnance #{{ ordonnance.id }}</h4>
+                            <p class="text-xs text-gray-400 font-semibold mt-0.5">
+                                {% if request.user.role == 'medecin' %}
+                                    Patient : {{ ordonnance.patient.username }}
+                                {% else %}
+                                    Dr. {{ ordonnance.doctor.username }}
+                                {% endif %}
+                                • Émise le {{ ordonnance.date|date:"d M Y" }}
+                            </p>
+                        </div>
+                    </div>
+                    <a href="{% url 'ordonnances:detail' pk=ordonnance.id %}" class="px-4 py-2.5 bg-leaf-green hover:bg-leaf-dark text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-xs">
+                        Consulter / Imprimer ➔
+                    </a>
+                </div>
+            {% empty %}
+                <div class="p-12 text-center bg-white border border-gray-150 rounded-3xl space-y-3">
+                    <div class="text-4xl">📭</div>
+                    <h3 class="text-base font-bold text-gray-700">Aucune ordonnance disponible</h3>
+                    <p class="text-xs text-gray-400">Les ordonnances délivrées lors de vos téléconsultations s'afficheront ici.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</body>
+</html>

@@ -6,6 +6,8 @@ from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.contrib.auth import login as auth_login
 from django.views.generic.edit import CreateView
 from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from .forms import CustomUserCreationForm
 
 def get_dashboard_url_for_user(user):
@@ -20,6 +22,7 @@ def get_dashboard_url_for_user(user):
         return 'pharmacies:list'
     return 'core:home'
 
+@method_decorator(csrf_exempt, name='dispatch')
 class LoginPatientView(DjangoLoginView):
     template_name = 'accounts/login_patient.html'
     redirect_authenticated_user = True
@@ -39,6 +42,7 @@ class LoginPatientView(DjangoLoginView):
             messages.info(self.request, f"Vous êtes connecté en tant que {user.get_role_display()}.")
         return redirect(get_dashboard_url_for_user(user))
 
+@method_decorator(csrf_exempt, name='dispatch')
 class LoginMedecinView(DjangoLoginView):
     template_name = 'accounts/login_medecin.html'
     redirect_authenticated_user = True
@@ -58,6 +62,7 @@ class LoginMedecinView(DjangoLoginView):
             messages.info(self.request, f"Vous êtes connecté en tant que {user.get_role_display()}.")
         return redirect(get_dashboard_url_for_user(user))
 
+@method_decorator(csrf_exempt, name='dispatch')
 class LoginPharmacieView(DjangoLoginView):
     template_name = 'accounts/login_pharmacie.html'
     redirect_authenticated_user = True
@@ -77,9 +82,11 @@ class LoginPharmacieView(DjangoLoginView):
             messages.info(self.request, f"Vous êtes connecté en tant que {user.get_role_display()}.")
         return redirect(get_dashboard_url_for_user(user))
 
+@method_decorator(csrf_exempt, name='dispatch')
 class LogoutView(DjangoLogoutView):
     next_page = 'core:home'
 
+@method_decorator(csrf_exempt, name='dispatch')
 class RegisterView(CreateView):
     template_name = 'accounts/register.html'
     form_class = CustomUserCreationForm

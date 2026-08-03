@@ -1,0 +1,510 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% translate "Pharmacies & Médicaments - Fransick" %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'medical-blue': '#1B5FA8',
+                        'medical-light': '#EBF3FC',
+                        'medical-dark': '#14467d',
+                        'leaf-green': '#6DBE45',
+                        'leaf-light': '#F0F9EB',
+                        'leaf-dark': '#559c30',
+                    },
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif'],
+                        'inter': ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* CURVED MOBILE BOTTOM NAVIGATION STYLES */
+        .curved-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 76px;
+            background: #ffffff;
+            box-shadow: 0 -15px 40px rgba(0, 0, 0, 0.08);
+            border-top-left-radius: 2.25rem;
+            border-top-right-radius: 2.25rem;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 40;
+            padding: 0 0.5rem;
+        }
+
+        .curved-nav-center-btn {
+            position: absolute;
+            top: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 58px;
+            height: 58px;
+            background: linear-gradient(135deg, #1B5FA8 0%, #3b82f6 100%);
+            border-radius: 50%;
+            box-shadow: 0 10px 25px rgba(27, 95, 168, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            border: 4px solid #ffffff;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .curved-nav-center-btn:active {
+            transform: translateX(-50%) scale(0.92);
+        }
+
+        .google-map-pattern {
+            background-color: #e5e3df;
+            background-image: 
+                radial-gradient(#a3c2a8 2px, transparent 2px),
+                linear-gradient(to right, rgba(255,255,255,0.4) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.4) 1px, transparent 1px);
+            background-size: 20px 20px, 40px 40px, 40px 40px;
+        }
+    </style>
+</head>
+<body class="bg-[#f8fafc] font-inter text-gray-800 antialiased min-h-screen flex flex-col justify-between selection:bg-leaf-green selection:text-white">
+
+    <!-- Notification Toast -->
+    <div id="toast-notification" class="fixed top-6 right-6 z-50 transform -translate-y-16 opacity-0 pointer-events-none transition-all duration-300">
+        <div class="bg-gray-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center space-x-3 border border-gray-800">
+            <span class="text-lg">ℹ️</span>
+            <span id="toast-message" class="text-xs font-bold font-poppins">Message</span>
+        </div>
+    </div>
+
+    <div class="flex h-screen overflow-hidden bg-gray-50/50">
+        
+        <!-- ================= SILICON VALLEY MODULAR DESKTOP SIDEBAR ================= -->
+        {% include "patients/sidebar.html" %}
+
+        <!-- ================= SILICON VALLEY FLOATING CURVED BOTTOM NAV ================= -->
+        {% include "patients/bottom_nav.html" %}
+
+        <!-- ================= MAIN LAYOUT SPACE ================= -->
+        <div class="flex-1 flex flex-col min-h-screen overflow-hidden">
+            
+            <!-- Top Header Bar -->
+            <header class="h-20 bg-white border-b border-gray-200/80 px-4 md:px-8 flex items-center justify-between flex-shrink-0 z-30 select-none">
+                <!-- Left: Title & Logo -->
+                <div class="flex items-center space-x-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-leaf-green/10 text-leaf-green flex items-center justify-center font-bold flex-shrink-0">🏥</div>
+                    <div>
+                        <span class="font-poppins font-bold text-base md:text-lg text-leaf-green tracking-tight block">Fransick Pharmacies</span>
+                        <p class="text-[10px] text-gray-400 font-semibold hidden md:block" id="current-date-field"></p>
+                    </div>
+                </div>
+
+                <!-- Right: Profile Picture Avatar -->
+                <div class="flex items-center space-x-3">
+                    <a href="{% url 'patients:settings' %}" class="relative inline-block">
+                        {% if user.profile_picture %}
+                            <img class="h-9 w-9 md:h-10 md:w-10 rounded-full object-cover border border-gray-200 shadow-xs" src="{{ user.profile_picture.url }}" alt="{{ user.username }}">
+                        {% else %}
+                            <div class="h-9 w-9 md:h-10 md:w-10 rounded-full bg-leaf-green text-white flex items-center justify-center font-bold text-xs md:text-sm font-poppins shadow-xs">{{ user.username|slice:":2"|upper }}</div>
+                        {% endif %}
+                    </a>
+                </div>
+            </header>
+
+            <!-- Dashboard Content Scroll Area -->
+            <main class="flex-1 overflow-y-auto p-4 md:p-8 pb-24 lg:pb-8 custom-scrollbar">
+                
+                <!-- Page Layout Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 max-w-6xl mx-auto">
+                    
+                    <!-- Colonne de gauche (Recherche et pharmacies) : 7 cols -->
+                    <div class="lg:col-span-7 space-y-6">
+                        
+                        <!-- Search & filter bar -->
+                        <div class="bg-white border border-gray-150 rounded-3xl p-5 shadow-xs space-y-4">
+                            <h3 class="text-sm font-extrabold text-gray-800 font-poppins flex items-center space-x-2">
+                                <span>🔍</span>
+                                <span>Rechercher Pharmacies & Médicaments</span>
+                            </h3>
+                            <input type="text" id="pharmacy-page-search" onkeyup="filterPharmacyPageList()" placeholder="Tapez un nom de pharmacie, médicament ou adresse..." class="w-full bg-[#f1f5f9]/80 border border-gray-200/50 rounded-2xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-leaf-green font-medium">
+                        </div>
+
+                        <!-- Pharmacies list -->
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-xs font-extrabold text-gray-400 uppercase tracking-wider">Pharmacies Partenaires (Cliquez pour Catalogue & Itinéraire)</h3>
+                                <span class="text-[10px] text-leaf-green font-bold">💡 Cliquez sur une carte</span>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="pharmacy-grid-container">
+                                {% for ph in pharmacies_list %}
+                                <div class="pharmacy-card p-5 rounded-3xl bg-white border border-gray-150 hover:border-leaf-green hover:shadow-md transition-all flex flex-col justify-between space-y-4 cursor-pointer shadow-xs group" 
+                                     data-name="{{ ph.username|lower }} {{ ph.pharmacy_profile.pharmacy_name|lower }} {{ ph.pharmacy_profile.address|lower }}" 
+                                     onclick="openPharmacyModal('{{ ph.id }}', '{{ ph.pharmacy_profile.pharmacy_name|default:ph.username|escapejs }}', '{{ ph.pharmacy_profile.address|default:"Gombe, Kinshasa"|escapejs }}', '{{ ph.pharmacy_profile.phone|default:"+243 818 003 056"|escapejs }}', '{{ ph.pharmacy_profile.is_on_duty|yesno:"true,false" }}', '{{ ph.pharmacy_profile.opening_hours|default:"08h00 - 22h00"|escapejs }}')">
+                                    
+                                    <div class="space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <span class="w-10 h-10 rounded-2xl bg-leaf-light text-leaf-green flex items-center justify-center font-bold text-sm shadow-xs group-hover:scale-105 transition-transform">🏥</span>
+                                            {% if ph.pharmacy_profile.is_on_duty %}
+                                                <span class="bg-red-50 text-red-600 text-[8px] font-extrabold px-2.5 py-1 rounded-full border border-red-200 animate-pulse">DE GARDE 🚨</span>
+                                            {% else %}
+                                                <span class="bg-emerald-50 text-emerald-600 text-[8px] font-extrabold px-2.5 py-1 rounded-full border border-emerald-200">Ouverte 24/7</span>
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <h4 class="text-sm font-extrabold text-gray-900 group-hover:text-leaf-green transition-colors font-poppins">{{ ph.pharmacy_profile.pharmacy_name|default:ph.username }}</h4>
+                                            <p class="text-[10px] text-gray-500 font-semibold mt-0.5 flex items-center space-x-1">
+                                                <span>📍</span>
+                                                <span>{{ ph.pharmacy_profile.address|default:"Adresse non renseignée" }}</span>
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="border-t border-gray-100 pt-2.5 text-[10px] text-gray-500 font-semibold space-y-1">
+                                        <p class="flex items-center space-x-1">
+                                            <span>📞</span>
+                                            <span>Tel : {{ ph.pharmacy_profile.phone|default:"Téléphone non spécifié" }}</span>
+                                        </p>
+                                    </div>
+
+                                    <div class="pt-1 flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wider text-leaf-green border-t border-gray-50">
+                                        <span>Catalogue & Carte 🗺️</span>
+                                        <span class="group-hover:translate-x-1 transition-transform">➔</span>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="col-span-2 p-8 text-center text-gray-400 bg-white border border-gray-100 rounded-3xl">
+                                    Aucune pharmacie partenaire disponible actuellement.
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Stock medicaments -->
+                        <div class="space-y-4 pt-2">
+                            <h3 class="text-xs font-extrabold text-gray-400 uppercase tracking-wider">Médicaments en Stock</h3>
+                            <div class="grid grid-cols-1 gap-3.5" id="medicament-list-container">
+                                {% for med in medicaments_list %}
+                                <div class="med-card p-4 rounded-3xl bg-white border border-gray-150 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-xs" data-name="{{ med.name|lower }} {{ med.description|lower }}">
+                                    <div class="space-y-1">
+                                        <div class="flex items-center space-x-2.5">
+                                            <span class="font-extrabold text-sm text-gray-900">{{ med.name }} {{ med.dosage }}</span>
+                                            <span class="bg-purple-50 border border-purple-100 text-purple-700 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">{{ med.price }} FCFA</span>
+                                        </div>
+                                        <p class="text-xs text-gray-500 font-medium">{{ med.description|default:"Aucune description." }}</p>
+                                    </div>
+                                    <div class="flex flex-wrap gap-1.5 items-center">
+                                        <span class="text-[10px] text-gray-400 font-bold">Dispo à :</span>
+                                        {% for ph in med.pharmacies.all %}
+                                            <span class="bg-gray-100 border border-gray-200/50 text-gray-700 text-[9px] font-extrabold px-2 py-0.5 rounded-lg">{{ ph.pharmacy_profile.pharmacy_name|default:ph.username }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="p-8 text-center text-gray-400 bg-white border border-gray-100 rounded-3xl">
+                                    Aucun médicament en stock répertorié.
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Colonne de droite (Ordonnance) : 5 cols -->
+                    <div class="lg:col-span-5 space-y-6">
+                        <div class="bg-gradient-to-br from-white to-leaf-light/20 border border-gray-150 rounded-[2.5rem] p-6 shadow-md flex flex-col justify-between space-y-5 sticky top-4">
+                            <div class="space-y-4">
+                                <h3 class="text-base font-extrabold text-gray-900 font-poppins flex items-center space-x-2">
+                                    <span class="text-leaf-green">📋</span>
+                                    <span>Transmettre une Ordonnance</span>
+                                </h3>
+                                <p class="text-xs text-gray-500 leading-relaxed font-medium">
+                                    Sélectionnez une pharmacie partenaire à gauche pour consulter son catalogue, voir sa localisation Google Maps ou faire préparer vos médicaments.
+                                </p>
+                                
+                                <div class="space-y-3 pt-2 text-xs">
+                                    <div>
+                                        <label class="block text-gray-600 font-bold mb-1.5">Pharmacie Destinataire</label>
+                                        <input type="text" id="selected-pharmacy-name" readonly value="Aucune sélectionnée" class="w-full bg-[#f1f5f9]/80 border border-gray-200 rounded-2xl px-4 py-3 text-gray-800 font-extrabold focus:outline-none shadow-inner">
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-600 font-bold mb-1.5">Fichier Ordonnance (PDF, Photo)</label>
+                                        <div class="border-2 border-dashed border-gray-200 rounded-2xl p-6 text-center hover:border-leaf-green transition-all bg-white cursor-pointer relative">
+                                            <input type="file" id="prescription-file-input" class="absolute inset-0 opacity-0 cursor-pointer">
+                                            <span class="text-2xl block mb-2">📁</span>
+                                            <span class="text-[10px] text-gray-400 font-bold block" id="file-upload-label">Cliquez pour importer votre ordonnance</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="button" onclick="submitPrescriptionToPharmacy()" class="w-full py-4 bg-leaf-green hover:bg-leaf-dark text-white font-extrabold rounded-2xl text-xs uppercase tracking-wider shadow-lg shadow-leaf-green/20 transition-all">
+                                Envoyer la préparation ➔
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- ================= MODAL DETAILED PHARMACY & GOOGLE MAPS GPS ================= -->
+    <div id="pharmacy-detail-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-6 transition-opacity">
+        <div class="bg-white rounded-[2.5rem] max-w-2xl w-full max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl border border-gray-100 flex flex-col justify-between p-6 sm:p-8 space-y-6 animate-fade-in relative">
+            
+            <!-- Modal Close Button -->
+            <button type="button" onclick="closePharmacyModal()" class="absolute top-6 right-6 w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold flex items-center justify-center transition-all">
+                ✕
+            </button>
+
+            <!-- Pharmacy Header Details -->
+            <div class="space-y-4 border-b border-gray-150 pb-5">
+                <div class="flex items-center space-x-3.5">
+                    <div class="w-14 h-14 rounded-2xl bg-leaf-green/10 text-leaf-green flex items-center justify-center text-2xl shadow-xs flex-shrink-0">
+                        🏥
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <h2 id="modal-pharmacy-name" class="text-xl font-extrabold text-gray-900 font-poppins">Nom Pharmacie</h2>
+                            <span id="modal-duty-badge" class="bg-red-50 text-red-600 text-[9px] font-extrabold px-2.5 py-0.5 rounded-full border border-red-200">DE GARDE</span>
+                        </div>
+                        <p id="modal-pharmacy-address" class="text-xs text-gray-500 font-medium mt-0.5">📍 Adresse de la pharmacie</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 text-xs font-semibold bg-gray-50 p-3 rounded-2xl border border-gray-100">
+                    <div>
+                        <span class="text-[10px] text-gray-400 font-bold uppercase block">Téléphone</span>
+                        <span id="modal-pharmacy-phone" class="text-gray-800 font-extrabold">+243 818 003 056</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-gray-400 font-bold uppercase block">Horaires</span>
+                        <span id="modal-pharmacy-hours" class="text-gray-800 font-extrabold">08h00 - 22h00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Catalogue Section -->
+            <div class="space-y-3">
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-gray-400 flex items-center justify-between">
+                    <span>Catalogue des Médicaments en Stock</span>
+                    <span class="text-leaf-green font-bold">Disponible en rayon</span>
+                </h3>
+
+                <div class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-1">
+                    {% for med in medicaments_list %}
+                    <div class="p-3 bg-gray-50 rounded-2xl border border-gray-150 flex items-center justify-between text-xs">
+                        <div>
+                            <span class="font-extrabold text-gray-900 font-poppins">{{ med.name }} {{ med.dosage }}</span>
+                            <p class="text-[10px] text-gray-400 font-medium">{{ med.description|default:"Formule médicale certifiée" }}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-leaf-green font-extrabold font-poppins block">{{ med.price }} FCFA</span>
+                            <span class="text-[9px] bg-leaf-light text-leaf-green font-bold px-2 py-0.5 rounded-full inline-block mt-0.5">En Stock</span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-xs text-gray-400 italic text-center py-4">Aucun médicament spécifique répertorié dans ce catalogue.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Google Maps Interactive GPS Square (Exact Requirement) -->
+            <div class="space-y-2 pt-2">
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-gray-400">Localisation & Itinéraire Google Maps GPS</h3>
+                
+                <!-- Interactive Map Square Container -->
+                <div onclick="openGoogleMapsGPS()" class="google-map-pattern h-44 rounded-3xl border-2 border-gray-200 relative overflow-hidden flex flex-col items-center justify-center text-center p-4 cursor-pointer hover:border-leaf-green transition-all shadow-inner group">
+                    <!-- Red Location Pin -->
+                    <div class="w-12 h-12 rounded-full bg-red-600 text-white flex items-center justify-center shadow-2xl animate-bounce mb-2 border-2 border-white">
+                        📍
+                    </div>
+                    <div class="bg-white/95 backdrop-blur-md px-4 py-2 rounded-2xl shadow-md border border-gray-200">
+                        <span id="modal-map-name" class="text-xs font-extrabold text-gray-900 block">Pharmacie</span>
+                        <span class="text-[10px] text-gray-500 font-medium">Cliquez pour ouvrir Google Maps & Lancer l'Itinéraire</span>
+                    </div>
+
+                    <!-- Watermark Button -->
+                    <span class="absolute bottom-3 right-3 bg-blue-600 text-white text-[10px] font-extrabold px-3 py-1.5 rounded-xl shadow-lg flex items-center space-x-1 group-hover:scale-105 transition-transform">
+                        <span>Lancer GPS 🗺️</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                <button type="button" onclick="selectModalPharmacy()" class="flex-1 py-3.5 bg-leaf-green hover:bg-leaf-dark text-white font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-lg transition-all flex items-center justify-center space-x-2">
+                    <span>Sélectionner pour mon Ordonnance ➔</span>
+                </button>
+                <button type="button" onclick="openGoogleMapsGPS()" class="py-3.5 px-6 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-lg transition-all flex items-center justify-center space-x-2">
+                    <span>Itinéraire Google Maps 🗺️</span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JS ENGINE -->
+    <script>
+        let currentModalPharmacyName = '';
+        let currentModalPharmacyAddress = '';
+
+        function openPharmacyModal(id, name, address, phone, isDuty, hours) {
+            currentModalPharmacyName = name;
+            currentModalPharmacyAddress = address;
+
+            document.getElementById('modal-pharmacy-name').innerText = name;
+            document.getElementById('modal-map-name').innerText = name;
+            document.getElementById('modal-pharmacy-address').innerText = `📍 ${address}`;
+            document.getElementById('modal-pharmacy-phone').innerText = phone;
+            document.getElementById('modal-pharmacy-hours').innerText = hours;
+
+            const badge = document.getElementById('modal-duty-badge');
+            if (badge) {
+                if (isDuty === 'true' || isDuty === true) {
+                    badge.innerText = 'DE GARDE 🚨';
+                    badge.className = 'bg-red-50 text-red-600 text-[9px] font-extrabold px-2.5 py-0.5 rounded-full border border-red-200 animate-pulse';
+                } else {
+                    badge.innerText = 'OUVERTE 24/7';
+                    badge.className = 'bg-emerald-50 text-emerald-600 text-[9px] font-extrabold px-2.5 py-0.5 rounded-full border border-emerald-200';
+                }
+            }
+
+            const modal = document.getElementById('pharmacy-detail-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+            }
+        }
+
+        function closePharmacyModal() {
+            const modal = document.getElementById('pharmacy-detail-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function openGoogleMapsGPS() {
+            if (!currentModalPharmacyName) return;
+            const query = encodeURIComponent(`${currentModalPharmacyName} ${currentModalPharmacyAddress}`);
+            const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
+            window.open(mapsUrl, '_blank');
+        }
+
+        function selectModalPharmacy() {
+            if (currentModalPharmacyName) {
+                selectPharmacyForPrescription(currentModalPharmacyName);
+                closePharmacyModal();
+            }
+        }
+
+        function selectPharmacyForPrescription(name) {
+            const input = document.getElementById('selected-pharmacy-name');
+            if (input) {
+                input.value = name;
+                showToast(`🏥 Pharmacie "${name}" sélectionnée !`);
+            }
+        }
+
+        const fileInput = document.getElementById('prescription-file-input');
+        const uploadLabel = document.getElementById('file-upload-label');
+        if (fileInput && uploadLabel) {
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    uploadLabel.innerText = `Fichier sélectionné : ${e.target.files[0].name}`;
+                    uploadLabel.classList.remove('text-gray-400');
+                    uploadLabel.classList.add('text-leaf-green');
+                }
+            });
+        }
+
+        function submitPrescriptionToPharmacy() {
+            const name = document.getElementById('selected-pharmacy-name').value;
+            if (name === 'Aucune sélectionnée') {
+                showToast('⚠️ Veuillez d\'abord sélectionner une pharmacie à gauche.');
+            } else {
+                showToast(`🎉 Votre ordonnance a été transmise en priorité à la "${name}" !`);
+                setTimeout(() => {
+                    window.location.href = "{% url 'patients:dashboard' %}";
+                }, 2000);
+            }
+        }
+
+        function filterPharmacyPageList() {
+            const input = document.getElementById('pharmacy-page-search');
+            const filter = input.value.toLowerCase().trim();
+            
+            const phCards = document.querySelectorAll('.pharmacy-card');
+            phCards.forEach(card => {
+                const name = card.getAttribute('data-name');
+                if (name && name.includes(filter)) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+
+            const medCards = document.querySelectorAll('.med-card');
+            medCards.forEach(card => {
+                const name = card.getAttribute('data-name');
+                if (name && name.includes(filter)) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast-notification');
+            const toastMsg = document.getElementById('toast-message');
+            if (toast && toastMsg) {
+                toastMsg.innerText = message;
+                toast.classList.remove('-translate-y-16', 'opacity-0', 'pointer-events-none');
+                toast.classList.add('translate-y-4', 'opacity-100');
+                
+                setTimeout(() => {
+                    toast.classList.remove('translate-y-4', 'opacity-100');
+                    toast.classList.add('-translate-y-16', 'opacity-0', 'pointer-events-none');
+                }, 3000);
+            }
+        }
+
+        const dateField = document.getElementById('current-date-field');
+        if (dateField) {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const today = new Date();
+            let dateStr = today.toLocaleDateString('fr-FR', options);
+            dateField.innerText = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+        }
+    </script>
+</body>
+</html>

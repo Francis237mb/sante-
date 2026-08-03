@@ -1,0 +1,124 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% translate "Rédiger l'Ordonnance Médicale - Fransick" %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'medical-blue': '#1B5FA8',
+                        'medical-light': '#EBF3FC',
+                        'medical-dark': '#14467d',
+                        'leaf-green': '#6DBE45',
+                        'leaf-light': '#F0F9EB',
+                        'leaf-dark': '#559c30',
+                    },
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif'],
+                        'inter': ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-white sm:bg-gray-100 font-inter text-gray-800 antialiased min-h-screen flex flex-col items-center justify-center p-0 sm:p-8">
+
+    <!-- Container Card (100% Fullscreen on Mobile / Centered Card on Desktop) -->
+    <div class="w-full min-h-screen sm:min-h-0 sm:max-w-3xl bg-white border-0 sm:border border-gray-200 rounded-none sm:rounded-[2.5rem] p-5 sm:p-10 shadow-none sm:shadow-2xl space-y-6 flex flex-col justify-between">
+        
+        <div class="space-y-6">
+            <!-- Header -->
+            <div class="flex items-center justify-between border-b border-gray-150 pb-5">
+                <div class="flex items-center space-x-3">
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-leaf-green/10 text-leaf-green border border-leaf-green/20 flex items-center justify-center shadow-xs flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-6 h-6 sm:w-7 sm:h-7 text-leaf-green">
+                            <path d="M37 28 C20 28 15 48 30 65 C40 75 50 82 50 82 C50 82 60 75 70 65 C85 48 80 28 63 28" fill="none" stroke="#6DBE45" stroke-width="6" stroke-linecap="round"/>
+                            <circle cx="37" cy="28" r="4.5" fill="#38BDF8" />
+                            <circle cx="63" cy="28" r="4.5" fill="#38BDF8" />
+                            <path d="M43 46 H57 M50 39 V53" stroke="#38BDF8" stroke-width="5.5" stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-lg sm:text-2xl font-extrabold font-poppins text-gray-900 tracking-tight">Rédiger l'Ordonnance Médicale</h1>
+                        <p class="text-[11px] sm:text-xs text-gray-400 font-semibold mt-0.5">Dr. {{ user.username }} • Émission sécurisée Fransick</p>
+                    </div>
+                </div>
+                <a href="{% url 'medecins:dashboard' %}" class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold rounded-xl text-xs uppercase tracking-wider transition-all">
+                    Annuler
+                </a>
+            </div>
+
+            <!-- Form Start -->
+            <form method="post" action="" class="space-y-5">
+                {% csrf_token %}
+                
+                {% if patient %}
+                    <input type="hidden" name="patient_id" value="{{ patient.id }}">
+                    <div class="p-4 sm:p-5 bg-gradient-to-r from-medical-light via-blue-50/50 to-white border border-medical-blue/20 rounded-2xl flex items-center justify-between shadow-xs">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-11 h-11 rounded-2xl bg-medical-blue text-white font-extrabold text-sm flex items-center justify-center font-poppins shadow-xs">
+                                {{ patient.username|slice:":2"|upper }}
+                            </div>
+                            <div>
+                                <span class="text-[9px] sm:text-[10px] uppercase font-extrabold text-medical-blue tracking-wider block">Patient Destinataire</span>
+                                <h3 class="text-sm sm:text-base font-extrabold text-gray-800 font-poppins mt-0.5">{{ patient.username }}</h3>
+                            </div>
+                        </div>
+                        <span class="bg-medical-blue/10 text-medical-blue text-[11px] font-extrabold px-3 py-1.5 rounded-xl uppercase tracking-wider">
+                            ID : #{{ patient.id }}
+                        </span>
+                    </div>
+                {% endif %}
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <!-- Patient Age -->
+                    <div>
+                        <label for="patient_age" class="block text-xs font-extrabold uppercase tracking-wider text-gray-700 mb-1.5">Âge du Patient</label>
+                        <input type="text" name="patient_age" id="patient_age" value="30 ans" required placeholder="Ex: 30 ans" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold text-gray-800 focus:bg-white focus:ring-2 focus:ring-leaf-green focus:border-transparent outline-none transition-all">
+                    </div>
+                </div>
+
+                <!-- Diagnostic Médical -->
+                <div class="space-y-1.5">
+                    <label for="diagnostic" class="block text-xs font-extrabold uppercase tracking-wider text-gray-700">Diagnostic Médical / Constat Praticien</label>
+                    <textarea name="diagnostic" id="diagnostic" rows="3" required placeholder="Ex: Syndrome fébrile avec cephalées légères et rhinorrhée..." class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-medium text-gray-800 focus:bg-white focus:ring-2 focus:ring-leaf-green focus:border-transparent outline-none transition-all leading-relaxed"></textarea>
+                </div>
+
+                <!-- Prescription Details (Rx) -->
+                <div class="space-y-1.5">
+                    <div class="flex items-center justify-between">
+                        <label for="prescription_details" class="block text-xs font-extrabold uppercase tracking-wider text-gray-700">Prescription Médicamenteuse & Traitement (Rx)</label>
+                        <span class="text-xs text-leaf-green font-extrabold uppercase tracking-wider flex items-center space-x-1">
+                            <span>Symbole Rx</span>
+                            <span class="text-base">💊</span>
+                        </span>
+                    </div>
+                    <textarea name="prescription_details" id="prescription_details" rows="6" required placeholder="1. Paracétamol 1000mg : 1 comprimé 3 fois par jour au cours des repas pendant 5 jours.&#10;2. Amoxicilline 1g : 1 gélule matin et soir pendant 7 jours.&#10;3. Sirop Antitussif : 1 cuillère à soupe soir au coucher..." class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-mono text-gray-900 focus:bg-white focus:ring-2 focus:ring-leaf-green focus:border-transparent outline-none transition-all leading-relaxed"></textarea>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="pt-2">
+                    <button type="submit" class="w-full py-4 bg-leaf-green hover:bg-leaf-dark active:scale-95 text-white font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-lg transition-all flex items-center justify-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                        </svg>
+                        <span>Générer & Certifier l'Ordonnance Médicale</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>

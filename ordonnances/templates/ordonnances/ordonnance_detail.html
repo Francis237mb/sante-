@@ -1,0 +1,242 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% translate "Ordonnance Médicale Certifiée - Fransick" %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'medical-blue': '#1B5FA8',
+                        'medical-light': '#EBF3FC',
+                        'medical-dark': '#0f3866',
+                        'leaf-green': '#6DBE45',
+                        'leaf-light': '#F0F9EB',
+                        'leaf-dark': '#559c30',
+                    },
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif'],
+                        'inter': ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; padding: 0 !important; }
+            .print-card { border: none !important; box-shadow: none !important; width: 100% !important; margin: 0 !important; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-inter text-gray-800 antialiased min-h-screen p-3 sm:p-8 flex flex-col items-center justify-center">
+
+    <!-- Action Toolbar (Responsive & Clean - No Print) -->
+    <div class="max-w-3xl w-full flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-6 no-print">
+        {% if request.user.role == 'medecin' %}
+            <a href="{% url 'medecins:dashboard' %}" class="inline-flex items-center space-x-2 text-xs font-extrabold text-gray-600 hover:text-leaf-green transition-colors uppercase tracking-wider">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                </svg>
+                <span>Retour Tableau de bord</span>
+            </a>
+        {% else %}
+            <a href="{% url 'patients:dashboard' %}" class="inline-flex items-center space-x-2 text-xs font-extrabold text-gray-600 hover:text-leaf-green transition-colors uppercase tracking-wider">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                </svg>
+                <span>Retour Tableau de bord</span>
+            </a>
+        {% endif %}
+
+        <!-- Interactive Action Buttons Bar -->
+        <div class="flex flex-wrap items-center gap-2.5">
+            <!-- Option 1: Envoyer au patient -->
+            <form action="{% url 'ordonnances:send_to_patient' pk=ordonnance.id %}" method="post" class="inline">
+                {% csrf_token %}
+                <button type="submit" class="w-full sm:w-auto px-3.5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-[11px] rounded-xl shadow-xs uppercase tracking-wider transition-all flex items-center justify-center space-x-1.5 cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                    </svg>
+                    <span>Envoyer au patient 📩</span>
+                </button>
+            </form>
+
+            <!-- Option 2: Programmer un autre RDV -->
+            <a href="{% url 'patients:doctor_detail' pk=ordonnance.doctor.id %}" class="flex-1 sm:flex-initial px-3.5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[11px] rounded-xl shadow-xs uppercase tracking-wider transition-all flex items-center justify-center space-x-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5" />
+                </svg>
+                <span>Programmer Suivi 📅</span>
+            </a>
+
+            <!-- Option 3: Transmettre Pharmacie -->
+            <a href="{% url 'patients:pharmacies' %}" class="flex-1 sm:flex-initial px-3.5 py-2.5 bg-leaf-green hover:bg-leaf-dark text-white font-extrabold text-[11px] rounded-xl shadow-xs uppercase tracking-wider transition-all flex items-center justify-center space-x-1.5">
+                <span>Pharmacie 💊</span>
+            </a>
+
+            <!-- Option 4: Imprimer / PDF -->
+            <button type="button" onclick="window.print()" class="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-extrabold text-[11px] rounded-xl shadow-xs uppercase tracking-wider transition-all flex items-center justify-center space-x-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231a1.125 1.125 0 01-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.656" />
+                </svg>
+                <span>Imprimer</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-notify" class="fixed top-5 right-5 z-50 transform -translate-y-20 opacity-0 pointer-events-none transition-all duration-300">
+        <div class="bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center space-x-3 text-xs font-bold">
+            <span class="text-lg">✅</span>
+            <span id="toast-text">Ordonnance transmise avec succès !</span>
+        </div>
+    </div>
+
+    <!-- Official Medical Prescription Card (Matching User Image Design 100%) -->
+    <div class="print-card max-w-3xl w-full bg-white border border-gray-200 shadow-2xl rounded-none relative overflow-hidden flex flex-col justify-between min-h-[920px] select-none text-slate-800">
+        
+        <!-- Watermark central (Logo Fransick en filigrane translucide) -->
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-5 z-0">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-[450px] h-[450px] text-medical-dark">
+                <path d="M37 28 C20 28 15 48 30 65 C40 75 50 82 50 82 C50 82 60 75 70 65 C85 48 80 28 63 28" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+                <circle cx="37" cy="28" r="4.5" fill="currentColor" />
+                <circle cx="63" cy="28" r="4.5" fill="currentColor" />
+                <path d="M30 65 C22 55 15 55 12 60 C8 65 14 74 22 72" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+                <circle cx="22" cy="72" r="6" fill="currentColor" />
+                <path d="M43 46 H57 M50 39 V53" stroke="currentColor" stroke-width="5.5" stroke-linecap="round" />
+                <path d="M48 68 L58 60 L60 72 Z" fill="currentColor" />
+                <path d="M50 82 C68 76 83 60 83 38 C83 55 70 70 50 82 Z" fill="currentColor" />
+            </svg>
+        </div>
+
+        <!-- Top Section Content -->
+        <div class="p-6 sm:p-10 relative z-10 space-y-6">
+            <!-- Header Grid -->
+            <div class="flex items-start justify-between">
+                <div>
+                    <h1 class="text-xl sm:text-3xl font-extrabold tracking-wider font-poppins text-slate-800 uppercase">
+                        ORDONNANCE MÉDICALE
+                    </h1>
+                </div>
+
+                <!-- Official Circular Stamp Badge -->
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-4 border-medical-dark flex flex-col items-center justify-center p-1 text-center shadow-xs flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-7 h-7 text-leaf-green">
+                        <path d="M37 28 C20 28 15 48 30 65 C40 75 50 82 50 82 C50 82 60 75 70 65 C85 48 80 28 63 28" fill="none" stroke="#6DBE45" stroke-width="6" stroke-linecap="round"/>
+                        <circle cx="37" cy="28" r="4.5" fill="#38BDF8" />
+                        <circle cx="63" cy="28" r="4.5" fill="#38BDF8" />
+                        <path d="M43 46 H57 M50 39 V53" stroke="#38BDF8" stroke-width="5.5" stroke-linecap="round" />
+                    </svg>
+                    <span class="text-[6px] sm:text-[7px] font-black uppercase text-medical-dark tracking-tighter leading-tight mt-0.5">FRANSICK SANTE</span>
+                </div>
+            </div>
+
+            <!-- Doctor & Patient Fields (Underlined dotted style) -->
+            <div class="space-y-3.5 font-inter text-xs sm:text-sm font-semibold">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                    <div class="sm:col-span-2 flex items-baseline">
+                        <span class="font-extrabold text-slate-900 mr-2">Dr :</span>
+                        <span class="border-b-2 border-dotted border-slate-400 flex-1 px-2 font-bold text-medical-blue">Dr. {{ ordonnance.doctor.username }}</span>
+                    </div>
+                    <div class="flex items-baseline">
+                        <span class="font-extrabold text-slate-900 mr-2">Date :</span>
+                        <span class="border-b-2 border-dotted border-slate-400 flex-1 px-2 text-slate-700">{{ ordonnance.date|date:"d / m / Y" }}</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                    <div class="sm:col-span-2 flex items-baseline">
+                        <span class="font-extrabold text-slate-900 mr-2">Patient :</span>
+                        <span class="border-b-2 border-dotted border-slate-400 flex-1 px-2 font-bold text-slate-800">{{ ordonnance.patient.username }}</span>
+                    </div>
+                    <div class="flex items-baseline">
+                        <span class="font-extrabold text-slate-900 mr-2">Âge :</span>
+                        <span class="border-b-2 border-dotted border-slate-400 flex-1 px-2 text-slate-700">{{ ordonnance.patient_age }}</span>
+                    </div>
+                </div>
+
+                <div class="flex items-baseline">
+                    <span class="font-extrabold text-slate-900 mr-2">Diagnostic :</span>
+                    <span class="border-b-2 border-dotted border-slate-400 flex-1 px-2 text-slate-700 italic">{{ ordonnance.diagnostic }}</span>
+                </div>
+            </div>
+
+            <!-- Prescription Symbol Rx & Content -->
+            <div class="pt-4 space-y-3">
+                <div class="text-3xl sm:text-4xl font-extrabold font-serif text-medical-dark tracking-tight">
+                    Rx
+                </div>
+                <div class="pl-4 sm:pl-6 text-xs sm:text-base font-mono whitespace-pre-line leading-relaxed text-slate-800 border-l-2 border-leaf-green/40 min-h-[200px]">
+                    {{ ordonnance.prescription_details }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Section: Signature & Blue Footer -->
+        <div class="relative z-10">
+            <!-- Signature Area -->
+            <div class="px-6 sm:px-10 pb-6 flex justify-end">
+                <div class="text-center space-y-8 w-48 sm:w-56">
+                    <span class="text-xs font-extrabold text-slate-700 uppercase tracking-wider block">Signature du Dr.</span>
+                    <div class="border-t border-slate-400 pt-1">
+                        <span class="text-xs font-bold text-medical-blue font-poppins">Dr. {{ ordonnance.doctor.username }}</span>
+                        <span class="block text-[8px] text-gray-400 font-semibold uppercase">Signature Numérique Certifiée</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Official Dark Blue Footer Band (Exact Match Image) -->
+            <div class="bg-medical-dark text-white p-5 sm:px-10 space-y-3">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-semibold">
+                    <div class="font-extrabold tracking-wider font-poppins text-xs sm:text-sm uppercase text-center sm:text-left">
+                        FRANSICK SANTE SÉCURISÉE
+                    </div>
+                    <div class="flex items-center space-x-4 text-[10px] sm:text-[11px] font-medium flex-wrap justify-center">
+                        <span class="flex items-center space-x-1">
+                            <svg class="w-3.5 h-3.5 text-leaf-green" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            <span>PLATEFORME DE TÉLÉMÉDECINE CERTIFIÉE</span>
+                        </span>
+                        <span class="flex items-center space-x-1">
+                            <svg class="w-3.5 h-3.5 text-leaf-green" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                            <span>+243 818 003 056</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="text-[9px] sm:text-[10px] text-gray-300 text-center border-t border-white/10 pt-2 font-medium">
+                    Noter que ce document est une ordonnance électronique valable partout dans le domaine médical et auprès des pharmacies certifiées Fransick.
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- JS Notification Script -->
+    <script>
+        function sendToPatient() {
+            const toast = document.getElementById('toast-notify');
+            const toastText = document.getElementById('toast-text');
+            if (toast && toastText) {
+                toastText.innerText = "📩 Ordonnance transmise avec succès dans le dossier du patient {{ ordonnance.patient.username }} !";
+                toast.classList.remove('-translate-y-20', 'opacity-0', 'pointer-events-none');
+                toast.classList.add('translate-y-0', 'opacity-100');
+                
+                setTimeout(() => {
+                    toast.classList.remove('translate-y-0', 'opacity-100');
+                    toast.classList.add('-translate-y-20', 'opacity-0', 'pointer-events-none');
+                }, 4000);
+            }
+        }
+    </script>
+</body>
+</html>

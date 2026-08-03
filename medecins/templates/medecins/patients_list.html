@@ -1,0 +1,254 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes Patients & Historique des Diagnostics | Fransick Santé</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'medical-blue': '#14467d',
+                        'medical-dark': '#0b2b50',
+                        'medical-light': '#eef5fc',
+                        'leaf-green': '#15803d',
+                        'leaf-light': '#f0fdf4',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        poppins: ['Poppins', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    </style>
+</head>
+<body class="bg-gray-50/70 font-inter text-gray-800 antialiased overflow-hidden">
+
+    <!-- App Shell Layout -->
+    <div class="flex h-screen overflow-hidden bg-gray-50/50">
+        
+        <!-- ================= SILICON VALLEY MODULAR DESKTOP SIDEBAR ================= -->
+        {% include "medecins/sidebar.html" %}
+
+        <!-- ================= SILICON VALLEY FLOATING CURVED BOTTOM NAV ================= -->
+        {% include "medecins/bottom_nav.html" %}
+
+        <!-- ================= MAIN LAYOUT SPACE ================= -->
+        <div class="flex-1 flex flex-col min-h-screen overflow-hidden">
+
+    <!-- Top Navigation Header -->
+    <header class="h-20 bg-white/90 backdrop-blur-md border-b border-gray-200/80 px-4 md:px-8 flex items-center justify-between shadow-xs sticky top-0 z-30">
+        <div class="flex items-center space-x-3">
+            <a href="{% url 'medecins:dashboard' %}" class="w-10 h-10 rounded-2xl bg-gray-100 hover:bg-medical-blue hover:text-white flex items-center justify-center text-gray-600 transition-all shadow-xs" title="Retour au Tableau de Bord">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                </svg>
+            </a>
+            <div>
+                <h1 class="text-base md:text-xl font-extrabold font-poppins text-gray-900 flex items-center space-x-2">
+                    <span class="text-medical-blue">📋</span>
+                    <span>Dossiers Patients & Diagnostics</span>
+                </h1>
+                <p class="text-[10px] md:text-xs text-gray-400 font-medium">Portail Médical • Historique des consultations et ordonnances délivrées</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <a href="{% url 'ordonnances:create' %}" class="px-4 py-2.5 bg-gradient-to-r from-medical-blue to-medical-dark hover:from-medical-dark hover:to-medical-blue text-white font-extrabold text-xs rounded-2xl shadow-sm hover:shadow-md transition-all uppercase tracking-wider flex items-center space-x-1.5">
+                <span>+ Rédiger Ordonnance</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto max-w-7xl w-full mx-auto p-4 md:p-8 pb-28 lg:pb-8 space-y-6 custom-scrollbar">
+
+        <!-- Stats Bar & Search -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+            <div class="bg-white p-5 rounded-3xl border border-gray-150 shadow-xs flex items-center space-x-4">
+                <div class="w-12 h-12 rounded-2xl bg-blue-50 text-medical-blue flex items-center justify-center font-extrabold text-xl shadow-2xs">
+                    👥
+                </div>
+                <div>
+                    <span class="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block">Patients Suivis</span>
+                    <h3 class="text-2xl font-black text-gray-900 font-poppins">{{ my_patients|length }}</h3>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-3xl border border-gray-150 shadow-xs flex items-center space-x-4">
+                <div class="w-12 h-12 rounded-2xl bg-leaf-light text-leaf-green flex items-center justify-center font-extrabold text-xl shadow-2xs">
+                    🩺
+                </div>
+                <div>
+                    <span class="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block">Diagnostics Posés</span>
+                    <h3 class="text-2xl font-black text-gray-900 font-poppins">{{ total_ordonnances_count }}</h3>
+                </div>
+            </div>
+
+            <!-- Search Field -->
+            <div class="bg-white p-4 rounded-3xl border border-gray-150 shadow-xs flex items-center">
+                <div class="relative w-full">
+                    <input type="text" id="search-patient-input" onkeyup="filterPatientCards()" placeholder="Rechercher un patient ou un diagnostic..." class="w-full pl-10 pr-4 py-3 bg-slate-50/80 border border-gray-200 rounded-2xl text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-medical-blue font-medium transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Title & Counter -->
+        <div class="flex items-center justify-between pt-2">
+            <h2 class="text-sm font-extrabold text-gray-800 font-poppins uppercase tracking-wider flex items-center space-x-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-leaf-green shadow-2xs"></span>
+                <span>Liste des Fiches Médicales Patients</span>
+            </h2>
+            <span id="patient-count-badge" class="bg-gray-100 text-gray-600 font-extrabold text-[10px] px-3 py-1 rounded-full">
+                {{ my_patients|length }} enregistrement(s)
+            </span>
+        </div>
+
+        <!-- Patient Cards Container -->
+        <div class="space-y-5" id="patients-grid-container">
+            {% if my_patients %}
+                {% for item in my_patients %}
+                <div class="patient-card animate-fade-in bg-white border border-gray-150 rounded-3xl p-6 shadow-xs space-y-5 hover:shadow-md transition-all" data-patient-name="{{ item.patient.username|lower }}" data-patient-diag="{{ item.diagnostic|lower }}">
+                    
+                    <!-- Card Top Header -->
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-gray-100 pb-4">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-medical-blue via-medical-dark to-slate-900 text-white font-extrabold text-lg flex items-center justify-center shadow-md font-poppins border-2 border-white">
+                                {{ item.patient.username|slice:":2"|upper }}
+                            </div>
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <h3 class="text-base font-extrabold text-gray-900 font-poppins">{{ item.patient.username }}</h3>
+                                    <span class="bg-leaf-light text-leaf-green text-[9px] font-extrabold px-2.5 py-0.5 rounded-full border border-leaf-green/20">Dossier Actif</span>
+                                </div>
+                                <p class="text-xs text-gray-400 font-medium mt-0.5">Âge : <span class="font-bold text-gray-700">{{ item.patient_age }}</span> • Dernier passage : <span class="font-bold text-gray-700">{{ item.last_ordonnance.date|date:"d F Y" }}</span></p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-blue-50/80 text-medical-blue text-xs font-extrabold px-3.5 py-1.5 rounded-2xl border border-blue-100">
+                                {{ item.all_ordonnances|length }} Ordonnance(s)
+                            </span>
+                            <a href="{% url 'ordonnances:create' %}" class="px-3.5 py-1.5 bg-leaf-green hover:bg-leaf-green/90 text-white text-xs font-extrabold rounded-xl transition-all shadow-2xs uppercase tracking-wider">
+                                + Nouvelle Ordonnance
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Highlight Last Diagnostic Card -->
+                    <div class="bg-gradient-to-r from-medical-light via-blue-50/50 to-white p-4 rounded-2xl border border-blue-100/80 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[9px] font-black text-medical-blue uppercase tracking-wider flex items-center space-x-1">
+                                <span>🩺</span>
+                                <span>Dernier Diagnostic Établi :</span>
+                            </span>
+                            <span class="text-[10px] text-gray-400 font-semibold">{{ item.last_ordonnance.date|date:"d/m/Y" }}</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-gray-900 font-poppins">{{ item.diagnostic }}</h4>
+                        <p class="text-xs text-gray-600 font-medium line-clamp-2 leading-relaxed bg-white/70 p-2.5 rounded-xl border border-blue-100/40">
+                            <strong class="text-medical-blue">Rx :</strong> {{ item.last_ordonnance.prescription_details }}
+                        </p>
+                    </div>
+
+                    <!-- Complete Diagnostics History -->
+                    <div class="space-y-3 pt-1">
+                        <span class="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block">Historique Chronologique des Ordonnances & Posologies :</span>
+
+                        <div class="space-y-3">
+                            {% for ord in item.all_ordonnances %}
+                            <div class="bg-slate-50/90 p-4 rounded-2xl border border-slate-200/60 space-y-2.5 hover:bg-white transition-colors">
+                                <div class="flex items-center justify-between text-xs">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-medical-blue shadow-2xs"></span>
+                                        <span class="font-extrabold text-gray-900 font-poppins">{{ ord.diagnostic }}</span>
+                                    </div>
+                                    <span class="text-[10px] text-gray-500 font-extrabold bg-white px-3 py-1 rounded-full border border-gray-200 shadow-2xs">
+                                        📅 {{ ord.date|date:"d F Y" }}
+                                    </span>
+                                </div>
+
+                                <div class="bg-white p-3 rounded-xl border border-gray-150 text-xs space-y-1">
+                                    <span class="text-[9px] font-extrabold text-gray-400 uppercase tracking-wider block">Prescriptions et posologie :</span>
+                                    <p class="text-gray-700 font-medium whitespace-pre-line leading-relaxed">{{ ord.prescription_details }}</p>
+                                </div>
+
+                                <div class="flex items-center justify-between pt-1">
+                                    <span class="text-[10px] text-gray-400 font-semibold">Médecin signataire : Dr. {{ ord.doctor.username }}</span>
+                                    <a href="{% url 'ordonnances:detail' pk=ord.id %}" class="px-3 py-1 bg-medical-blue/10 hover:bg-medical-blue hover:text-white text-medical-blue text-xs font-bold rounded-xl transition-all flex items-center space-x-1">
+                                        <span>Consulter l'Ordonnance 📄</span>
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="p-12 text-center bg-white border border-gray-150 rounded-3xl space-y-4 shadow-xs">
+                    <div class="w-16 h-16 rounded-full bg-blue-50 text-medical-blue flex items-center justify-center mx-auto text-3xl shadow-xs">
+                        📋
+                    </div>
+                    <div class="space-y-1">
+                        <h3 class="text-base font-bold text-gray-900 font-poppins">Aucun dossier patient répertorié pour le moment</h3>
+                        <p class="text-xs text-gray-400 max-w-sm mx-auto font-medium">Dès que vous délivrerez une ordonnance ou terminerez une consultation, les dossiers patients et leurs historiques de diagnostics apparaîtront ici.</p>
+                    </div>
+                    <a href="{% url 'ordonnances:create' %}" class="inline-block px-5 py-2.5 bg-medical-blue hover:bg-medical-dark text-white font-extrabold text-xs rounded-2xl shadow-sm uppercase tracking-wider">
+                        + Rédiger une Ordonnance
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+    </main>
+        </div>
+    </div>
+
+<script>
+    function filterPatientCards() {
+        const query = document.getElementById('search-patient-input').value.toLowerCase().trim();
+        const cards = document.querySelectorAll('.patient-card');
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const name = card.getAttribute('data-patient-name') || '';
+            const diag = card.getAttribute('data-patient-diag') || '';
+            if (name.includes(query) || diag.includes(query)) {
+                card.style.display = 'block';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        const badge = document.getElementById('patient-count-badge');
+        if (badge) {
+            badge.innerText = `${visibleCount} enregistrement(s)`;
+        }
+    }
+</script>
+</body>
+</html>

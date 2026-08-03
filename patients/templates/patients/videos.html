@@ -1,0 +1,697 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="fr" class="h-full bg-[#f8fafc]">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{% translate "Capsules Vidéos Santé - Fransick" %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'medical-blue': '#1B5FA8',
+                        'medical-light': '#EBF3FC',
+                        'medical-dark': '#14467d',
+                        'leaf-green': '#6DBE45',
+                        'leaf-light': '#F0F9EB',
+                        'tiktok-red': '#fe2c55',
+                    },
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif'],
+                        'inter': ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Smooth Snap Scroll Vertical TikTok */
+        .tiktok-snap-container {
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            height: 100%;
+            overflow-y: scroll;
+            scrollbar-width: none;
+        }
+        .tiktok-snap-container::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .tiktok-slide {
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+            height: 100%;
+            min-height: 100%;
+            max-height: 100%;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        /* Vinyl Spin Animation */
+        @keyframes vinylSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-vinyl {
+            animation: vinylSpin 4s linear infinite;
+        }
+        .animate-vinyl-paused {
+            animation-play-state: paused;
+        }
+
+        /* Heart Pulse Animation */
+        @keyframes heartPulse {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.4); }
+            100% { transform: scale(1); }
+        }
+        .heart-liked {
+            animation: heartPulse 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            fill: #fe2c55;
+            color: #fe2c55;
+        }
+
+        /* Glassmorphic Overlay Gradient */
+        .tiktok-bottom-gradient {
+            background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.65) 45%, rgba(0,0,0,0.95) 100%);
+        }
+        .tiktok-top-gradient {
+            background: linear-gradient(360deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.65) 100%);
+        }
+
+        /* CURVED MOBILE BOTTOM NAVIGATION STYLES */
+        .curved-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 76px;
+            background: #ffffff;
+            box-shadow: 0 -15px 40px rgba(0, 0, 0, 0.08);
+            border-top-left-radius: 2.25rem;
+            border-top-right-radius: 2.25rem;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 40;
+            padding: 0 0.5rem;
+        }
+
+        .curved-nav-center-btn {
+            position: absolute;
+            top: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 58px;
+            height: 58px;
+            background: linear-gradient(135deg, #1B5FA8 0%, #3b82f6 100%);
+            border-radius: 50%;
+            box-shadow: 0 10px 25px rgba(27, 95, 168, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            border: 4px solid #ffffff;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .curved-bottom-nav-cutout {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 82px;
+            height: 41px;
+            background: #f8fafc;
+            border-bottom-left-radius: 41px;
+            border-bottom-right-radius: 41px;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body class="bg-[#f8fafc] font-inter text-gray-800 antialiased overflow-hidden h-full">
+
+    <!-- Toast Notification Popup -->
+    <div id="toast-notification" class="fixed top-6 right-6 z-50 transform -translate-y-16 opacity-0 pointer-events-none transition-all duration-300">
+        <div class="bg-gray-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center space-x-3 border border-gray-800">
+            <span class="text-lg">ℹ️</span>
+            <span id="toast-message" class="text-xs font-bold font-poppins">Message</span>
+        </div>
+    </div>
+
+    <!-- App Shell Layout (Sidebar + Main Content Area) -->
+    <div class="flex h-screen overflow-hidden bg-gray-50/50">
+        
+        <!-- ================= SILICON VALLEY MODULAR DESKTOP SIDEBAR ================= -->
+        {% include "patients/sidebar.html" %}
+
+        <!-- ================= MAIN CONTENT AREA ================= -->
+        <div class="flex-1 flex flex-col h-full overflow-hidden relative">
+            
+            <!-- Dashboard Top Header Bar (Harmonisé avec les autres pages) -->
+            <header class="h-16 md:h-20 bg-white border-b border-gray-200/80 px-4 md:px-8 flex items-center justify-between flex-shrink-0 z-30 select-none">
+                <div class="flex items-center space-x-3">
+                    <a href="{% url 'patients:dashboard' %}" class="w-9 h-9 rounded-2xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition-all">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </a>
+                    <div>
+                        <h2 class="text-sm md:text-base font-extrabold text-gray-900 font-poppins flex items-center space-x-2">
+                            <span>📹</span>
+                            <span>Capsules Vidéos Santé</span>
+                        </h2>
+                        <p class="text-[10px] text-gray-400 font-semibold">Conseils préventifs publiés par les médecins Fransick</p>
+                    </div>
+                </div>
+
+                <!-- Sound Control Button -->
+                <button type="button" onclick="toggleGlobalSound()" id="sound-toggle-btn" class="px-3 py-2 rounded-2xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-extrabold text-xs flex items-center space-x-2 transition-all shadow-xs">
+                    <svg id="sound-icon-off" class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                    </svg>
+                    <svg id="sound-icon-on" class="w-4 h-4 text-leaf-green hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                    </svg>
+                    <span id="sound-text-status" class="hidden md:inline text-[11px]">Son Désactivé</span>
+                </button>
+            </header>
+
+            <!-- Video Player Centered Container -->
+            <div class="flex-1 overflow-hidden relative flex justify-center items-center p-0 lg:p-4 bg-[#f8fafc]">
+                
+                <!-- Phone Card Frame Container -->
+                <main id="tiktok-feed-container" class="tiktok-snap-container w-full lg:max-w-[420px] lg:h-[calc(100vh-7.5rem)] lg:rounded-[2.5rem] lg:border-[5px] lg:border-white shadow-2xl relative overflow-hidden bg-black">
+
+                    {% for video in videos %}
+                    <section class="tiktok-slide flex items-center justify-center overflow-hidden bg-black" id="video-slide-{{ video.id }}">
+                        
+                        <!-- Video Player Element -->
+                        <video 
+                            id="video-player-{{ video.id }}"
+                            class="w-full h-full object-cover cursor-pointer"
+                            loop 
+                            playsinline 
+                            preload="metadata"
+                            onclick="togglePlayPause({{ video.id }})"
+                        >
+                            {% if video.video_file %}
+                                <source src="{{ video.video_file.url }}" type="video/mp4">
+                            {% else %}
+                                <source src="/media/videos/sto_1.mp4" type="video/mp4">
+                            {% endif %}
+                            Votre navigateur ne prend pas en charge les vidéos.
+                        </video>
+
+                        <!-- Center Play/Pause Indicator Icon -->
+                        <div id="play-indicator-{{ video.id }}" class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300">
+                            <div class="w-20 h-20 rounded-full bg-black/60 backdrop-blur-md border border-white/20 flex items-center justify-center text-white shadow-2xl scale-90">
+                                <svg class="w-10 h-10 fill-current translate-x-1" viewBox="0 0 24 24">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <!-- Bottom Gradient Overlay -->
+                        <div class="absolute inset-x-0 bottom-0 tiktok-bottom-gradient pt-24 pb-20 px-4 flex justify-between items-end pointer-events-none z-20">
+                            
+                            <!-- Left Overlay Info (Vrai Nom du Docteur & Vraies Infos) -->
+                            <div class="space-y-2 max-w-[78%] pointer-events-auto">
+                                
+                                <!-- Vrai Nom du Médecin Auteur (SANS Certification) -->
+                                <div class="flex items-center space-x-2 flex-wrap gap-y-1">
+                                    <a href="{% url 'patients:doctor_detail' video.author.id %}" class="flex items-center space-x-1.5 group">
+                                        <span class="font-poppins font-extrabold text-sm md:text-base text-white hover:text-leaf-green transition-colors drop-shadow-md">
+                                            {% if video.author.first_name or video.author.last_name %}
+                                                Dr. {{ video.author.first_name }} {{ video.author.last_name }}
+                                            {% else %}
+                                                Dr. {{ video.author.username }}
+                                            {% endif %}
+                                        </span>
+                                    </a>
+
+                                    {% if video.author.doctor_profile.speciality %}
+                                        <span class="bg-blue-600/80 backdrop-blur-md text-white font-extrabold text-[9px] px-2 py-0.5 rounded-full border border-blue-400/40">
+                                            {{ video.author.doctor_profile.speciality }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Titre Réel de la vidéo -->
+                                <h3 class="text-xs md:text-sm font-extrabold text-white font-poppins leading-snug drop-shadow">
+                                    {{ video.title }}
+                                </h3>
+
+                                <!-- Description Réelle de la vidéo -->
+                                {% if video.description %}
+                                    <p class="text-[11px] text-gray-200 line-clamp-2 leading-relaxed font-medium transition-all" id="desc-{{ video.id }}">
+                                        {{ video.description }}
+                                    </p>
+                                    {% if video.description|length > 60 %}
+                                        <button onclick="toggleExpandDesc({{ video.id }})" id="btn-desc-{{ video.id }}" class="text-[9px] text-gray-400 font-extrabold uppercase hover:text-white">Voir plus</button>
+                                    {% endif %}
+                                {% endif %}
+
+                                <!-- Légende Audio avec Vrai Nom du Médecin -->
+                                <div class="flex items-center space-x-2 text-[10px] text-gray-300 font-medium pt-0.5">
+                                    <svg class="w-3.5 h-3.5 text-leaf-green animate-bounce flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 .895-2 3-2 3 .895 3 2zm12 0c0 1.105-1.343 2-3 2s-3-.895-3-2 .895-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                                    </svg>
+                                    <span class="truncate">
+                                        Son original - 
+                                        {% if video.author.first_name or video.author.last_name %}
+                                            Dr. {{ video.author.first_name }} {{ video.author.last_name }}
+                                        {% else %}
+                                            Dr. {{ video.author.username }}
+                                        {% endif %} 
+                                        • Fransick
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Right Action Column -->
+                            <div class="flex flex-col items-center space-y-4 pointer-events-auto z-30 mb-1">
+                                
+                                <!-- Avatar du docteur avec bouton Suivre (+) -->
+                                <div class="relative group">
+                                    <a href="{% url 'patients:doctor_detail' video.author.id %}" class="block">
+                                        {% if video.author.profile_picture %}
+                                            <img src="{{ video.author.profile_picture.url }}" class="w-11 h-11 rounded-full object-cover ring-2 ring-leaf-green shadow-xl" alt="Dr. {{ video.author.username }}">
+                                        {% else %}
+                                            <div class="w-11 h-11 rounded-full bg-gradient-to-tr from-medical-blue to-leaf-green text-white flex items-center justify-center font-bold font-poppins text-xs ring-2 ring-white shadow-xl">
+                                                {{ video.author.username|slice:":2"|upper }}
+                                            </div>
+                                        {% endif %}
+                                    </a>
+
+                                    <button 
+                                        type="button"
+                                        onclick="toggleFollowDoctor({{ video.author.id }}, this)"
+                                        data-doctor-id="{{ video.author.id }}"
+                                        class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-4 h-4 rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg transition-transform active:scale-90 {% if video.author.id in followed_doctor_ids %}bg-leaf-green{% else %}bg-tiktok-red animate-pulse{% endif %}"
+                                        title="Suivre ce médecin"
+                                    >
+                                        <span id="follow-icon-{{ video.author.id }}">{% if video.author.id in followed_doctor_ids %}✓{% else %}+{% endif %}</span>
+                                    </button>
+                                </div>
+
+                                <!-- Bouton Like (VRAIES INFOS DE LIKES BDD) -->
+                                <button type="button" onclick="toggleVideoLike({{ video.id }})" class="flex flex-col items-center space-y-0.5 group focus:outline-none">
+                                    <div class="w-11 h-11 rounded-full bg-slate-900/50 backdrop-blur-md border border-white/10 flex items-center justify-center transition-all group-active:scale-90 shadow-lg">
+                                        <svg 
+                                            id="heart-icon-{{ video.id }}" 
+                                            class="w-6 h-6 stroke-white transition-colors duration-200 {% if video.id in liked_video_ids %}heart-liked{% endif %}" 
+                                            fill="{% if video.id in liked_video_ids %}#fe2c55{% else %}none{% endif %}" 
+                                            viewBox="0 0 24 24" 
+                                            stroke-width="2"
+                                        >
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                        </svg>
+                                    </div>
+                                    <span id="likes-count-{{ video.id }}" class="text-[11px] font-extrabold text-white font-poppins drop-shadow">
+                                        {{ video.likes_count }}
+                                    </span>
+                                </button>
+
+                                <!-- Bouton Commentaires (VRAI COMPTEUR BDD) -->
+                                <button type="button" onclick="openVideoCommentsDrawer({{ video.id }}, '{{ video.title|escapejs }}')" class="flex flex-col items-center space-y-0.5 group focus:outline-none">
+                                    <div class="w-11 h-11 rounded-full bg-slate-900/50 backdrop-blur-md border border-white/10 flex items-center justify-center transition-all group-active:scale-90 shadow-lg">
+                                        <svg class="w-6 h-6 text-white fill-current" viewBox="0 0 24 24">
+                                            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+                                        </svg>
+                                    </div>
+                                    <span id="comments-count-{{ video.id }}" class="text-[11px] font-extrabold text-white font-poppins drop-shadow">
+                                        {{ video.comments.count }}
+                                    </span>
+                                </button>
+
+                                <!-- Bouton Partager -->
+                                <button type="button" onclick="shareVideoTikTok('{{ video.title|escapejs }}', 'Dr. {{ video.author.first_name|default:video.author.username }} {{ video.author.last_name }}')" class="flex flex-col items-center space-y-0.5 group focus:outline-none">
+                                    <div class="w-11 h-11 rounded-full bg-slate-900/50 backdrop-blur-md border border-white/10 flex items-center justify-center transition-all group-active:scale-90 shadow-lg">
+                                        <svg class="w-5 h-5 text-white stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                        </svg>
+                                    </div>
+                                    <span class="text-[9px] font-extrabold text-white font-poppins drop-shadow">Partager</span>
+                                </button>
+
+                                <!-- Disque Vinyle animé -->
+                                <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-slate-900 via-gray-800 to-slate-900 p-1 border-2 border-white/30 shadow-2xl animate-vinyl" id="vinyl-{{ video.id }}">
+                                    <div class="w-full h-full rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center">
+                                        <div class="w-2 h-2 rounded-full bg-leaf-green"></div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+                    {% empty %}
+                    <div class="h-full flex flex-col items-center justify-center text-center p-6 space-y-4 bg-slate-950">
+                        <div class="w-16 h-16 rounded-full bg-slate-900 flex items-center justify-center text-2xl">📹</div>
+                        <h2 class="text-base font-bold text-white">Aucune capsule vidéo disponible</h2>
+                        <p class="text-xs text-gray-400 max-w-sm">Revenez bientôt ! Les médecins partenaires Fransick publieront prochainement des conseils vidéo.</p>
+                        <a href="{% url 'patients:dashboard' %}" class="px-5 py-2.5 bg-medical-blue hover:bg-blue-600 text-white text-xs font-bold rounded-full transition-all">Retour au Tableau de bord</a>
+                    </div>
+                    {% endfor %}
+
+                </main>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ================= SILICON VALLEY FLOATING CURVED BOTTOM NAV ================= -->
+    {% include "patients/bottom_nav.html" %}
+
+    <!-- ================= MODAL COMMENTAIRES SLIDE-UP DRAWER ================= -->
+    <div id="video-comments-drawer" class="fixed inset-0 z-50 overflow-hidden hidden bg-black/75 backdrop-blur-sm flex flex-col justify-end">
+        <div class="bg-slate-900 border-t border-slate-800 rounded-t-[2.5rem] p-6 max-w-lg w-full mx-auto shadow-2xl flex flex-col justify-between max-h-[75vh] space-y-4">
+            
+            <!-- Header Drawer -->
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h4 class="text-sm font-extrabold text-white font-poppins flex items-center space-x-2">
+                    <span>💬</span>
+                    <span id="comments-drawer-title">Commentaires</span>
+                </h4>
+                <button type="button" onclick="closeVideoCommentsDrawer()" class="w-8 h-8 rounded-full bg-slate-800 text-gray-400 hover:text-white font-bold flex items-center justify-center">✕</button>
+            </div>
+
+            <!-- Comment List Area -->
+            <div id="comments-list-container" class="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-1 min-h-[160px]">
+                <div class="text-center py-8 text-gray-400 text-xs italic">Chargement des commentaires...</div>
+            </div>
+
+            <!-- Comment Add Form -->
+            <form id="comment-form-ajax" onsubmit="submitVideoCommentAjax(event)" class="flex items-center space-x-2 pt-2 border-t border-slate-800">
+                {% csrf_token %}
+                <input type="hidden" id="comment-video-id" name="video_id" value="">
+                <input type="text" id="comment-input-text" name="text" required placeholder="Laisser un commentaire médical..." class="flex-1 bg-slate-800 border border-slate-700 rounded-2xl px-4 py-3 text-xs text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-leaf-green font-medium">
+                <button type="submit" class="px-4 py-3 bg-leaf-green hover:bg-emerald-600 text-white font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-md transition-all">
+                    Envoyer
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= JS ENGINE ================= -->
+    <script>
+        let isGlobalMuted = true;
+        let activeVideoObserver = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initTikTokObserver();
+        });
+
+        function initTikTokObserver() {
+            const container = document.getElementById('tiktok-feed-container');
+            if (!container) return;
+
+            const slides = container.querySelectorAll('.tiktok-slide');
+
+            activeVideoObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const video = entry.target.querySelector('video');
+                    const videoId = entry.target.id.replace('video-slide-', '');
+                    const vinyl = document.getElementById(`vinyl-${videoId}`);
+
+                    if (video) {
+                        if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+                            video.muted = isGlobalMuted;
+                            video.play().then(() => {
+                                if (vinyl) vinyl.classList.remove('animate-vinyl-paused');
+                            }).catch(() => {});
+                        } else {
+                            video.pause();
+                            if (vinyl) vinyl.classList.add('animate-vinyl-paused');
+                        }
+                    }
+                });
+            }, {
+                root: container,
+                threshold: 0.65
+            });
+
+            slides.forEach(slide => activeVideoObserver.observe(slide));
+        }
+
+        function togglePlayPause(videoId) {
+            const video = document.getElementById(`video-player-${videoId}`);
+            const indicator = document.getElementById(`play-indicator-${videoId}`);
+            const vinyl = document.getElementById(`vinyl-${videoId}`);
+
+            if (!video) return;
+
+            if (video.paused) {
+                video.muted = isGlobalMuted;
+                video.play();
+                if (vinyl) vinyl.classList.remove('animate-vinyl-paused');
+                if (indicator) indicator.classList.add('opacity-0');
+            } else {
+                video.pause();
+                if (vinyl) vinyl.classList.add('animate-vinyl-paused');
+                if (indicator) {
+                    indicator.classList.remove('opacity-0');
+                    setTimeout(() => {
+                        if (!video.paused) indicator.classList.add('opacity-0');
+                    }, 1200);
+                }
+            }
+        }
+
+        function toggleGlobalSound() {
+            isGlobalMuted = !isGlobalMuted;
+            const iconOff = document.getElementById('sound-icon-off');
+            const iconOn = document.getElementById('sound-icon-on');
+            const statusText = document.getElementById('sound-text-status');
+
+            if (isGlobalMuted) {
+                if (iconOff) iconOff.classList.remove('hidden');
+                if (iconOn) iconOn.classList.add('hidden');
+                if (statusText) statusText.innerText = "Son Désactivé";
+                showToast("🔇 Son désactivé");
+            } else {
+                if (iconOff) iconOff.classList.add('hidden');
+                if (iconOn) iconOn.classList.remove('hidden');
+                if (statusText) statusText.innerText = "Son Activé";
+                showToast("🔊 Son activé pour les capsules vidéo !");
+            }
+
+            const videos = document.querySelectorAll('video');
+            videos.forEach(v => {
+                v.muted = isGlobalMuted;
+            });
+        }
+
+        function toggleVideoLike(videoId) {
+            fetch(`/patients/video/${videoId}/like/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const countEl = document.getElementById(`likes-count-${videoId}`);
+                    const heartIcon = document.getElementById(`heart-icon-${videoId}`);
+
+                    if (countEl) countEl.innerText = data.likes_count;
+
+                    if (data.liked) {
+                        heartIcon.classList.add('heart-liked');
+                        heartIcon.setAttribute('fill', '#fe2c55');
+                        showToast("❤️ Vous aimez cette capsule vidéo !");
+                    } else {
+                        heartIcon.classList.remove('heart-liked');
+                        heartIcon.setAttribute('fill', 'none');
+                    }
+                }
+            })
+            .catch(err => console.error("Erreur Like:", err));
+        }
+
+        function toggleFollowDoctor(doctorId, btn) {
+            fetch(`/patients/medecin/${doctorId}/subscribe/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                    "Content-Type": "application/x-www-form-urlencoded"
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                const iconSpan = document.getElementById(`follow-icon-${doctorId}`);
+                if (data.is_subscribed) {
+                    btn.className = btn.className.replace('bg-tiktok-red animate-pulse', 'bg-leaf-green');
+                    if (iconSpan) iconSpan.innerText = '✓';
+                    showToast("🎉 Vous êtes désormais abonné(e) aux conseils de ce médecin !");
+                } else {
+                    btn.className = btn.className.replace('bg-leaf-green', 'bg-tiktok-red animate-pulse');
+                    if (iconSpan) iconSpan.innerText = '+';
+                    showToast("Vous vous êtes désabonné(e) de ce médecin.");
+                }
+            })
+            .catch(err => console.error("Erreur Follow:", err));
+        }
+
+        function openVideoCommentsDrawer(videoId, videoTitle) {
+            document.getElementById('comment-video-id').value = videoId;
+            document.getElementById('comments-drawer-title').innerText = `Commentaires • ${videoTitle}`;
+
+            const list = document.getElementById('comments-list-container');
+            let commentsData = [];
+
+            {% for video in videos %}
+                if (videoId === {{ video.id }}) {
+                    commentsData = [
+                        {% for comment in video.comments.all %}
+                        {
+                            author: "{% if comment.author.first_name or comment.author.last_name %}Dr. {{ comment.author.first_name }} {{ comment.author.last_name }}{% else %}{{ comment.author.username }}{% endif %}",
+                            text: "{{ comment.text|escapejs }}",
+                            date: "{{ comment.created_at|date:'d/m/Y à H:i' }}"
+                        },
+                        {% endfor %}
+                    ];
+                }
+            {% endfor %}
+
+            if (commentsData.length === 0) {
+                list.innerHTML = `<div class="text-center py-8 text-gray-400 text-xs font-medium">Soyez le premier patient à commenter cette vidéo conseil !</div>`;
+            } else {
+                list.innerHTML = commentsData.map(c => `
+                    <div class="bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700/60 space-y-1">
+                        <div class="flex items-center justify-between text-[10px]">
+                            <span class="font-extrabold text-leaf-green font-poppins">${c.author}</span>
+                            <span class="text-gray-400 font-semibold">${c.date}</span>
+                        </div>
+                        <p class="text-xs text-gray-200 font-medium">${c.text}</p>
+                    </div>
+                `).join('');
+            }
+
+            const drawer = document.getElementById('video-comments-drawer');
+            if (drawer) drawer.classList.remove('hidden');
+        }
+
+        function closeVideoCommentsDrawer() {
+            const drawer = document.getElementById('video-comments-drawer');
+            if (drawer) drawer.classList.add('hidden');
+        }
+
+        function submitVideoCommentAjax(e) {
+            e.preventDefault();
+            const videoId = document.getElementById('comment-video-id').value;
+            const inputText = document.getElementById('comment-input-text').value;
+
+            if (!inputText || !videoId) return;
+
+            fetch(`/medecins/video/${videoId}/comment/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: `text=${encodeURIComponent(inputText)}`
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById('comment-input-text').value = '';
+                    showToast("💬 Commentaire publié avec succès !");
+
+                    const countEl = document.getElementById(`comments-count-${videoId}`);
+                    if (countEl) countEl.innerText = data.total_comments;
+
+                    const list = document.getElementById('comments-list-container');
+                    const emptyState = list.querySelector('.text-center');
+                    if (emptyState) emptyState.remove();
+
+                    const newCommentHtml = `
+                        <div class="bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700/60 space-y-1">
+                            <div class="flex items-center justify-between text-[10px]">
+                                <span class="font-extrabold text-leaf-green font-poppins">${data.comment.author}</span>
+                                <span class="text-gray-400 font-semibold">${data.comment.created_at}</span>
+                            </div>
+                            <p class="text-xs text-gray-200 font-medium">${data.comment.text}</p>
+                        </div>
+                    `;
+                    list.insertAdjacentHTML('beforeend', newCommentHtml);
+                    list.scrollTop = list.scrollHeight;
+                }
+            })
+            .catch(err => console.error("Erreur Commentaire:", err));
+        }
+
+        function shareVideoTikTok(title, doctorName) {
+            const shareUrl = window.location.href;
+            const shareText = `Regardez la capsule vidéo santé de ${doctorName} : "${title}" sur Fransick !`;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: title,
+                    text: shareText,
+                    url: shareUrl
+                }).catch(() => {});
+            } else {
+                navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+                showToast("🔗 Lien de la vidéo copié ! Vous pouvez le partager.");
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast-notification');
+            const toastMsg = document.getElementById('toast-message');
+            if (toast && toastMsg) {
+                toastMsg.innerText = message;
+                toast.classList.remove('-translate-y-16', 'opacity-0', 'pointer-events-none');
+                toast.classList.add('translate-y-0', 'opacity-100');
+
+                setTimeout(() => {
+                    toast.classList.remove('translate-y-0', 'opacity-100');
+                    toast.classList.add('-translate-y-16', 'opacity-0', 'pointer-events-none');
+                }, 3000);
+            }
+        }
+
+        function toggleExpandDesc(videoId) {
+            const desc = document.getElementById(`desc-${videoId}`);
+            const btn = document.getElementById(`btn-desc-${videoId}`);
+            if (desc) {
+                if (desc.classList.contains('line-clamp-2')) {
+                    desc.classList.remove('line-clamp-2');
+                    if (btn) btn.innerText = "Moins";
+                } else {
+                    desc.classList.add('line-clamp-2');
+                    if (btn) btn.innerText = "Voir plus";
+                }
+            }
+        }
+    </script>
+</body>
+</html>

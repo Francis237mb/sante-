@@ -8,17 +8,35 @@ from django.contrib.auth.forms import PasswordChangeForm
 from .forms import PatientProfileForm
 from medecins.models import HealthVideo, DoctorProfile, DoctorSubscription
 from consultations.models import RendezVous
+from ordonnances.models import Ordonnance
 from pharmacies.models import PharmacyProfile, Medicament
 
 User = get_user_model()
+
+def get_all_registered_medecins():
+    """
+    Récupère tous les médecins inscrits en base de données réelle et s'assure qu'un profil existe pour chacun.
+    """
+    medecins = User.objects.filter(role='medecin').order_by('id')
+    for doc in medecins:
+        if not hasattr(doc, 'doctor_profile') or doc.doctor_profile is None:
+            DoctorProfile.objects.get_or_create(
+                user=doc,
+                defaults={
+                    'speciality': 'Médecin Généraliste',
+                    'clinic_address': 'Douala, Cameroun',
+                    'about': 'Médecin praticien certifié inscrit sur la plateforme Fransick Santé.'
+                }
+            )
+    return User.objects.filter(role='medecin').order_by('id')
 
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'patients/dashboard.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['medecins_list'] = User.objects.filter(role='medecin')
-        context['videos_list'] = HealthVideo.objects.all()
+        context['medecins_list'] = get_all_registered_medecins()
+        context['videos_list'] = HealthVideo.objects.all().order_by('-created_at')
         # Pharmacies et Médicaments pour la recherche globale
         context['pharmacies_list'] = User.objects.filter(role='pharmacie')
         context['medicaments_list'] = Medicament.objects.all()
@@ -29,12 +47,13 @@ class PatientSuiviView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['medecins_list'] = User.objects.filter(role='medecin')
+        context['medecins_list'] = get_all_registered_medecins()
         context['videos_list'] = HealthVideo.objects.all()
         context['pharmacies_list'] = User.objects.filter(role='pharmacie')
         context['medicaments_list'] = Medicament.objects.all()
-        # Vrais rendez-vous du patient en BDD SQLite
+        # Vrais rendez-vous & ordonnances du patient en BDD SQLite
         context['user_rdv_list'] = RendezVous.objects.filter(patient=self.request.user)
+        context['user_ordonnances_list'] = Ordonnance.objects.filter(patient=self.request.user)
         return context
 
 class DoctorDetailView(LoginRequiredMixin, DetailView):
@@ -48,13 +67,24 @@ class DoctorDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         doctor = self.get_object()
+        if not hasattr(doctor, 'doctor_profile') or doctor.doctor_profile is None:
+            DoctorProfile.objects.get_or_create(
+                user=doctor,
+                defaults={
+                    'speciality': 'Médecin Généraliste',
+                    'clinic_address': 'Douala, Cameroun',
+                    'about': 'Médecin praticien certifié inscrit sur la plateforme Fransick Santé.'
+                }
+            )
         context['profile'] = getattr(doctor, 'doctor_profile', None)
         context['subscribers_count'] = DoctorSubscription.objects.filter(doctor=doctor).count()
         context['is_subscribed'] = DoctorSubscription.objects.filter(patient=self.request.user, doctor=doctor).exists()
         context['pharmacies_list'] = User.objects.filter(role='pharmacie')
         context['medicaments_list'] = Medicament.objects.all()
-        context['medecins_list'] = User.objects.filter(role='medecin')
+        context['medecins_list'] = get_all_registered_medecins()
         return context
+
+
 
 class BookAppointmentView(LoginRequiredMixin, View):
     def post(self, request, pk, *args, **kwargs):
@@ -154,3 +184,56 @@ class PatientSettingsView(LoginRequiredMixin, TemplateView):
             active_tab=active_tab
         )
         return render(request, self.template_name, context)
+
+class PharmacyListView(LoginRequiredMixin, TemplateView):
+    template_name = 'patients/pharmacies.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['medecins_list'] = get_all_registered_medecins()
+        context['videos_list'] = HealthVideo.objects.all()
+        context['pharmacies_list'] = User.objects.filter(role='pharmacie')
+        context['medicaments_list'] = Medicament.objects.all()
+        return context
+
+
+class PatientVideosFeedView(LoginRequiredMixin, TemplateView):
+    template_name = 'patients/videos.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        videos = HealthVideo.objects.select_related('author', 'author__doctor_profile').prefetch_related('comments', 'comments__author').order_by('-created_at')
+        followed_doctor_ids = set(DoctorSubscription.objects.filter(patient=self.request.user).values_list('doctor_id', flat=True))
+        liked_video_ids = set(self.request.session.get('liked_videos', []))
+
+        context['videos'] = videos
+        context['followed_doctor_ids'] = followed_doctor_ids
+        context['liked_video_ids'] = liked_video_ids
+        context['medecins_list'] = get_all_registered_medecins()
+        context['pharmacies_list'] = User.objects.filter(role='pharmacie')
+        return context
+
+
+class ToggleVideoLikeView(LoginRequiredMixin, View):
+    def post(self, request, pk, *args, **kwargs):
+        video = get_object_or_404(HealthVideo, pk=pk)
+        session_likes = request.session.get('liked_videos', [])
+        if pk in session_likes:
+            video.likes_count = max(0, video.likes_count - 1)
+            video.save()
+            session_likes.remove(pk)
+            liked = False
+        else:
+            video.likes_count += 1
+            video.save()
+            session_likes.append(pk)
+            liked = True
+            
+        request.session['liked_videos'] = session_likes
+        return JsonResponse({
+            'status': 'success',
+            'liked': liked,
+            'likes_count': video.likes_count
+        })
+
+

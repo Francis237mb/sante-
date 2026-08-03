@@ -202,114 +202,119 @@
         </header>
 
         <!-- Mobile Navigation Menu Dropdown -->
-        <div id="mobile-menu" class="w-full max-w-6xl mt-2 bg-white/95 backdrop-blur-md border border-white/30 shadow-xl rounded-3xl p-5 pointer-events-auto hidden transition-all duration-300 ease-in-out opacity-0 -translate-y-4 md:hidden">
-            <div class="space-y-6">
+        <div id="mobile-menu" class="w-full max-w-6xl mt-3 bg-white/95 backdrop-blur-xl border border-gray-100 shadow-2xl rounded-3xl p-5 pointer-events-auto hidden transition-all duration-300 ease-in-out opacity-0 -translate-y-4 md:hidden z-50">
+            <div class="space-y-5">
                 <!-- Navigation Section -->
                 <div>
-                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 px-1">{% translate "Navigation" %}</div>
-                    <div class="grid grid-cols-1 gap-2">
+                    <div class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-2.5 px-1 font-poppins">{% translate "Navigation Principale" %}</div>
+                    <div class="grid grid-cols-2 gap-2">
                         <!-- Accueil -->
-                        <a href="{% url 'core:home' %}" class="mobile-link flex items-center space-x-3.5 px-4 py-3 rounded-2xl bg-gray-50/60 hover:bg-medical-light/40 hover:text-medical-blue text-sm font-semibold text-gray-700 transition-all">
-                            <div class="w-8 h-8 rounded-xl bg-medical-blue/10 text-medical-blue flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4.5 h-4.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                                </svg>
-                            </div>
+                        <a href="{% url 'core:home' %}" class="mobile-link flex items-center space-x-2.5 p-3 rounded-2xl bg-gray-50/80 hover:bg-medical-light/40 hover:text-medical-blue text-xs font-bold text-gray-800 transition-all border border-gray-100">
+                            <span class="w-7 h-7 rounded-xl bg-blue-50 text-medical-blue flex items-center justify-center text-sm shadow-xs font-bold">🏠</span>
                             <span>{% translate "Accueil" %}</span>
                         </a>
 
                         <!-- À propos -->
-                        <a href="{% url 'core:home' %}#about" class="mobile-link flex items-center space-x-3.5 px-4 py-3 rounded-2xl bg-gray-50/60 hover:bg-medical-light/40 hover:text-medical-blue text-sm font-semibold text-gray-700 transition-all">
-                            <div class="w-8 h-8 rounded-xl bg-medical-blue/10 text-medical-blue flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4.5 h-4.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 111.083.986l-1.083 1.354A.75.75 0 0110.5 13.5v-1.875c0-.414.336-.75.75-.75zM12 8.25a.75.75 0 100-1.5.75.75 0 000 1.5zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
+                        <a href="{% url 'core:home' %}#about" class="mobile-link flex items-center space-x-2.5 p-3 rounded-2xl bg-gray-50/80 hover:bg-medical-light/40 hover:text-medical-blue text-xs font-bold text-gray-800 transition-all border border-gray-100">
+                            <span class="w-7 h-7 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-sm shadow-xs font-bold">💡</span>
                             <span>{% translate "À propos" %}</span>
                         </a>
 
-                        <!-- Patient -->
-                        <a href="{% url 'accounts:login_patient' %}" class="mobile-link flex items-center space-x-3.5 px-4 py-3 rounded-2xl bg-gray-50/60 hover:bg-leaf-light/60 hover:text-leaf-green text-sm font-semibold text-gray-700 transition-all">
-                            <div class="w-8 h-8 rounded-xl bg-leaf-green/10 text-leaf-green flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4.5 h-4.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0zM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                                </svg>
-                            </div>
-                            <span>{% translate "Patient" %}</span>
+                        <!-- Vidéos -->
+                        <a href="{% url 'patients:dashboard' %}?open_videos=true" class="mobile-link flex items-center space-x-2.5 p-3 rounded-2xl bg-gray-50/80 hover:bg-emerald-50 hover:text-emerald-700 text-xs font-bold text-gray-800 transition-all border border-gray-100">
+                            <span class="w-7 h-7 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm shadow-xs font-bold">📹</span>
+                            <span>{% translate "Vidéos Santé" %}</span>
                         </a>
 
-                        <!-- Médecin -->
-                        <a href="{% url 'accounts:login_medecin' %}" class="mobile-link flex items-center space-x-3.5 px-4 py-3 rounded-2xl bg-gray-50/60 hover:bg-medical-light/40 hover:text-medical-blue text-sm font-semibold text-gray-700 transition-all">
-                            <div class="w-8 h-8 rounded-xl bg-medical-blue/10 text-medical-blue flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4.5 h-4.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.03 0 1.9.693 2.166 1.638m-7.377 12.408l-1.428-1.428m0 0A3 3 0 106.12 11.23L7.548 12.66m-1.429-1.43a3 3 0 004.243 4.242" />
-                                </svg>
-                            </div>
-                            <span>{% translate "Médecin" %}</span>
+                        <!-- Pharmacies -->
+                        <a href="{% url 'patients:pharmacies' %}" class="mobile-link flex items-center space-x-2.5 p-3 rounded-2xl bg-gray-50/80 hover:bg-orange-50 hover:text-orange-700 text-xs font-bold text-gray-800 transition-all border border-gray-100">
+                            <span class="w-7 h-7 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center text-sm shadow-xs font-bold">🏥</span>
+                            <span>{% translate "Pharmacies" %}</span>
                         </a>
                     </div>
                 </div>
 
                 <!-- Account/Services Section -->
                 <div>
-                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 px-1">{% translate "Espaces & Connexion" %}</div>
+                    <div class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-2.5 px-1 font-poppins">{% translate "Espaces & Connexion" %}</div>
                     {% if user.is_authenticated %}
-                        <div class="bg-gray-50/50 border border-gray-100 rounded-2xl p-4 flex flex-col space-y-3">
+                        <div class="bg-gradient-to-br from-gray-50 to-emerald-50/30 border border-gray-150 rounded-2xl p-4 flex flex-col space-y-3">
                             <div class="flex items-center space-x-3">
                                 {% if user.profile_picture %}
-                                    <img class="h-9 w-9 rounded-full object-cover ring-2 ring-medical-blue/20" src="{{ user.profile_picture.url }}" alt="{{ user.username }}">
+                                    <img class="h-10 w-10 rounded-full object-cover ring-2 ring-medical-blue/20" src="{{ user.profile_picture.url }}" alt="{{ user.username }}">
                                 {% else %}
-                                    <div class="h-9 w-9 rounded-full bg-medical-blue text-white flex items-center justify-center text-sm font-bold shadow-inner">{{ user.username|slice:":2"|upper }}</div>
+                                    <div class="h-10 w-10 rounded-full bg-medical-blue text-white flex items-center justify-center text-xs font-bold shadow-inner font-poppins">{{ user.username|slice:":2"|upper }}</div>
                                 {% endif %}
                                 <div>
-                                    <div class="text-sm font-bold text-gray-800">{{ user.username }}</div>
-                                    <div class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">{{ user.get_role_display }}</div>
+                                    <div class="text-xs font-extrabold text-gray-900 font-poppins">{{ user.get_full_name|default:user.username }}</div>
+                                    <div class="text-[10px] text-leaf-green font-extrabold uppercase tracking-wider">{{ user.get_role_display|default:"Connecté" }}</div>
                                 </div>
                             </div>
                             <div class="grid grid-cols-1 gap-2 pt-1">
                                 {% if user.role == 'patient' %}
-                                    <a href="{% url 'patients:dashboard' %}" class="mobile-link w-full text-center py-2.5 px-4 rounded-xl bg-medical-blue text-white text-xs font-bold shadow-sm transition-all hover:bg-medical-dark">{% translate "Tableau de Bord Patient" %}</a>
+                                    <a href="{% url 'patients:dashboard' %}" class="mobile-link w-full text-center py-3 px-4 rounded-xl bg-leaf-green text-white text-xs font-extrabold shadow-sm transition-all hover:bg-leaf-dark">{% translate "Mon Espace Patient" %} ➔</a>
                                 {% elif user.role == 'medecin' %}
-                                    <a href="{% url 'medecins:dashboard' %}" class="mobile-link w-full text-center py-2.5 px-4 rounded-xl bg-medical-blue text-white text-xs font-bold shadow-sm transition-all hover:bg-medical-dark">{% translate "Tableau de Bord Médecin" %}</a>
+                                    <a href="{% url 'medecins:dashboard' %}" class="mobile-link w-full text-center py-3 px-4 rounded-xl bg-medical-blue text-white text-xs font-extrabold shadow-sm transition-all hover:bg-medical-dark">{% translate "Mon Espace Médecin" %} ➔</a>
                                 {% endif %}
                                 <form action="{% url 'accounts:logout' %}" method="post" class="block w-full">
                                     {% csrf_token %}
-                                    <button type="submit" class="w-full text-center py-2.5 px-4 rounded-xl border border-red-200 text-red-500 bg-red-50/40 text-xs font-bold hover:bg-red-50 transition-all">{% translate "Déconnexion" %}</button>
+                                    <button type="submit" class="w-full text-center py-2.5 px-4 rounded-xl border border-red-200 text-red-600 bg-red-50/50 text-xs font-bold hover:bg-red-100 transition-all">{% translate "Se Déconnecter" %}</button>
                                 </form>
                             </div>
                         </div>
                     {% else %}
-                        <div class="grid grid-cols-3 gap-2.5">
-                            <a href="{% url 'accounts:login_patient' %}" class="mobile-link flex flex-col items-center justify-center p-3 rounded-2xl border border-gray-100 hover:border-leaf-green hover:bg-leaf-light/30 transition-all text-center group bg-gray-50/20">
-                                <span class="w-2.5 h-2.5 rounded-full bg-leaf-green shadow-sm group-hover:scale-110 transition-transform mb-1.5"></span>
-                                <span class="text-[10px] font-bold text-gray-600">Patient</span>
+                        <!-- 3 Clear Full-Width Login Cards (No Truncation) -->
+                        <div class="space-y-2">
+                            <!-- Espace Patient -->
+                            <a href="{% url 'accounts:login_patient' %}" class="mobile-link flex items-center justify-between p-3.5 rounded-2xl border border-emerald-100 bg-emerald-50/30 hover:bg-emerald-50 transition-all group">
+                                <div class="flex items-center space-x-3">
+                                    <span class="w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold text-sm shadow-xs">🟢</span>
+                                    <div>
+                                        <div class="text-xs font-extrabold text-emerald-950 font-poppins">{% translate "Espace Patient" %}</div>
+                                        <div class="text-[10px] text-emerald-700/80 font-medium">Prendre RDV & suivre ma santé</div>
+                                    </div>
+                                </div>
+                                <span class="text-emerald-600 font-extrabold text-xs group-hover:translate-x-1 transition-transform">➔</span>
                             </a>
-                            <a href="{% url 'accounts:login_medecin' %}" class="mobile-link flex flex-col items-center justify-center p-3 rounded-2xl border border-gray-100 hover:border-medical-blue hover:bg-medical-light/30 transition-all text-center group bg-gray-50/20">
-                                <span class="w-2.5 h-2.5 rounded-full bg-medical-blue shadow-sm group-hover:scale-110 transition-transform mb-1.5"></span>
-                                <span class="text-[10px] font-bold text-gray-600">Médecin</span>
+
+                            <!-- Espace Médecin -->
+                            <a href="{% url 'accounts:login_medecin' %}" class="mobile-link flex items-center justify-between p-3.5 rounded-2xl border border-blue-100 bg-blue-50/30 hover:bg-blue-50 transition-all group">
+                                <div class="flex items-center space-x-3">
+                                    <span class="w-9 h-9 rounded-xl bg-medical-blue text-white flex items-center justify-center font-bold text-sm shadow-xs">🔵</span>
+                                    <div>
+                                        <div class="text-xs font-extrabold text-blue-950 font-poppins">{% translate "Espace Médecin" %}</div>
+                                        <div class="text-[10px] text-blue-700/80 font-medium">Gestion d'agenda & téléconsultations</div>
+                                    </div>
+                                </div>
+                                <span class="text-medical-blue font-extrabold text-xs group-hover:translate-x-1 transition-transform">➔</span>
                             </a>
-                            <a href="{% url 'accounts:login_pharmacie' %}" class="mobile-link flex flex-col items-center justify-center p-3 rounded-2xl border border-gray-100 hover:border-orange-400 hover:bg-orange-50/20 transition-all text-center group bg-gray-50/20">
-                                <span class="w-2.5 h-2.5 rounded-full bg-orange-400 shadow-sm group-hover:scale-110 transition-transform mb-1.5"></span>
-                                <span class="text-[10px] font-bold text-gray-600">Pharmacie</span>
+
+                            <!-- Espace Pharmacie -->
+                            <a href="{% url 'accounts:login_pharmacie' %}" class="mobile-link flex items-center justify-between p-3.5 rounded-2xl border border-amber-100 bg-amber-50/30 hover:bg-amber-50 transition-all group">
+                                <div class="flex items-center space-x-3">
+                                    <span class="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold text-sm shadow-xs">🟠</span>
+                                    <div>
+                                        <div class="text-xs font-extrabold text-amber-950 font-poppins">{% translate "Espace Pharmacie" %}</div>
+                                        <div class="text-[10px] text-amber-700/80 font-medium">Pharmacies de garde & gestion stocks</div>
+                                    </div>
+                                </div>
+                                <span class="text-amber-600 font-extrabold text-xs group-hover:translate-x-1 transition-transform">➔</span>
                             </a>
                         </div>
                     {% endif %}
                 </div>
 
                 <!-- Language Section -->
-                <div class="pt-4 border-t border-gray-100">
+                <div class="pt-3 border-t border-gray-100">
                     <div class="flex items-center justify-between px-1">
                         <div class="flex items-center space-x-2 text-gray-500">
-                            <!-- Globe Icon -->
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-.856.12-1.685.342-2.47" />
-                            </svg>
-                            <span class="text-xs font-bold uppercase tracking-wider text-gray-400">{% translate "Langue de l'interface" %}</span>
+                            <span class="text-base">🌐</span>
+                            <span class="text-xs font-extrabold uppercase tracking-wider text-gray-400 font-poppins">{% translate "Langue de l'interface" %}</span>
                         </div>
                         <form action="{% url 'set_language' %}" method="post" class="inline">
                             {% csrf_token %}
                             <input name="next" type="hidden" value="{{ request.path }}">
-                            <select name="language" onchange="this.form.submit()" class="bg-gray-100/80 hover:bg-gray-200 border border-gray-200/60 rounded-full px-3.5 py-1.5 text-xs font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-medical-blue cursor-pointer transition-all duration-200">
+                            <select name="language" onchange="this.form.submit()" class="bg-gray-100/90 hover:bg-gray-200 border border-gray-200 rounded-full px-3.5 py-1.5 text-xs font-extrabold text-gray-800 focus:outline-none focus:ring-2 focus:ring-medical-blue cursor-pointer transition-all">
                                 {% get_current_language as LANGUAGE_CODE %}
                                 {% get_available_languages as LANGUAGES %}
                                 {% for lang in LANGUAGES %}

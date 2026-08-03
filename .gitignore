@@ -16,9 +16,11 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# Django
+# Django & Secrets
 *.log
 local_settings.py
+.env
+db.sqlite3
 
 # Media files (optionnel)
 # media/

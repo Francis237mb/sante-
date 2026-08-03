@@ -48,155 +48,13 @@
     </style>
 </head>
 <body class="bg-gray-50/80 font-inter text-gray-800 antialiased overflow-hidden">
-
-    <!-- App Shell Layout -->
-    <div class="flex h-screen overflow-hidden">
+    <div class="flex h-screen overflow-hidden bg-gray-50/50">
         
-        <!-- ================= DESKTOP SIDEBAR ================= -->
-        <aside class="hidden lg:flex flex-col w-64 bg-white border-r border-gray-200/80 flex-shrink-0 sticky top-0 h-screen">
-            <!-- Sidebar Header / Logo -->
-            <div class="h-20 flex items-center px-6 border-b border-gray-100 select-none">
-                <a href="{% url 'core:home' %}" class="flex items-center space-x-2.5">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-8 h-8 text-medical-blue">
-                        <path d="M37 28 C20 28 15 48 30 65 C40 75 50 82 50 82 C50 82 60 75 70 65 C85 48 80 28 63 28" fill="none" stroke="#1B5FA8" stroke-width="6" stroke-linecap="round"/>
-                        <circle cx="37" cy="28" r="4.5" fill="#38BDF8" />
-                        <circle cx="63" cy="28" r="4.5" fill="#38BDF8" />
-                        <path d="M30 65 C22 55 15 55 12 60 C8 65 14 74 22 72" fill="none" stroke="#1B5FA8" stroke-width="6" stroke-linecap="round"/>
-                        <circle cx="22" cy="72" r="6" fill="#14467d" />
-                        <path d="M43 46 H57 M50 39 V53" stroke="#38BDF8" stroke-width="5.5" stroke-linecap="round" />
-                        <path d="M48 68 L58 60 L60 72 Z" fill="#15803d" />
-                        <path d="M50 82 C68 76 83 60 83 38 C83 55 70 70 50 82 Z" fill="#6DBE45" />
-                        <path d="M50 82 C55 70 65 60 83 38" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
-                    </svg>
-                    <span class="font-poppins font-bold text-xl text-medical-blue tracking-tight">Fransick</span>
-                </a>
-            </div>
+        <!-- ================= SILICON VALLEY MODULAR DESKTOP SIDEBAR ================= -->
+        {% include "medecins/sidebar.html" %}
 
-            <!-- Active Doctor Profile Summary -->
-            <div class="px-5 py-6 border-b border-gray-100 flex items-center space-x-3.5 select-none">
-                {% if user.profile_picture %}
-                    <img class="h-11 w-11 rounded-full object-cover ring-2 ring-medical-blue/20" src="{{ user.profile_picture.url }}" alt="{{ user.username }}">
-                {% else %}
-                    <div class="h-11 w-11 rounded-xl bg-medical-blue text-white flex items-center justify-center font-bold font-poppins text-lg shadow-sm">Dr</div>
-                {% endif %}
-                <div class="overflow-hidden">
-                    <h4 class="text-sm font-bold text-gray-800 truncate">Dr. {{ user.username }}</h4>
-                    <span class="inline-block bg-medical-blue/10 text-medical-blue font-bold text-[9px] uppercase tracking-wider px-2.5 py-0.5 rounded-full mt-1">
-                        {% translate "Médecin Praticien" %}
-                    </span>
-                </div>
-            </div>
-
-            <!-- Navigation Links -->
-            <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto custom-scrollbar select-none">
-                <!-- Dashboard (Active) -->
-                <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-2xl bg-medical-light text-medical-blue font-bold text-sm transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
-                    </svg>
-                    <span>{% translate "Tableau de Bord" %}</span>
-                </a>
-
-                <!-- Mes Consultations -->
-                <a href="#" onclick="alert('Gestion des consultations en cours...')" class="flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-medical-blue hover:bg-gray-50 font-semibold text-sm transition-all group">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 group-hover:scale-105 transition-transform">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
-                    </svg>
-                    <span>{% translate "Mes Consultations" %}</span>
-                </a>
-
-                <!-- Patient Dossiers -->
-                <a href="#" onclick="alert('Accès aux dossiers patients en cours...')" class="flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-medical-blue hover:bg-gray-50 font-semibold text-sm transition-all group">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 group-hover:scale-105 transition-transform">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6 0 3.375 3.375 0 0 1 6 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
-                    </svg>
-                    <span>{% translate "Mes Patients" %}</span>
-                </a>
-
-                <!-- Ordonnances & Actes -->
-                <a href="#" onclick="alert('Rédaction d\'ordonnance en cours...')" class="flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-medical-blue hover:bg-gray-50 font-semibold text-sm transition-all group">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 group-hover:scale-105 transition-transform">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5A3.375 3.375 0 0 0 10.125 2.25H9.75m0 18.75h-1.5A3.375 3.375 0 0 1 4.875 17.625v-12A3.375 3.375 0 0 1 8.25 2.25h1.5a3 3 0 0 1 3 3v2.25c0 .828.672 1.5 1.5 1.5h2.25a3 3 0 0 1 3 3v3.75m-6A3 3 0 0 0 15 18a3 3 0 0 0 3-3m0 0v1.5a3 3 0 0 1-3 3m0-3v1.5a3 3 0 0 1-3 3" />
-                    </svg>
-                    <span>{% translate "Ordonnances" %}</span>
-                </a>
-
-                <!-- Assistant IA Médical -->
-                <a href="{% url 'ia_assistant:chat' %}" class="flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-medical-blue hover:bg-gray-50 font-semibold text-sm transition-all group">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 text-leaf-green group-hover:scale-105 transition-transform">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 21l-.813-5.096L3 15l5.187-.813L9 9l.813 5.187L15 15l-5.187.813ZM18 7.5 17.25 12l-.75-4.5L12 6.75l4.5-.75.75-4.5.75 4.5 4.5.75-4.5.75-.75 4.5ZM3 3v2.25h2.25v1.5H3V9H1.5V6.75H0v-1.5h1.5V3H3Z" />
-                    </svg>
-                    <span>{% translate "Assistant IA Médical" %}</span>
-                </a>
-
-                <!-- Availability Agenda -->
-                <a href="#" onclick="alert('Gestion de l\'agenda médical en cours...')" class="flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-500 hover:text-medical-blue hover:bg-gray-50 font-semibold text-sm transition-all group">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 group-hover:scale-105 transition-transform">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                    </svg>
-                    <span>{% translate "Mon Agenda & Disponibilités" %}</span>
-                </a>
-            </nav>
-
-            <!-- Logout Button (Footer of Sidebar) -->
-            <div class="p-4 border-t border-gray-100">
-                <form action="{% url 'accounts:logout' %}" method="post">
-                    {% csrf_token %}
-                    <button type="submit" class="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-red-500 bg-red-50/20 border border-red-100 hover:bg-red-50 font-bold text-sm transition-all focus:outline-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
-                        </svg>
-                        <span>{% translate "Déconnexion" %}</span>
-                    </button>
-                </form>
-            </div>
-        </aside>
-
-        <!-- ================= MOBILE BOTTOM NAVIGATION (WhatsApp Style) ================= -->
-        <div class="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/95 backdrop-blur-md border-t border-gray-200/80 flex items-center justify-around px-2 z-40 shadow-lg select-none">
-            <!-- Home / Dashboard -->
-            <a href="#" class="flex flex-col items-center justify-center flex-1 py-1 text-medical-blue font-bold transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
-                </svg>
-                <span class="text-[9px] mt-0.5 font-medium">{% translate "Accueil" %}</span>
-            </a>
-            
-            <!-- Consultations -->
-            <a href="#" onclick="alert('Consultations...')" class="flex flex-col items-center justify-center flex-1 py-1 text-gray-400 hover:text-medical-blue transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
-                </svg>
-                <span class="text-[9px] mt-0.5 font-medium">{% translate "Consultations" %}</span>
-            </a>
-
-            <!-- Central AI Button -->
-            <a href="{% url 'ia_assistant:chat' %}" class="flex flex-col items-center justify-center flex-1 py-1 text-gray-400 hover:text-medical-blue transition-all relative">
-                <div class="-mt-8 w-12 h-12 rounded-full bg-gradient-to-r from-medical-blue to-medical-dark text-white flex items-center justify-center shadow-md transform active:scale-95 transition-transform duration-200 border-4 border-gray-50">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 21l-.813-5.096L3 15l5.187-.813L9 9l.813 5.187L15 15l-5.187.813Z" />
-                    </svg>
-                </div>
-                <span class="text-[9px] mt-1 font-bold text-gray-600">{% translate "Assistant IA" %}</span>
-            </a>
-
-            <!-- Patients -->
-            <a href="#" onclick="alert('Accès dossiers patients...')" class="flex flex-col items-center justify-center flex-1 py-1 text-gray-400 hover:text-medical-blue transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6 0 3.375 3.375 0 0 1 6 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
-                </svg>
-                <span class="text-[9px] mt-0.5 font-medium">{% translate "Patients" %}</span>
-            </a>
-
-            <!-- Déconnexion -->
-            <a href="#" onclick="document.getElementById('mobile-logout-form').submit();" class="flex flex-col items-center justify-center flex-1 py-1 text-red-400 hover:text-red-600 transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
-                </svg>
-                <span class="text-[9px] mt-0.5 font-medium">{% translate "Quitter" %}</span>
-            </a>
-        </div>
-        <form action="{% url 'accounts:logout' %}" method="post" id="mobile-logout-form" class="hidden">{% csrf_token %}</form>
+        <!-- ================= SILICON VALLEY FLOATING CURVED BOTTOM NAV ================= -->
+        {% include "medecins/bottom_nav.html" %}
 
         <!-- ================= MAIN LAYOUT SPACE ================= -->
         <div class="flex-1 flex flex-col min-h-screen overflow-hidden">
@@ -218,11 +76,15 @@
                     </div>
 
                     <!-- Notification Bell Trigger -->
-                    <button type="button" onclick="toggleDocNotificationsPanel()" class="w-10 h-10 rounded-full border border-gray-200/50 bg-gray-50/50 hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-medical-blue transition-all relative focus:outline-none">
+                    <button type="button" onclick="toggleDocNotificationsPanel()" class="w-10 h-10 rounded-full border border-gray-200/50 bg-gray-50/50 hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-medical-blue transition-all relative focus:outline-none" title="Notifications">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
                         </svg>
-                        <span id="doc-notif-badge" class="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center border-2 border-white shadow-xs">4</span>
+                        {% if rdvs_count > 0 %}
+                            <span id="doc-notif-badge" class="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center border-2 border-white shadow-xs">{{ rdvs_count }}</span>
+                        {% else %}
+                            <span id="doc-notif-badge" class="hidden absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center border-2 border-white shadow-xs">0</span>
+                        {% endif %}
                     </button>
 
                     <!-- Doctor Notifications Dropdown Panel -->
@@ -230,41 +92,36 @@
                         <div class="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                             <h4 class="text-xs font-bold font-poppins text-gray-800 flex items-center space-x-1.5">
                                 <span>Notifications Praticien</span>
-                                <span id="doc-notif-count-badge" class="bg-red-100 text-red-600 px-2 py-0.5 rounded-full text-[9px] font-extrabold">4 nouvelles</span>
+                                {% if rdvs_count > 0 %}
+                                    <span id="doc-notif-count-badge" class="bg-red-100 text-red-600 px-2 py-0.5 rounded-full text-[9px] font-extrabold">{{ rdvs_count }} en attente</span>
+                                {% endif %}
                             </h4>
                             <button type="button" onclick="markAllDocNotificationsAsRead()" class="text-[10px] text-medical-blue hover:underline font-bold">Tout marquer comme lu</button>
                         </div>
                         
                         <!-- Notifications List -->
                         <div id="doc-notif-list-container" class="max-h-72 overflow-y-auto custom-scrollbar p-2 space-y-2">
-                            <div class="p-3 rounded-2xl bg-blue-50/40 border border-blue-100 flex items-start space-x-3">
-                                <div class="w-8 h-8 rounded-xl bg-medical-blue text-white flex items-center justify-center flex-shrink-0 font-bold text-xs shadow-xs">📅</div>
-                                <div class="flex-1">
-                                    <div class="flex items-center justify-between">
-                                        <h5 class="text-xs font-bold text-gray-800">Demande de Consultation Vidéo</h5>
-                                        <span class="text-[9px] text-gray-400 font-normal">Il y a 5 min</span>
+                            {% if my_rdvs %}
+                                {% for rdv in my_rdvs %}
+                                <div class="p-3 rounded-2xl bg-blue-50/40 border border-blue-100 flex items-start space-x-3">
+                                    <div class="w-8 h-8 rounded-xl bg-medical-blue text-white flex items-center justify-center flex-shrink-0 font-bold text-xs shadow-xs">📅</div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center justify-between">
+                                            <h5 class="text-xs font-bold text-gray-800">Consultation {{ rdv.get_consultation_type_display }}</h5>
+                                            <span class="text-[9px] text-gray-400 font-normal">{{ rdv.date|date:"d/m/Y" }}</span>
+                                        </div>
+                                        <p class="text-[11px] text-gray-600 mt-0.5 leading-snug">Patient : {{ rdv.patient.username }} (Motif : {{ rdv.reason }})</p>
                                     </div>
-                                    <p class="text-[11px] text-gray-600 mt-0.5 leading-snug">Patient Francis M. a réservé un créneau pour demain à 10:00.</p>
                                 </div>
-                            </div>
-
-                            <div class="p-3 rounded-2xl bg-purple-50/40 border border-purple-100 flex items-start space-x-3">
-                                <div class="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center flex-shrink-0 font-bold text-xs shadow-xs">💬</div>
-                                <div class="flex-1">
-                                    <div class="flex items-center justify-between">
-                                        <h5 class="text-xs font-bold text-gray-800">Nouveau Commentaire Patient</h5>
-                                        <span class="text-[9px] text-gray-400 font-normal">Il y a 30 min</span>
-                                    </div>
-                                    <p class="text-[11px] text-gray-600 mt-0.5 leading-snug">Un patient a posé une question sous votre vidéo "Don de Sang".</p>
+                                {% endfor %}
+                            {% else %}
+                                <!-- Empty State -->
+                                <div id="doc-notif-empty-state" class="p-8 text-center space-y-2">
+                                    <div class="w-12 h-12 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mx-auto text-xl">🔔</div>
+                                    <h5 class="text-xs font-bold text-gray-700">Aucune notification en attente</h5>
+                                    <p class="text-[10px] text-gray-400">Toutes les demandes de rendez-vous et questions sont traitées.</p>
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- Empty State Container -->
-                        <div id="doc-notif-empty-state" class="hidden p-8 text-center space-y-2">
-                            <div class="w-12 h-12 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mx-auto text-xl">🔔</div>
-                            <h5 class="text-xs font-bold text-gray-700">Aucune notification en attente</h5>
-                            <p class="text-[10px] text-gray-400">Toutes les demandes de rendez-vous et questions sont traitées.</p>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -296,7 +153,11 @@
                             Bonjour, Dr. {{ user.username }} !
                         </h2>
                         <p class="text-blue-100 text-sm max-w-md font-medium">
-                            Vous avez 4 consultations vidéo programmées aujourd'hui. Vos créneaux de l'après-midi sont ouverts à la réservation.
+                            {% if rdvs_count > 0 %}
+                                Vous avez {{ rdvs_count }} consultation{{ rdvs_count|pluralize }} programmée{{ rdvs_count|pluralize }} dans votre agenda. Vos créneaux sont ouverts à la réservation en ligne.
+                            {% else %}
+                                Vous n'avez aucune consultation programmée pour le moment. Vos créneaux de l'après-midi sont ouverts à la réservation en ligne par vos patients.
+                            {% endif %}
                         </p>
                     </div>
                     <div class="z-10 flex-shrink-0 flex flex-col sm:flex-row gap-3">
@@ -304,15 +165,20 @@
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
                             <span>Publier Conseil Vidéo</span>
                         </button>
-                        <button type="button" onclick="alert('Ouverture de la salle d\'attente virtuelle...')" class="bg-white hover:bg-medical-light text-medical-blue font-bold text-xs uppercase tracking-wider px-5 py-3.5 rounded-2xl shadow-md transition-all block text-center">
-                            Salle d'attente (2)
+                        <button type="button" onclick="openWaitingRoomModal()" class="bg-white hover:bg-medical-light text-medical-blue font-bold text-xs uppercase tracking-wider px-5 py-3.5 rounded-2xl shadow-md transition-all flex items-center justify-center space-x-2 relative">
+                            <span id="waiting-room-btn-text">Salle d'attente ({{ waiting_room_count|default:0 }})</span>
+                            {% if waiting_room_count > 0 %}
+                                <span id="waiting-room-badge" class="w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center border-2 border-white shadow-xs">{{ waiting_room_count }}</span>
+                            {% else %}
+                                <span id="waiting-room-badge" class="hidden w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center border-2 border-white shadow-xs">0</span>
+                            {% endif %}
                         </button>
                     </div>
                 </div>
 
-                <!-- KPI Metric Cards Grid -->
+                <!-- KPI Metric Cards Grid (Données réelles de la BD SQLite) -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 select-none">
-                    <!-- Consultations aujourd'hui -->
+                    <!-- Consultations & RDV -->
                     <div class="bg-white border border-gray-100 rounded-3xl p-5 shadow-xs flex items-center space-x-4">
                         <div class="w-12 h-12 rounded-2xl bg-medical-light text-medical-blue flex items-center justify-center flex-shrink-0 font-bold">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
@@ -320,10 +186,10 @@
                             </svg>
                         </div>
                         <div>
-                            <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">RDV Aujourd'hui</span>
-                            <div class="text-xl font-extrabold text-gray-800 font-poppins mt-0.5">8 Patients</div>
+                            <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">Consultations</span>
+                            <div class="text-xl font-extrabold text-gray-800 font-poppins mt-0.5">{{ rdvs_count|default:0 }} RDV</div>
                             <span class="text-[10px] text-leaf-green font-bold flex items-center mt-1">
-                                4 terminés • 4 à venir
+                                Données en temps réel
                             </span>
                         </div>
                     </div>
@@ -332,19 +198,19 @@
                     <div class="bg-white border border-gray-100 rounded-3xl p-5 shadow-xs flex items-center space-x-4">
                         <div class="w-12 h-12 rounded-2xl bg-leaf-light text-leaf-green flex items-center justify-center flex-shrink-0 font-bold">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6 0 3.375 3.375 0 0 1 6 0Z" />
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6 0 3.375 3.375 0 0 1 6 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
                             </svg>
                         </div>
                         <div>
                             <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">Patients Suivis</span>
-                            <div class="text-xl font-extrabold text-gray-800 font-poppins mt-0.5">142 Actifs</div>
+                            <div class="text-xl font-extrabold text-gray-800 font-poppins mt-0.5">{{ my_patients_count|default:0 }} Actif{{ my_patients_count|pluralize }}</div>
                             <span class="text-[10px] text-leaf-green font-bold flex items-center mt-1">
-                                +12 ce mois-ci
+                                Dossiers électroniques
                             </span>
                         </div>
                     </div>
 
-                    <!-- Note Patients -->
+                    <!-- Abonnés Patient -->
                     <div class="bg-white border border-gray-100 rounded-3xl p-5 shadow-xs flex items-center space-x-4">
                         <div class="w-12 h-12 rounded-2xl bg-orange-50 text-orange-500 flex items-center justify-center flex-shrink-0 font-bold">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
@@ -352,26 +218,26 @@
                             </svg>
                         </div>
                         <div>
-                            <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">Avis Patients</span>
-                            <div class="text-xl font-extrabold text-gray-800 font-poppins mt-0.5">4.9 ★ / 5</div>
+                            <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">Abonnés</span>
+                            <div class="text-xl font-extrabold text-gray-800 font-poppins mt-0.5">{{ subscribers_count|default:0 }} Patient{{ subscribers_count|pluralize }}</div>
                             <span class="text-[10px] text-gray-400 font-bold flex items-center mt-1">
-                                Basé sur 38 évaluations
+                                Suivent vos conseils
                             </span>
                         </div>
                     </div>
 
-                    <!-- Honoraires du Mois -->
+                    <!-- Mes Capsules Vidéos -->
                     <div class="bg-white border border-gray-100 rounded-3xl p-5 shadow-xs flex items-center space-x-4">
                         <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0 font-bold">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-6h6m-9 6.75h12a2.25 2.25 0 0 0 2.25-2.25V7.5A2.25 2.25 0 0 0 18.75 5.25H5.25A2.25 2.25 0 0 0 3 7.5v9.75A2.25 2.25 0 0 0 5.25 18.75Z" />
+                              <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
                             </svg>
                         </div>
                         <div>
-                            <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">Revenus du mois</span>
-                            <div class="text-xl font-extrabold text-gray-800 font-poppins mt-0.5">450 000 FCFA</div>
+                            <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">Mes Vidéos</span>
+                            <div class="text-xl font-extrabold text-gray-800 font-poppins mt-0.5">{{ my_videos_count|default:0 }} Capsule{{ my_videos_count|pluralize }}</div>
                             <span class="text-[10px] text-leaf-green font-bold flex items-center mt-1">
-                                Versé le 30 du mois
+                                Publiées en ligne
                             </span>
                         </div>
                     </div>
@@ -383,119 +249,109 @@
                     <!-- Left: Appointments Today & Patient Files (8 Cols) -->
                     <div class="lg:col-span-8 space-y-8">
                         
-                        <!-- Today's Consultations List -->
+                        <!-- Today's Consultations List (Données réelles de la BD SQLite) -->
                         <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-xs">
                             <div class="flex items-center justify-between mb-5 border-b border-gray-50 pb-4">
                                 <h3 class="text-md font-bold text-gray-800 font-poppins flex items-center">
                                     <span class="w-2.5 h-2.5 rounded-full bg-medical-blue mr-2 shadow-xs"></span>
-                                    {% translate "Consultations programmées aujourd'hui" %}
+                                    {% translate "Consultations & Rendez-vous en BDD" %}
                                 </h3>
                                 <span class="bg-medical-light text-medical-blue text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">En direct</span>
                             </div>
 
                             <div class="space-y-4">
-                                <!-- Consultation Item 1 -->
-                                <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100/60 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:shadow-xs transition-shadow">
-                                    <div class="flex items-center space-x-3.5">
-                                        <div class="w-11 h-11 rounded-2xl bg-leaf-green/10 text-leaf-green flex items-center justify-center font-bold text-sm font-poppins shadow-xs">PM</div>
-                                        <div>
-                                            <h5 class="text-sm font-bold text-gray-800">Paul Mbida</h5>
-                                            <p class="text-xs text-gray-400 font-semibold mt-0.5">Téléconsultation • Motif : Suivi Hypertension</p>
+                                {% if my_rdvs %}
+                                    {% for rdv in my_rdvs %}
+                                    <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100/60 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:shadow-xs transition-shadow">
+                                        <div class="flex items-center space-x-3.5">
+                                            <div class="w-11 h-11 rounded-2xl bg-medical-blue/10 text-medical-blue flex items-center justify-center font-bold text-sm font-poppins shadow-xs">
+                                                {{ rdv.patient.username|slice:":2"|upper }}
+                                            </div>
+                                            <div>
+                                                <h5 class="text-sm font-bold text-gray-800">{{ rdv.patient.username }}</h5>
+                                                <p class="text-xs text-gray-400 font-semibold mt-0.5">{{ rdv.get_consultation_type_display }} • Motif : {{ rdv.reason }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-3">
+                                            <div class="text-right">
+                                                <div class="text-xs font-extrabold text-medical-blue">{{ rdv.date|date:"d/m/Y" }} à {{ rdv.time_slot }}</div>
+                                                <div class="text-[10px] font-bold {% if rdv.in_waiting_room %}text-leaf-green animate-pulse{% else %}text-gray-400{% endif %}">
+                                                    {% if rdv.in_waiting_room %}🟢 En salle d'attente{% else %}Confirmé{% endif %}
+                                                </div>
+                                            </div>
+                                            <a href="{% url 'medecins:patients' %}" class="px-4 py-2.5 bg-medical-blue hover:bg-medical-dark text-white text-xs font-bold rounded-xl transition-all shadow-xs uppercase tracking-wide">
+                                                Dossier
+                                            </a>
                                         </div>
                                     </div>
-                                    <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-3">
-                                        <div class="text-right">
-                                            <div class="text-xs font-extrabold text-medical-blue">14:00 (Aujourd'hui)</div>
-                                            <div class="text-[10px] font-bold text-leaf-green">Salle d'attente prêt</div>
-                                        </div>
-                                        <button type="button" onclick="alert('Démarrage de la visioconférence avec Paul Mbida...')" class="px-4 py-2.5 bg-leaf-green hover:bg-leaf-dark text-white text-xs font-bold rounded-xl transition-all shadow-xs uppercase tracking-wide">
-                                            Démarrer Visio
-                                        </button>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="p-8 text-center bg-gray-50 border border-gray-100 rounded-2xl space-y-2">
+                                        <span class="text-3xl block">📅</span>
+                                        <h4 class="text-xs font-bold text-gray-700">Aucun rendez-vous planifié</h4>
+                                        <p class="text-[10px] text-gray-400 max-w-xs mx-auto">Les consultations et créneaux réservés en temps réel par vos patients s'afficheront directement ici.</p>
                                     </div>
-                                </div>
-
-                                <!-- Consultation Item 2 -->
-                                <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100/60 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:shadow-xs transition-shadow">
-                                    <div class="flex items-center space-x-3.5">
-                                        <div class="w-11 h-11 rounded-2xl bg-medical-blue/10 text-medical-blue flex items-center justify-center font-bold text-sm font-poppins shadow-xs">SN</div>
-                                        <div>
-                                            <h5 class="text-sm font-bold text-gray-800">Sarah Nguema</h5>
-                                            <p class="text-xs text-gray-400 font-semibold mt-0.5">Présentiel Cabinet • Motif : Pédiatrie / Fièvre enfant</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-3">
-                                        <div class="text-right">
-                                            <div class="text-xs font-bold text-gray-700">15:30 (Aujourd'hui)</div>
-                                            <div class="text-[10px] font-bold text-gray-400">Confirmé</div>
-                                        </div>
-                                        <button type="button" onclick="alert('Ouverture du dossier médical de Sarah Nguema...')" class="px-4 py-2.5 border border-gray-200 hover:border-medical-blue hover:text-medical-blue text-xs font-bold rounded-xl transition-all shadow-xs uppercase tracking-wide">
-                                            Dossier
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- Consultation Item 3 -->
-                                <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100/60 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:shadow-xs transition-shadow">
-                                    <div class="flex items-center space-x-3.5">
-                                        <div class="w-11 h-11 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-sm font-poppins shadow-xs">AF</div>
-                                        <div>
-                                            <h5 class="text-sm font-bold text-gray-800">Alain Foko</h5>
-                                            <p class="text-xs text-gray-400 font-semibold mt-0.5">Téléconsultation • Motif : Renouvellement d'ordonnance</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-3">
-                                        <div class="text-right">
-                                            <div class="text-xs font-bold text-gray-700">17:00 (Aujourd'hui)</div>
-                                            <div class="text-[10px] font-bold text-gray-400">Programmé</div>
-                                        </div>
-                                        <button type="button" onclick="alert('Préparation du dossier d\'Alain Foko...')" class="px-4 py-2.5 border border-gray-200 hover:border-medical-blue hover:text-medical-blue text-xs font-bold rounded-xl transition-all shadow-xs uppercase tracking-wide">
-                                            Dossier
-                                        </button>
-                                    </div>
-                                </div>
+                                {% endif %}
                             </div>
                         </div>
 
-                        <!-- Recent Patient Dossiers -->
-                        <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-xs">
-                            <div class="flex items-center justify-between mb-5 border-b border-gray-50 pb-4">
-                                <h3 class="text-md font-bold text-gray-800 font-poppins flex items-center">
-                                    <span class="w-2.5 h-2.5 rounded-full bg-leaf-green mr-2 shadow-xs"></span>
-                                    {% translate "Dossiers Patients Récents" %}
-                                </h3>
-                                <button type="button" onclick="alert('Affichage de la liste complète des patients...')" class="text-xs text-medical-blue hover:underline font-bold uppercase tracking-wide">
-                                    Voir tous les dossiers
-                                </button>
+                        <!-- Recent Patient Dossiers & Diagnostics History -->
+                        <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-xs select-none space-y-5">
+                            <div class="flex items-center justify-between border-b border-gray-50 pb-4">
+                                <div>
+                                    <h3 class="text-md font-bold text-gray-800 font-poppins flex items-center space-x-2">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-leaf-green shadow-xs"></span>
+                                        <span>{% translate "Dossiers Patients & Derniers Diagnostics" %}</span>
+                                    </h3>
+                                    <p class="text-xs text-gray-400 font-semibold mt-0.5">Historique des diagnostics et ordonnances électroniques délivrées</p>
+                                </div>
+                                <a href="{% url 'medecins:patients' %}" class="text-xs text-medical-blue hover:underline font-extrabold uppercase tracking-wide flex items-center space-x-1">
+                                    <span>Voir tous les dossiers</span>
+                                    <span>➔</span>
+                                </a>
                             </div>
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <!-- Patient File 1 -->
-                                <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100/60 flex items-center justify-between">
-                                    <div>
-                                        <h5 class="text-sm font-bold text-gray-800">Jeanne Abena</h5>
-                                        <p class="text-[10px] text-gray-400 font-semibold mt-0.5">Dernière visite : 12 Juillet 2026</p>
-                                        <span class="inline-block mt-1.5 bg-blue-50 text-medical-blue text-[9px] font-bold px-2 py-0.5 rounded-full">Groupe O+</span>
-                                    </div>
-                                    <button type="button" onclick="alert('Consulter le dossier de Jeanne Abena')" class="p-2 text-gray-400 hover:text-medical-blue">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                                          <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-                                        </svg>
-                                    </button>
-                                </div>
+                                {% if my_patients %}
+                                    {% for item in my_patients %}
+                                    <div class="p-4 rounded-2xl bg-gray-50 border border-gray-150 hover:border-medical-blue/30 transition-all space-y-3">
+                                        <div class="flex items-start justify-between">
+                                            <div class="flex items-center space-x-3">
+                                                <div class="w-10 h-10 rounded-2xl bg-medical-blue text-white font-extrabold flex items-center justify-center text-sm shadow-xs font-poppins">
+                                                    {{ item.patient.username|slice:":2"|upper }}
+                                                </div>
+                                                <div>
+                                                    <h5 class="text-sm font-extrabold text-gray-900 font-poppins">{{ item.patient.username }}</h5>
+                                                    <p class="text-[10px] text-gray-400 font-semibold">Âge : {{ item.patient_age }} • Consultation : {{ item.last_ordonnance.date|date:"d/m/Y" }}</p>
+                                                </div>
+                                            </div>
+                                            <span class="bg-leaf-light text-leaf-green text-[9px] font-extrabold px-2 py-0.5 rounded-full">Dossier Actif</span>
+                                        </div>
 
-                                <!-- Patient File 2 -->
-                                <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100/60 flex items-center justify-between">
-                                    <div>
-                                        <h5 class="text-sm font-bold text-gray-800">Marc Kouamé</h5>
-                                        <p class="text-[10px] text-gray-400 font-semibold mt-0.5">Dernière visite : 08 Juillet 2026</p>
-                                        <span class="inline-block mt-1.5 bg-green-50 text-leaf-green text-[9px] font-bold px-2 py-0.5 rounded-full">Groupe A+</span>
+                                        <!-- Dernier Diagnostic posé par le docteur -->
+                                        <div class="bg-white p-3 rounded-xl border border-gray-100 text-xs space-y-1">
+                                            <span class="text-[9px] font-extrabold text-medical-blue uppercase tracking-wider block">Dernier Diagnostic Établi :</span>
+                                            <p class="text-gray-800 font-bold italic font-poppins">{{ item.diagnostic }}</p>
+                                            <p class="text-[10px] text-gray-500 font-medium truncate pt-0.5">Rx : {{ item.last_ordonnance.prescription_details|truncatechars:40 }}</p>
+                                        </div>
+
+                                        <div class="pt-1 flex items-center justify-between gap-2 text-[10px] font-extrabold uppercase tracking-wider">
+                                            <a href="{% url 'ordonnances:detail' pk=item.last_ordonnance.id %}" class="text-leaf-green hover:underline flex items-center space-x-1">
+                                                <span>Fiche Ordonnance 📄</span>
+                                            </a>
+                                            <a href="{% url 'medecins:patients' %}" class="text-medical-blue hover:underline">
+                                                <span>Historique ({{ item.all_ordonnances|length }}) ➔</span>
+                                            </a>
+                                        </div>
                                     </div>
-                                    <button type="button" onclick="alert('Consulter le dossier de Marc Kouamé')" class="p-2 text-gray-400 hover:text-medical-blue">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                                          <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-                                        </svg>
-                                    </button>
-                                </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="col-span-2 p-8 text-center bg-gray-50 border border-gray-100 rounded-2xl space-y-2">
+                                        <span class="text-3xl block">📋</span>
+                                        <h4 class="text-xs font-bold text-gray-700">Aucun dossier patient enregistré</h4>
+                                        <p class="text-[10px] text-gray-400 max-w-xs mx-auto">Vos dossiers patients et leurs historiques de diagnostic apparaîtront ici dès la fin de vos consultations et émissions d'ordonnances.</p>
+                                    </div>
+                                {% endif %}
                             </div>
                         </div>
 
@@ -505,54 +361,47 @@
                                 <div>
                                     <h3 class="text-md font-bold text-gray-800 font-poppins flex items-center space-x-2">
                                         <span class="text-purple-600">📹</span>
-                                        <span>Mes Publications Vidéos & Réactions Patients</span>
+                                        <span>Mes Capsules Vidéos Publiées & Réactions Patients</span>
                                     </h3>
-                                    <p class="text-xs text-gray-400 font-semibold mt-0.5">Consultez les réactions et commentaires reçus sous vos conseils de santé</p>
+                                    <p class="text-xs text-gray-400 font-semibold mt-0.5">Consultez les réactions ❤️ et commentaires 💬 reçus sous vos conseils de santé</p>
                                 </div>
                                 <button type="button" onclick="openPublishVideoModal()" class="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl shadow-xs uppercase tracking-wider">
                                     + Publier Vidéo
                                 </button>
                             </div>
 
-                            <!-- Video Card Item 1 -->
-                            <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100/60 space-y-3">
-                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                                    <div class="flex items-center space-x-3">
-                                        <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs shadow-xs">
-                                            🎬
+                            <div class="space-y-3">
+                                {% if my_videos %}
+                                    {% for video in my_videos %}
+                                    <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-10 h-10 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-base shadow-xs shrink-0">
+                                                🎥
+                                            </div>
+                                            <div class="min-w-0 overflow-hidden">
+                                                <h4 class="text-sm font-bold text-gray-800 font-poppins truncate">{{ video.title }}</h4>
+                                                <p class="text-xs text-gray-400 mt-0.5 truncate">{{ video.description|default:"Conseil médical vidéo de 60 secondes" }}</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h4 class="text-sm font-bold text-gray-800">Don de Sang : Un geste qui sauve des vies</h4>
-                                            <p class="text-[10px] text-gray-400 font-semibold">Publié le 14 Juin 2026</p>
+                                        <div class="flex items-center space-x-4 text-xs font-bold shrink-0">
+                                            <span class="text-red-500 flex items-center space-x-1" title="J'aime">
+                                                <span>❤️</span>
+                                                <span>{{ video.likes_count|default:0 }}</span>
+                                            </span>
+                                            <span class="text-medical-blue flex items-center space-x-1" title="Commentaires">
+                                                <span>💬</span>
+                                                <span>{{ video.comments.count }}</span>
+                                            </span>
                                         </div>
                                     </div>
-                                    <div class="flex items-center space-x-2">
-                                        <span class="bg-blue-50 text-medical-blue font-bold text-xs px-3 py-1 rounded-full">
-                                            👍 <span id="doc-reactions-count-1">2</span> Réactions
-                                        </span>
-                                        <span class="bg-purple-50 text-purple-700 font-bold text-xs px-3 py-1 rounded-full">
-                                            💬 <span id="doc-comments-count-1">1</span> Commentaire
-                                        </span>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="p-8 text-center bg-gray-50 border border-gray-100 rounded-2xl space-y-2">
+                                        <span class="text-3xl block">📹</span>
+                                        <h4 class="text-xs font-bold text-gray-700">Aucune capsule vidéo publiée</h4>
+                                        <p class="text-[10px] text-gray-400 max-w-xs mx-auto">Publiez de courtes vidéos de prévention pour éduquer votre patientèle et interagir avec les patients.</p>
                                     </div>
-                                </div>
-
-                                <!-- Comments list for doctor -->
-                                <div class="pt-2 border-t border-gray-200/50 space-y-2">
-                                    <span class="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block">Commentaires des Patients :</span>
-                                    <div class="bg-white p-3 rounded-xl border border-gray-100 text-xs space-y-1">
-                                        <div class="flex items-center justify-between font-bold text-gray-800">
-                                            <span>Patient Francis M.</span>
-                                            <span class="text-[9px] text-gray-400 font-normal">Hier à 16:20</span>
-                                        </div>
-                                        <p class="text-gray-600 font-medium">"Merci Dr. Dany pour cette vidéo explicative ! Comment se passe le bilan avant le don ?"</p>
-                                    </div>
-
-                                    <!-- Reply input -->
-                                    <div class="flex items-center space-x-2 pt-1">
-                                        <input type="text" id="doc-reply-input-1" placeholder="Répondre au patient..." class="flex-1 bg-white border border-gray-200 rounded-full px-3.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-600 font-medium">
-                                        <button type="button" onclick="addDoctorReply(1)" class="bg-medical-blue hover:bg-medical-dark text-white font-bold px-3 py-1.5 rounded-full text-xs transition-colors">Répondre</button>
-                                    </div>
-                                </div>
+                                {% endif %}
                             </div>
                         </div>
 
@@ -709,6 +558,124 @@
             }
             alert('Toutes vos notifications praticien ont été marquées comme lues !');
         }
+
+        // Modal Waiting Room Functions
+        function openWaitingRoomModal() {
+            document.getElementById('modal-waiting-room').classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+            updateWaitingRoom();
+        }
+
+        function closeWaitingRoomModal() {
+            document.getElementById('modal-waiting-room').classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        // Fetch waiting patients list and update UI
+        function updateWaitingRoom() {
+            const listContainer = document.getElementById('waiting-patients-list');
+            const emptyState = document.getElementById('waiting-patients-empty');
+            const bellBadge = document.getElementById('waiting-room-badge');
+            const headerBtnText = document.getElementById('waiting-room-btn-text');
+
+            fetch("{% url 'consultations:doctor_waiting_list' %}")
+                .then(response => response.json())
+                .then(data => {
+                    const patients = data.waiting_patients;
+                    
+                    // Update badges
+                    if (bellBadge) {
+                        bellBadge.innerText = patients.length;
+                        if (patients.length > 0) {
+                            bellBadge.classList.remove('hidden');
+                        } else {
+                            bellBadge.classList.add('hidden');
+                        }
+                    }
+                    if (headerBtnText) {
+                        headerBtnText.innerText = `Salle d'attente (${patients.length})`;
+                    }
+
+                    // Render list
+                    if (listContainer) {
+                        listContainer.innerHTML = '';
+                        if (patients.length > 0) {
+                            emptyState.classList.add('hidden');
+                            patients.forEach(pat => {
+                                const patEl = document.createElement('div');
+                                patEl.className = "p-4 rounded-2xl bg-gray-50 border border-gray-150 hover:border-leaf-green transition-all flex items-center justify-between gap-4";
+                                
+                                const avatarHTML = pat.patient_avatar 
+                                    ? `<img class="w-11 h-11 rounded-xl object-cover" src="${pat.patient_avatar}">`
+                                    : `<div class="w-11 h-11 rounded-xl bg-leaf-green/10 text-leaf-green flex items-center justify-center font-extrabold text-sm shadow-xs">${pat.patient_initials}</div>`;
+
+                                patEl.innerHTML = `
+                                    <div class="flex items-center space-x-3.5">
+                                        ${avatarHTML}
+                                        <div>
+                                            <h5 class="text-xs font-extrabold text-gray-800">${pat.patient_name}</h5>
+                                            <p class="text-[10px] text-gray-400 font-semibold mt-0.5">${pat.type} • Créneau : ${pat.time_slot}</p>
+                                            <p class="text-[10px] text-gray-500 font-medium mt-0.5">Motif : ${pat.reason}</p>
+                                        </div>
+                                    </div>
+                                    <form action="/consultations/rdv/${pat.id}/start/" method="post">
+                                        {% csrf_token %}
+                                        <button type="submit" class="px-4 py-2.5 bg-leaf-green hover:bg-leaf-dark active:scale-95 text-white text-[10px] font-extrabold tracking-wider uppercase rounded-xl transition-all shadow-xs">
+                                            Admettre & Appeler 🎥
+                                        </button>
+                                    </form>
+                                `;
+                                listContainer.appendChild(patEl);
+                            });
+                        } else {
+                            emptyState.classList.remove('hidden');
+                        }
+                    }
+                })
+                .catch(err => console.error("Erreur de récupération de la salle d'attente :", err));
+        }
+
+        // Run polling update every 5 seconds
+        setInterval(updateWaitingRoom, 5000);
+        updateWaitingRoom(); // First call
     </script>
+
+    <!-- ================= WAITING ROOM MODAL ================= -->
+    <div id="modal-waiting-room" class="fixed inset-0 z-50 overflow-y-auto hidden">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <!-- Background Overlay -->
+            <div class="fixed inset-0 transition-opacity bg-gray-900/60 backdrop-blur-xs" onclick="closeWaitingRoomModal()"></div>
+
+            <!-- Modal Panel -->
+            <div class="inline-block w-full max-w-xl my-8 overflow-hidden text-left align-middle transition-all transform bg-white border border-gray-100 rounded-[2.5rem] shadow-2xl select-none sm:align-middle">
+                <!-- Header -->
+                <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-gray-50/50">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-3 h-3 rounded-full bg-leaf-green animate-pulse"></span>
+                        <h3 class="text-md font-bold font-poppins text-gray-800">Salle d'attente active</h3>
+                    </div>
+                    <button type="button" onclick="closeWaitingRoomModal()" class="text-gray-400 hover:text-gray-600 transition-colors focus:outline-none">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Body / Patient Waiting List -->
+                <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                    <div id="waiting-patients-list" class="space-y-3.5">
+                        <!-- Les patients connectés s'afficheront ici dynamiquement -->
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="waiting-patients-empty" class="text-center py-10 space-y-3">
+                        <div class="text-4xl">📭</div>
+                        <h4 class="text-sm font-bold text-gray-700">Aucun patient en attente</h4>
+                        <p class="text-xs text-gray-400 max-w-xs mx-auto">Les patients prenant place dans votre salle d'attente virtuelle apparaîtront instantanément ici.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

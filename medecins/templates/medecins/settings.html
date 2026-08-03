@@ -1,0 +1,399 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% translate "Paramètres Praticien - Fransick" %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'medical-blue': '#1B5FA8',
+                        'medical-light': '#EBF3FC',
+                        'medical-dark': '#14467d',
+                        'leaf-green': '#6DBE45',
+                        'leaf-light': '#F0F9EB',
+                        'leaf-dark': '#559c30',
+                    },
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif'],
+                        'inter': ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #1B5FA8;
+            background-color: #1B5FA8;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #1B5FA8;
+        }
+    </style>
+</head>
+<body class="bg-gray-50/70 font-inter text-gray-800 antialiased overflow-hidden">
+
+    <!-- App Shell Layout -->
+    <div class="flex h-screen overflow-hidden bg-gray-50/50">
+        
+        <!-- ================= SILICON VALLEY MODULAR DESKTOP SIDEBAR ================= -->
+        {% include "medecins/sidebar.html" %}
+
+        <!-- ================= SILICON VALLEY FLOATING CURVED BOTTOM NAV ================= -->
+        {% include "medecins/bottom_nav.html" %}
+
+        <!-- ================= MAIN LAYOUT SPACE ================= -->
+        <div class="flex-1 flex flex-col min-h-screen overflow-hidden">
+            
+            <!-- Dashboard Top Header Bar -->
+            <header class="h-20 bg-white border-b border-gray-200/80 px-4 md:px-8 flex items-center justify-between flex-shrink-0 z-30 select-none relative">
+                <div class="flex items-center space-x-3 lg:hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-8 h-8 text-medical-blue">
+                        <path d="M37 28 C20 28 15 48 30 65 C40 75 50 82 50 82 C50 82 60 75 70 65 C85 48 80 28 63 28" fill="none" stroke="#1B5FA8" stroke-width="6" stroke-linecap="round"/>
+                        <circle cx="37" cy="28" r="4.5" fill="#38BDF8" />
+                        <circle cx="63" cy="28" r="4.5" fill="#38BDF8" />
+                        <path d="M30 65 C22 55 15 55 12 60 C8 65 14 74 22 72" fill="none" stroke="#1B5FA8" stroke-width="6" stroke-linecap="round"/>
+                        <circle cx="22" cy="72" r="6" fill="#14467d" />
+                        <path d="M43 46 H57 M50 39 V53" stroke="#38BDF8" stroke-width="5.5" stroke-linecap="round" />
+                        <path d="M48 68 L58 60 L60 72 Z" fill="#15803d" />
+                        <path d="M50 82 C68 76 83 60 83 38 C83 55 70 70 50 82 Z" fill="#6DBE45" />
+                        <path d="M50 82 C55 70 65 60 83 38" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                    <span class="font-poppins font-bold text-lg text-medical-blue tracking-tight">Fransick Praticien</span>
+                </div>
+
+                <div class="hidden lg:block">
+                    <h2 class="text-lg font-bold font-poppins text-gray-800">{% translate "Paramètres & Gestion du Cabinet" %}</h2>
+                    <p class="text-xs text-gray-400 font-semibold">Configurez votre profil médical et vos spécialités en ligne</p>
+                </div>
+
+                <!-- Right Avatar & Quick Info -->
+                <div class="flex items-center space-x-3.5">
+                    <button type="button" onclick="openModal('modal-profile')" class="flex items-center space-x-2 bg-medical-light/60 hover:bg-medical-light px-3.5 py-2 rounded-2xl transition-all border border-medical-blue/20 text-medical-blue font-bold text-xs">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                        <span>Éditer Profil</span>
+                    </button>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-4 md:p-8 pb-24 lg:pb-8 custom-scrollbar">
+                
+                <!-- Django Messages Alerts -->
+                {% if messages %}
+                    <div class="mb-6 space-y-2 max-w-3xl mx-auto">
+                        {% for message in messages %}
+                            <div class="p-4 rounded-2xl border text-sm font-medium flex items-center space-x-2 {% if message.tags == 'success' %}bg-leaf-light border-leaf-green/20 text-leaf-green{% else %}bg-red-50 border-red-100 text-red-600{% endif %} shadow-xs">
+                                {% if message.tags == 'success' %}
+                                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4"/></svg>
+                                {% else %}
+                                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                {% endif %}
+                                <span>{{ message }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="max-w-3xl mx-auto space-y-6">
+
+                    <!-- ================= PROFILE COMPLETION & BANNER CARD ================= -->
+                    <div class="bg-gradient-to-r from-medical-blue via-blue-700 to-indigo-800 rounded-3xl p-6 md:p-8 shadow-xl text-white relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 select-none border border-blue-400/30">
+                        <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+                        <div class="flex items-center space-x-5 z-10 w-full md:w-auto">
+                            {% if user.profile_picture %}
+                                <img class="w-20 h-20 rounded-3xl object-cover ring-4 ring-white/30 shadow-lg" src="{{ user.profile_picture.url }}" alt="{{ user.username }}">
+                            {% else %}
+                                <div class="w-20 h-20 rounded-3xl bg-white text-medical-blue font-extrabold font-poppins text-3xl flex items-center justify-center shadow-lg">Dr</div>
+                            {% endif %}
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <h3 class="text-xl font-black font-poppins tracking-tight">Dr. {% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}</h3>
+                                    <span class="bg-leaf-green text-white px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider">Praticien Vérifié</span>
+                                </div>
+                                <p class="text-xs text-blue-100 mt-1 font-medium">{% if user.doctor_profile.speciality %}{{ user.doctor_profile.speciality }}{% else %}Spécialité à renseigner{% endif %} • {% if user.doctor_profile.clinic_name %}{{ user.doctor_profile.clinic_name }}{% else %}Cabinet Privé{% endif %}</p>
+                                <div class="mt-3 flex items-center space-x-3 text-xs text-blue-200">
+                                    <span class="flex items-center gap-1">📍 {% if user.doctor_profile.clinic_address %}{{ user.doctor_profile.clinic_address }}{% else %}Adresse à configurer{% endif %}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="button" onclick="openModal('modal-profile')" class="z-10 w-full md:w-auto px-6 py-3.5 rounded-2xl bg-white text-medical-blue font-bold text-xs hover:bg-blue-50 transition-all transform active:scale-95 shadow-lg shadow-black/15 text-center flex-shrink-0">
+                            ✨ Configurer mon Profil
+                        </button>
+                    </div>
+
+                    <!-- ================= GROUP 1: ESPACE CABINET & SPÉCIALITÉS ================= -->
+                    <div class="bg-white border border-gray-100 rounded-3xl shadow-md overflow-hidden select-none">
+                        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                            <h4 class="text-xs font-black text-gray-400 uppercase tracking-widest font-poppins">Configuration de la Clinique & Profil</h4>
+                            <span class="text-[11px] font-bold text-medical-blue bg-medical-blue/10 px-2.5 py-1 rounded-full">Section Publique</span>
+                        </div>
+                        <div class="divide-y divide-gray-100">
+                            <!-- Modifier Spécialité et Bio -->
+                            <button type="button" onclick="openModal('modal-profile')" class="w-full px-6 py-4.5 flex items-center justify-between hover:bg-blue-50/30 transition-colors focus:outline-none group">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-10 h-10 rounded-2xl bg-medical-light text-medical-blue flex items-center justify-center font-bold text-lg group-hover:scale-110 transition-transform">
+                                        🩺
+                                    </div>
+                                    <div class="text-left">
+                                        <h5 class="text-sm font-bold text-gray-800">Spécialité, Biographie & Expérience</h5>
+                                        <p class="text-xs text-gray-400 mt-0.5">Modifiez vos diplômes, votre spécialité et vos années d'exercice</p>
+                                    </div>
+                                </div>
+                                <span class="text-xs font-bold text-medical-blue group-hover:underline flex items-center gap-1">Modifier <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></span>
+                            </button>
+
+                            <!-- Coordonnées et Horaires -->
+                            <button type="button" onclick="openModal('modal-profile')" class="w-full px-6 py-4.5 flex items-center justify-between hover:bg-blue-50/30 transition-colors focus:outline-none group">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-leaf-green flex items-center justify-center font-bold text-lg group-hover:scale-110 transition-transform">
+                                        🏥
+                                    </div>
+                                    <div class="text-left">
+                                        <h5 class="text-sm font-bold text-gray-800">Adresse du Cabinet & Horaires d'Ouverture</h5>
+                                        <p class="text-xs text-gray-400 mt-0.5">Gérez le lieu de consultation et vos disponibilités hebdomadaires</p>
+                                    </div>
+                                </div>
+                                <span class="text-xs font-bold text-leaf-green group-hover:underline flex items-center gap-1">Gérer <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ================= GROUP 2: SÉCURITÉ & CONNEXION ================= -->
+                    <div class="bg-white border border-gray-100 rounded-3xl shadow-md overflow-hidden select-none">
+                        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                            <h4 class="text-xs font-black text-gray-400 uppercase tracking-widest font-poppins">Sécurité & Identifiants</h4>
+                            <span class="text-[11px] font-bold text-purple-600 bg-purple-50 px-2.5 py-1 rounded-full">Privé & Confidentiel</span>
+                        </div>
+                        <div class="divide-y divide-gray-100">
+                            <!-- Mot de passe -->
+                            <button type="button" onclick="openModal('modal-password')" class="w-full px-6 py-4.5 flex items-center justify-between hover:bg-purple-50/20 transition-colors focus:outline-none group">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-lg group-hover:scale-110 transition-transform">
+                                        🔐
+                                    </div>
+                                    <div class="text-left">
+                                        <h5 class="text-sm font-bold text-gray-800">Modifier le mot de passe</h5>
+                                        <p class="text-xs text-gray-400 mt-0.5">Protégez votre espace praticien avec un mot de passe robuste</p>
+                                    </div>
+                                </div>
+                                <span class="text-xs font-bold text-purple-600 group-hover:underline flex items-center gap-1">Modifier <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></span>
+                            </button>
+
+                            <!-- Toggle Notifications -->
+                            <div class="px-6 py-4.5 flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-lg">
+                                        🔔
+                                    </div>
+                                    <div class="text-left">
+                                        <h5 class="text-sm font-bold text-gray-800">Alertes de Nouveaux Patients</h5>
+                                        <p class="text-xs text-gray-400 mt-0.5">Recevez une notification en direct pour chaque prise de RDV en salle d'attente</p>
+                                    </div>
+                                </div>
+                                <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                                    <input type="checkbox" name="toggle" id="toggle-notif" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-gray-300 transition-all duration-300" checked/>
+                                    <label for="toggle-notif" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================= GROUP 3: SUPPORT & IA MÉDICALE ================= -->
+                    <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 shadow-xl text-white border border-indigo-500/30 flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-400 to-blue-600 flex items-center justify-center font-black text-xl shadow-lg shadow-cyan-500/30">
+                                ⚡
+                            </div>
+                            <div>
+                                <h4 class="text-base font-black font-poppins tracking-tight">Assistant IA Diagnostique 24/7</h4>
+                                <p class="text-xs text-cyan-200/80 mt-0.5">Votre intelligence artificielle d'aide au diagnostic est configurée avec Groq Cloud (Ultra-Rapide).</p>
+                            </div>
+                        </div>
+                        <a href="{% url 'ia_assistant:chat' %}" class="w-full md:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 font-black text-xs text-white shadow-lg shadow-cyan-500/25 transition-all text-center flex-shrink-0">
+                            Lancer une consultation IA →
+                        </a>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- ================= MODAL 1: ÉDITION DU PROFIL & CABINET ================= -->
+    <div id="modal-profile" class="hidden fixed inset-0 z-50 overflow-y-auto bg-gray-900/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden border border-gray-100 transition-all transform scale-100">
+            <div class="p-6 bg-gradient-to-r from-medical-blue to-blue-700 text-white flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-black font-poppins">Modifier mon Profil Praticien & Cabinet</h3>
+                    <p class="text-xs text-blue-100 mt-0.5">Ces informations seront visibles par vos patients en ligne</p>
+                </div>
+                <button type="button" onclick="closeModal('modal-profile')" class="text-white/70 hover:text-white bg-white/10 p-2 rounded-full transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data" class="p-6 space-y-5 max-h-[75vh] overflow-y-auto custom-scrollbar">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update_profile">
+
+                <!-- Avatar Upload Section -->
+                <div class="bg-blue-50/60 border border-blue-100 rounded-3xl p-5 flex items-center space-x-5">
+                    {% if user.profile_picture %}
+                        <img class="h-16 w-16 rounded-2xl object-cover ring-2 ring-medical-blue/30" src="{{ user.profile_picture.url }}" alt="Avatar">
+                    {% else %}
+                        <div class="h-16 w-16 rounded-2xl bg-medical-blue text-white flex items-center justify-center font-black font-poppins text-2xl">Dr</div>
+                    {% endif %}
+                    <div class="flex-1">
+                        <label class="block text-xs font-black uppercase tracking-wider text-medical-blue mb-1.5 font-poppins">Photo de Profil Professionnelle</label>
+                        <input type="file" name="profile_picture" class="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-medical-blue file:text-white hover:file:bg-blue-700 cursor-pointer">
+                    </div>
+                </div>
+
+                <!-- Prénom & Nom -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Prénom du médecin</label>
+                        <input type="text" name="first_name" value="{{ profile_form.first_name.value|default:'' }}" placeholder="ex: Jean" class="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-medical-blue focus:ring-2 focus:ring-blue-100 text-xs font-semibold transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Nom du médecin</label>
+                        <input type="text" name="last_name" value="{{ profile_form.last_name.value|default:'' }}" placeholder="ex: Dupont" class="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-medical-blue focus:ring-2 focus:ring-blue-100 text-xs font-semibold transition-all">
+                    </div>
+                </div>
+
+                <!-- Email & Téléphone -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Email (Connexion)</label>
+                        <input type="email" name="email" value="{{ profile_form.email.value|default:'' }}" required class="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-medical-blue focus:ring-2 focus:ring-blue-100 text-xs font-semibold transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Téléphone de Contact</label>
+                        <input type="text" name="phone_number" value="{{ profile_form.phone_number.value|default:'' }}" placeholder="+237 ..." class="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-medical-blue focus:ring-2 focus:ring-blue-100 text-xs font-semibold transition-all">
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-100 pt-3">
+                    <h4 class="text-xs font-extrabold text-medical-blue uppercase tracking-wider mb-3">Spécialité & Ordre des Médecins</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Spécialité Médicale</label>
+                            <input type="text" name="speciality" value="{{ profile_form.speciality.value|default:'' }}" placeholder="ex: Cardiologue, Médecin Généraliste" class="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-medical-blue focus:ring-2 focus:ring-blue-100 text-xs font-semibold transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Numéro d'Ordre / Licence</label>
+                            <input type="text" name="license_number" value="{{ profile_form.license_number.value|default:'' }}" placeholder="ex: ORD-2023-849" class="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-medical-blue focus:ring-2 focus:ring-blue-100 text-xs font-semibold transition-all">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cabinet & Horaires -->
+                <div class="border-t border-gray-100 pt-3">
+                    <h4 class="text-xs font-extrabold text-leaf-green uppercase tracking-wider mb-3">Cabinet / Clinique & Horaires</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Nom de la Clinique / Cabinet</label>
+                            <input type="text" name="clinic_name" value="{{ profile_form.clinic_name.value|default:'' }}" placeholder="ex: Clinique Sainte-Marie" class="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-leaf-green focus:ring-2 focus:ring-emerald-100 text-xs font-semibold transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Horaires de Consultation</label>
+                            <input type="text" name="schedule" value="{{ profile_form.schedule.value|default:'' }}" placeholder="ex: Lun - Sam : 08h00 - 17h30" class="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-leaf-green focus:ring-2 focus:ring-emerald-100 text-xs font-semibold transition-all">
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Adresse complète du Cabinet</label>
+                        <input type="text" name="clinic_address" value="{{ profile_form.clinic_address.value|default:'' }}" placeholder="ex: Douala, Akwa - Boulevard de la Liberté" class="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-leaf-green focus:ring-2 focus:ring-emerald-100 text-xs font-semibold transition-all">
+                    </div>
+                </div>
+
+                <!-- Biographie & Présentation -->
+                <div class="border-t border-gray-100 pt-3">
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Présentation & Biographie Professionnelle</label>
+                    <textarea name="about" rows="3" placeholder="Présentez votre parcours, vos diplômes et vos approches de soin..." class="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-medical-blue focus:ring-2 focus:ring-blue-100 text-xs font-semibold transition-all custom-scrollbar">{{ profile_form.about.value|default:'' }}</textarea>
+                </div>
+
+                <div class="pt-4 border-t border-gray-100 flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal('modal-profile')" class="px-6 py-3 rounded-2xl font-bold text-xs text-gray-500 hover:bg-gray-100 transition-colors">Annuler</button>
+                    <button type="submit" class="px-8 py-3 rounded-2xl bg-medical-blue hover:bg-blue-700 font-bold text-xs text-white shadow-lg shadow-blue-500/25 transition-all">Enregistrer les Modifications</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= MODAL 2: MOT DE PASSE ================= -->
+    <div id="modal-password" class="hidden fixed inset-0 z-50 overflow-y-auto bg-gray-900/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden border border-gray-100 transition-all transform scale-100">
+            <div class="p-6 bg-gradient-to-r from-purple-600 to-indigo-700 text-white flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-black font-poppins">Changer de Mot de Passe</h3>
+                    <p class="text-xs text-purple-100 mt-0.5">Renforcez la sécurité de votre compte</p>
+                </div>
+                <button type="button" onclick="closeModal('modal-password')" class="text-white/70 hover:text-white bg-white/10 p-2 rounded-full transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <form method="POST" class="p-6 space-y-4">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="change_password">
+                
+                {% for field in password_form %}
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">{{ field.label }}</label>
+                        <input type="password" name="{{ field.name }}" required class="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-purple-600 focus:ring-2 focus:ring-purple-100 text-xs font-semibold transition-all">
+                        {% if field.errors %}
+                            <p class="text-red-500 text-[10px] font-semibold mt-1">{{ field.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <div class="pt-4 border-t border-gray-100 flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal('modal-password')" class="px-6 py-3 rounded-2xl font-bold text-xs text-gray-500 hover:bg-gray-100 transition-colors">Annuler</button>
+                    <button type="submit" class="px-8 py-3 rounded-2xl bg-purple-600 hover:bg-purple-700 font-bold text-xs text-white shadow-lg shadow-purple-500/25 transition-all">Mettre à Jour</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        }
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
+        // Ouvrir automatiquement en cas d'erreur ou d'onglet requis
+        {% if active_tab == 'password' or password_form.errors %}
+            openModal('modal-password');
+        {% elif active_tab == 'profile' and profile_form.errors %}
+            openModal('modal-profile');
+        {% endif %}
+    </script>
+</body>
+</html>

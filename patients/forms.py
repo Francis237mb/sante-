@@ -55,10 +55,7 @@ class PatientProfileForm(forms.ModelForm):
             self.fields['blood_group'].initial = profile.blood_group
 
     def clean_email(self):
-        email = self.cleaned_data.get('email')
-        if CustomUser.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
-            raise forms.ValidationError("Cette adresse email est déjà utilisée.")
-        return email
+        return self.cleaned_data.get('email')
 
     def save(self, commit=True):
         user = super().save(commit=commit)

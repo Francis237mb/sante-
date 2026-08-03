@@ -1,91 +1,392 @@
-{% extends 'core/base.html' %}
-{% load i18n %}
-{% block title %}{% translate "Assistant IA Médical - Fransick" %}{% endblock %}
-{% block content %}
-<section class="py-12 bg-gray-50 flex-grow flex items-center justify-center">
-    <div class="container mx-auto px-4 max-w-3xl flex flex-col h-[75vh]">
-        <!-- Chat Header -->
-        <div class="bg-gradient-to-r from-medical-blue to-medical-dark text-white p-6 rounded-t-3xl shadow flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-xl animate-pulse">✨</div>
-                <div>
-                    <h2 class="font-bold font-poppins text-lg">{% translate "Assistant Médical Fransick" %}</h2>
-                    <p class="text-xs text-blue-100 font-medium">{% translate "IA en ligne - Conseils généraux non médicaux" %}</p>
-                </div>
-            </div>
-            <button onclick="confirm('Effacer la discussion ?') && alert('Discussion réinitialisée.')" class="text-xs bg-white/10 hover:bg-white/20 border border-white/20 px-3 py-1.5 rounded-full transition-colors">
-                {% translate "Effacer" %}
-            </button>
-        </div>
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{% translate "Dr. Fransick IA Médical" %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN with Typography Plugin for Professional Markdown Rendering -->
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <!-- Marked.js CDN for Markdown generation -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'medical-blue': '#14467d',
+                        'medical-dark': '#0b2b50',
+                        'leaf-green': '#15803d',
+                        'leaf-light': '#f1fcf0',
+                    },
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif'],
+                        'sans': ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #f8fafc;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
-        <!-- Chat Area -->
-        <div class="flex-grow bg-white border-l border-r border-gray-100 p-6 overflow-y-auto space-y-4 shadow-sm" id="chat-messages">
-            <!-- Welcome message from AI -->
-            <div class="flex items-start space-x-3 max-w-[80%]">
-                <div class="w-8 h-8 rounded-full bg-medical-blue text-white flex items-center justify-center flex-shrink-0 text-sm">🤖</div>
-                <div class="bg-gray-100 text-gray-800 p-4 rounded-2xl rounded-tl-none text-sm leading-relaxed shadow-sm">
-                    <p>{% translate "Bonjour ! Je suis l'assistant intelligent Fransick. Comment puis-je vous accompagner ou vous conseiller sur vos questions thérapeutiques aujourd'hui ?" %}</p>
-                </div>
-            </div>
-        </div>
+        /* Markdown override inside AI speech bubbles */
+        .prose h3 {
+            color: #14467d !important;
+            font-size: 1.05rem !important;
+            margin-bottom: 0.5rem !important;
+            margin-top: 0.3rem !important;
+        }
+        .prose p {
+            margin-top: 0.35rem !important;
+            margin-bottom: 0.35rem !important;
+        }
+        .prose ul {
+            margin-top: 0.35rem !important;
+            margin-bottom: 0.35rem !important;
+        }
+        .prose li {
+            margin-top: 0.15rem !important;
+            margin-bottom: 0.15rem !important;
+        }
+        .prose hr {
+            margin-top: 0.7rem !important;
+            margin-bottom: 0.7rem !important;
+            border-color: #cbd5e1 !important;
+        }
+    </style>
+</head>
+<body class="bg-[#f8fafc] text-gray-800 font-sans antialiased h-full overflow-hidden select-none">
 
-        <!-- Chat Form -->
-        <div class="bg-white border-t border-gray-100 p-4 rounded-b-3xl shadow-md">
-            <form id="chat-form" class="flex gap-2" onsubmit="event.preventDefault(); sendMessage();">
-                <input type="text" id="chat-input" placeholder="{% translate 'Posez votre question de santé ici...' %}" class="flex-grow px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-medical-blue text-sm" required>
-                <button type="submit" class="bg-medical-blue hover:bg-medical-dark text-white font-semibold px-6 py-3 rounded-xl transition-colors shadow flex items-center justify-center">
-                    <!-- Send Arrow SVG -->
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
-                    </svg>
-                </button>
-            </form>
+    <!-- Toast Notification Popup -->
+    <div id="toast-notification" class="fixed top-6 right-6 z-50 transform -translate-y-16 opacity-0 pointer-events-none transition-all duration-300">
+        <div class="bg-gray-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center space-x-3 border border-gray-800">
+            <span class="text-lg">ℹ️</span>
+            <span id="toast-message" class="text-xs font-bold font-poppins">Message</span>
         </div>
     </div>
-</section>
 
-<script>
-    function sendMessage() {
-        const input = document.getElementById('chat-input');
-        const messages = document.getElementById('chat-messages');
-        const text = input.value.trim();
-        if (!text) return;
+    <!-- App Shell Layout (Sidebar + Main Content) -->
+    <div class="flex h-screen overflow-hidden bg-gray-50/50">
         
-        // Append user message
-        const userMsg = document.createElement('div');
-        userMsg.className = 'flex items-start space-x-3 max-w-[80%] ml-auto justify-end';
-        userMsg.innerHTML = `
-            <div class="bg-medical-blue text-white p-4 rounded-2xl rounded-tr-none text-sm leading-relaxed shadow-sm">
-                <p>${escapeHtml(text)}</p>
-            </div>
-            <div class="w-8 h-8 rounded-full bg-leaf-green text-white flex items-center justify-center flex-shrink-0 text-sm font-bold">U</div>
-        `;
-        messages.appendChild(userMsg);
-        input.value = '';
-        messages.scrollTop = messages.scrollHeight;
-        
-        // Simulate bot typing
-        setTimeout(() => {
-            const botMsg = document.createElement('div');
-            botMsg.className = 'flex items-start space-x-3 max-w-[80%]';
-            botMsg.innerHTML = `
-                <div class="w-8 h-8 rounded-full bg-medical-blue text-white flex items-center justify-center flex-shrink-0 text-sm">🤖</div>
-                <div class="bg-gray-100 text-gray-800 p-4 rounded-2xl rounded-tl-none text-sm leading-relaxed shadow-sm">
-                    <p>{% translate "Ceci est une réponse automatique de simulation. L'assistant IA sera connecté à une API d'intelligence médicale lors de la prochaine étape." %}</p>
+        <!-- ================= SILICON VALLEY MODULAR DESKTOP SIDEBAR ================= -->
+        {% include "patients/sidebar.html" %}
+
+        <!-- ================= SILICON VALLEY FLOATING CURVED BOTTOM NAV (MOBILE) ================= -->
+        {% include "patients/bottom_nav.html" %}
+
+        <!-- ================= MAIN CHAT CONTENT AREA ================= -->
+        <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
+            
+            <!-- Top App Navigation Header (Ultra-Compact & Stunning on Mobile) -->
+            <header class="h-16 sm:h-20 bg-gradient-to-r from-medical-blue via-medical-dark to-slate-900 text-white px-3 sm:px-6 flex items-center justify-between shadow-lg z-30 shrink-0 border-b border-white/10">
+                
+                <!-- Left: Retour Button (Icon-only on mobile, label on PC) -->
+                {% if request.user.role == 'medecin' %}
+                    <a href="{% url 'medecins:dashboard' %}" class="w-9 h-9 sm:w-auto sm:h-auto sm:px-3.5 sm:py-2 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center sm:space-x-1.5 text-white transition-all shadow-xs active:scale-95 text-xs font-bold shrink-0" title="Retour au Tableau de Bord">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                        </svg>
+                        <span class="hidden sm:inline">Retour</span>
+                    </a>
+                {% else %}
+                    <a href="{% url 'patients:dashboard' %}" class="w-9 h-9 sm:w-auto sm:h-auto sm:px-3.5 sm:py-2 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center sm:space-x-1.5 text-white transition-all shadow-xs active:scale-95 text-xs font-bold shrink-0" title="Retour à l'Accueil">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                        </svg>
+                        <span class="hidden sm:inline">Retour</span>
+                    </a>
+                {% endif %}
+
+                <!-- Center: Dr. Fransick IA Branding (Clean & Resizable) -->
+                <div class="flex items-center space-x-2 sm:space-x-3 min-w-0 overflow-hidden px-2">
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-leaf-green flex items-center justify-center text-base sm:text-xl shadow-md border border-white/20 text-white font-bold shrink-0">
+                        🩺
+                    </div>
+                    <div class="min-w-0 overflow-hidden">
+                        <h1 class="text-xs sm:text-base font-extrabold font-poppins text-white truncate tracking-wide">
+                            Dr. Fransick IA
+                        </h1>
+                        <p class="text-[9px] sm:text-xs text-emerald-300 font-semibold flex items-center space-x-1.5 truncate">
+                            <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-400 inline-block animate-ping shrink-0"></span>
+                            <span class="truncate text-slate-200">En ligne 24/7</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Right: Reset Discussion Button (Icon-only on mobile) -->
+                <button onclick="clearDiscussion()" class="w-9 h-9 sm:w-auto sm:h-auto sm:px-3.5 sm:py-2 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-400/40 text-red-200 flex items-center justify-center sm:space-x-1.5 transition-all active:scale-95 shadow-md shrink-0" title="Réinitialiser la discussion">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    <span class="hidden sm:inline text-xs font-extrabold">Réinitialiser</span>
+                </button>
+            </header>
+
+            <!-- Main Fullscreen Chat Area (With smooth scroll padding so messages stay above input) -->
+            <main class="flex-1 bg-gradient-to-b from-slate-50 via-white to-slate-50/50 overflow-y-auto p-3 sm:p-6 space-y-4 sm:space-y-5 custom-scrollbar" id="chat-messages">
+                
+                <!-- Welcome Message from AI -->
+                <div class="flex items-start space-x-2.5 sm:space-x-3 max-w-[92%] sm:max-w-[82%]">
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-medical-blue to-medical-dark text-white flex items-center justify-center flex-shrink-0 text-base sm:text-lg shadow-md border border-white/20 font-bold">
+                        🩺
+                    </div>
+                    <div class="bg-white text-gray-800 p-4 sm:p-5 rounded-3xl rounded-tl-none text-xs sm:text-sm leading-relaxed shadow-md border border-gray-200/80 space-y-2">
+                        <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+                            <span class="font-extrabold text-medical-blue font-poppins text-xs sm:text-sm flex items-center gap-1.5">
+                                <span>Dr. Fransick IA</span>
+                                <span class="text-[9px] px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded font-extrabold">IA 24/7</span>
+                            </span>
+                            <span class="text-[10px] text-gray-400 font-medium">En ligne</span>
+                        </div>
+                        <div class="prose prose-sm prose-slate max-w-none text-gray-700 font-medium">
+                            <p class="text-gray-800 font-semibold">Bonjour et bienvenue ! Je suis votre assistant médical d'excellence 🩺</p>
+                            <p>Je réponds en temps réel à <strong>toutes vos questions de santé et du quotidien</strong> : analyse de symptômes, posologies des traitements, conseils d'hygiène de vie et orientation personnalisée.</p>
+                            <p class="text-[11px] bg-emerald-50 text-emerald-800 p-2 sm:p-2.5 rounded-xl border border-emerald-200 mt-2 font-medium flex items-center gap-2">
+                                <span class="shrink-0">🛡️</span>
+                                <span><strong>Sécurité garantie :</strong> Mes conseils complètent mais ne remplacent nullement une consultation médicale chez l'un de nos praticiens certifiés.</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Render Past Persistent History with Markdown parser -->
+                {% for msg in chat_history %}
+                    {% if msg.sender == 'user' %}
+                        <div class="flex items-start space-x-2 sm:space-x-3 max-w-[90%] sm:max-w-[80%] ml-auto justify-end">
+                            <div class="bg-gradient-to-r from-medical-blue to-medical-dark text-white p-3.5 sm:p-4 rounded-3xl rounded-tr-none text-xs sm:text-sm leading-relaxed shadow-md font-medium border border-blue-900/30">
+                                <p>{{ msg.content }}</p>
+                            </div>
+                            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-2xl bg-gradient-to-br from-leaf-green to-emerald-700 text-white flex items-center justify-center flex-shrink-0 text-xs sm:text-sm font-extrabold shadow-md">
+                                {{ user.username|slice:":1"|upper|default:"U" }}
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="flex items-start space-x-2.5 sm:space-x-3 max-w-[92%] sm:max-w-[82%]">
+                            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-medical-blue to-medical-dark text-white flex items-center justify-center flex-shrink-0 text-base sm:text-lg shadow-md border border-white/20 font-bold">
+                                🩺
+                            </div>
+                            <div class="bg-white text-gray-800 p-4 sm:p-5 rounded-3xl rounded-tl-none text-xs sm:text-sm leading-relaxed shadow-md border border-gray-200/80">
+                                <div class="flex items-center justify-between border-b border-gray-100 pb-2 mb-2">
+                                    <span class="font-extrabold text-medical-blue font-poppins text-xs">Dr. Fransick IA</span>
+                                    <span class="text-[10px] text-gray-400 font-medium">{{ msg.timestamp|date:"H:i" }}</span>
+                                </div>
+                                <div class="ai-history-msg prose prose-sm prose-slate max-w-none text-gray-800 font-medium" data-raw="{{ msg.content }}">
+                                    {{ msg.content }}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+
+            </main>
+
+            <!-- Bottom Input Form Bar (Harmonized with bottom_nav on mobile via pb-[94px]) -->
+            <footer class="bg-white/95 backdrop-blur-xl border-t border-gray-200/90 px-3 sm:px-6 pt-3 pb-[94px] lg:py-4 shadow-2xl shrink-0 z-40 relative">
+                <form id="chat-form" class="max-w-4xl mx-auto flex items-center gap-2 sm:gap-3" onsubmit="event.preventDefault(); sendMessage();">
+                    {% csrf_token %}
+                    <div class="flex-grow relative flex items-center min-w-0">
+                        <input type="text" id="chat-input" placeholder="{% translate 'Poser une question médicale...' %}" class="w-full pl-3.5 pr-8 sm:pl-4 sm:pr-10 py-3 sm:py-3.5 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-medical-blue focus:border-transparent text-xs sm:text-sm text-gray-800 placeholder-gray-400 font-medium transition-all bg-slate-50 shadow-inner" required autocomplete="off">
+                        <span class="absolute right-3 text-gray-400 hover:text-medical-blue transition-colors text-xs sm:text-base cursor-pointer" title="Assistant IA 24/7">✨</span>
+                    </div>
+                    <button type="submit" id="btn-send" class="bg-gradient-to-r from-medical-blue to-medical-dark hover:from-medical-dark hover:to-medical-blue text-white font-extrabold w-11 h-11 sm:w-auto sm:h-auto sm:px-6 sm:py-3.5 rounded-2xl transition-all shadow-md shadow-medical-blue/20 active:scale-95 flex items-center justify-center sm:space-x-2 text-xs sm:text-sm uppercase tracking-wider shrink-0 cursor-pointer" title="Envoyer">
+                        <span class="hidden sm:inline font-extrabold">Envoyer</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.3" stroke="currentColor" class="w-5 h-5 shrink-0">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+                        </svg>
+                    </button>
+                </form>
+            </footer>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT CHAT ENGINE WITH MARKDOWN RENDERER -->
+    <script>
+        const apiChatUrl = "{% url 'ia_assistant:api_chat' %}";
+        const apiClearUrl = "{% url 'ia_assistant:api_clear' %}";
+
+        function scrollToBottom() {
+            const messages = document.getElementById('chat-messages');
+            if (messages) {
+                messages.scrollTo({ top: messages.scrollHeight, behavior: 'smooth' });
+            }
+        }
+
+        // Configuration du parseur Markdown (Marked.js)
+        if (typeof marked !== 'undefined') {
+            marked.setOptions({
+                breaks: true,
+                gfm: true
+            });
+        }
+
+        function renderMarkdown(text) {
+            if (typeof marked !== 'undefined') {
+                return marked.parse(text);
+            }
+            return escapeHtml(text);
+        }
+
+        window.addEventListener('load', () => {
+            // Convertir l'historique brut en beau HTML Markdown formaté
+            document.querySelectorAll('.ai-history-msg').forEach(el => {
+                const rawText = el.getAttribute('data-raw') || el.innerText;
+                if (rawText) {
+                    el.innerHTML = renderMarkdown(rawText);
+                }
+            });
+            scrollToBottom();
+        });
+
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const messages = document.getElementById('chat-messages');
+            const btnSend = document.getElementById('btn-send');
+            const text = input.value.trim();
+            if (!text) return;
+
+            // 1. Ajouter le message utilisateur
+            const userMsg = document.createElement('div');
+            userMsg.className = 'flex items-start space-x-2 sm:space-x-3 max-w-[90%] sm:max-w-[80%] ml-auto justify-end';
+            userMsg.innerHTML = `
+                <div class="bg-gradient-to-r from-medical-blue to-medical-dark text-white p-3.5 sm:p-4 rounded-3xl rounded-tr-none text-xs sm:text-sm leading-relaxed shadow-md font-medium border border-blue-900/30">
+                    <p>${escapeHtml(text)}</p>
+                </div>
+                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-2xl bg-gradient-to-br from-leaf-green to-emerald-700 text-white flex items-center justify-center flex-shrink-0 text-xs sm:text-sm font-extrabold shadow-md">
+                    {{ user.username|slice:":1"|upper|default:"U" }}
                 </div>
             `;
-            messages.appendChild(botMsg);
-            messages.scrollTop = messages.scrollHeight;
-        }, 1000);
-    }
-    
-    function escapeHtml(text) {
-        return text
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
-</script>
-{% endblock %}
+            messages.appendChild(userMsg);
+            input.value = '';
+            scrollToBottom();
+
+            // 2. Bulle de chargement "Analyse clinique en cours..."
+            const typingId = 'typing-' + Date.now();
+            const typingMsg = document.createElement('div');
+            typingMsg.id = typingId;
+            typingMsg.className = 'flex items-start space-x-2.5 sm:space-x-3 max-w-[92%] sm:max-w-[82%]';
+            typingMsg.innerHTML = `
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-medical-blue to-medical-dark text-white flex items-center justify-center flex-shrink-0 text-base sm:text-lg shadow-md border border-white/20 font-bold animate-pulse">🩺</div>
+                <div class="bg-white text-gray-600 p-3.5 sm:p-4 rounded-3xl rounded-tl-none text-xs sm:text-sm leading-relaxed shadow-md border border-gray-200/80 flex items-center space-x-2.5">
+                    <span class="font-extrabold text-medical-blue font-poppins text-xs">Analyse en cours...</span>
+                    <span class="flex space-x-1">
+                        <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-emerald-500 rounded-full animate-bounce"></span>
+                        <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-medical-blue rounded-full animate-bounce [animation-delay:0.2s]"></span>
+                        <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-purple-500 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+                    </span>
+                </div>
+            `;
+            messages.appendChild(typingMsg);
+            scrollToBottom();
+            btnSend.disabled = true;
+            btnSend.classList.add('opacity-50', 'cursor-not-allowed');
+
+            // 3. Requete AJAX vers l'API Backend Django
+            fetch(apiChatUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({ message: text })
+            })
+            .then(res => res.json())
+            .then(data => {
+                const typingEl = document.getElementById(typingId);
+                if (typingEl) typingEl.remove();
+
+                if (data.status === 'success') {
+                    const aiMsg = document.createElement('div');
+                    aiMsg.className = 'flex items-start space-x-2.5 sm:space-x-3 max-w-[92%] sm:max-w-[82%]';
+                    aiMsg.innerHTML = `
+                        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-medical-blue to-medical-dark text-white flex items-center justify-center flex-shrink-0 text-base sm:text-lg shadow-md border border-white/20 font-bold">🩺</div>
+                        <div class="bg-white text-gray-800 p-4 sm:p-5 rounded-3xl rounded-tl-none text-xs sm:text-sm leading-relaxed shadow-md border border-gray-200/80">
+                            <div class="flex items-center justify-between border-b border-gray-100 pb-2 mb-2">
+                                <span class="font-extrabold text-medical-blue font-poppins text-xs flex items-center gap-1">
+                                    <span>Dr. Fransick IA</span>
+                                    <span class="text-[9px] px-1 py-0.2 bg-emerald-50 text-emerald-700 rounded font-bold">Vérifié</span>
+                                </span>
+                                <span class="text-[10px] text-gray-400 font-medium">À l'instant</span>
+                            </div>
+                            <div class="prose prose-sm prose-slate max-w-none text-gray-800 font-medium">
+                                ${renderMarkdown(data.reply)}
+                            </div>
+                        </div>
+                    `;
+                    messages.appendChild(aiMsg);
+                } else {
+                    showToast('Erreur : ' + (data.message || 'Impossible de joindre l\'IA'));
+                }
+                scrollToBottom();
+                btnSend.disabled = false;
+                btnSend.classList.remove('opacity-50', 'cursor-not-allowed');
+                document.getElementById('chat-input').focus();
+            })
+            .catch(err => {
+                const typingEl = document.getElementById(typingId);
+                if (typingEl) typingEl.remove();
+                showToast('Erreur réseau. Veuillez réessayer.');
+                btnSend.disabled = false;
+                btnSend.classList.remove('opacity-50', 'cursor-not-allowed');
+            });
+        }
+
+        function clearDiscussion() {
+            if (!confirm('Voulez-vous vraiment effacer l\'historique de discussion avec le Dr. Fransick IA ?')) return;
+
+            fetch(apiClearUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    window.location.reload();
+                }
+            });
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast-notification');
+            const toastMsg = document.getElementById('toast-message');
+            if (toast && toastMsg) {
+                toastMsg.innerText = message;
+                toast.classList.remove('-translate-y-16', 'opacity-0', 'pointer-events-none');
+                toast.classList.add('translate-y-4', 'opacity-100');
+                
+                setTimeout(() => {
+                    toast.classList.remove('translate-y-4', 'opacity-100');
+                    toast.classList.add('-translate-y-16', 'opacity-0', 'pointer-events-none');
+                }, 3500);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -11,6 +11,7 @@ class RendezVous(models.Model):
     STATUS_CHOICES = [
         ('confirmed', 'Confirmé'),
         ('pending', 'En attente'),
+        ('in_progress', 'En cours'),
         ('completed', 'Terminé'),
         ('cancelled', 'Annulé'),
     ]
@@ -36,6 +37,8 @@ class RendezVous(models.Model):
     reason = models.CharField(max_length=255, verbose_name="Motif de la consultation")
     notes = models.TextField(blank=True, null=True, verbose_name="Symptômes / Remarques du patient")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='confirmed')
+    in_waiting_room = models.BooleanField(default=False, verbose_name="Dans la salle d'attente")
+    room_name = models.CharField(max_length=100, blank=True, null=True, verbose_name="Nom du salon de visio")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
