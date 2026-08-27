@@ -6,86 +6,88 @@
 {% url 'patients:pharmacies' as pharma_url %}
 {% url 'patients:settings' as settings_url %}
 
-<!-- ================= SILICON VALLEY MODULAR DESKTOP SIDEBAR ================= -->
-<aside id="desktop-modular-sidebar" style="position: sticky; top: 1rem; align-self: flex-start; max-height: calc(100vh - 2rem); z-index: 40;" class="hidden lg:flex flex-col w-[270px] bg-white/85 backdrop-blur-2xl border border-white/80 flex-shrink-0 sticky top-4 my-4 ml-4 h-[calc(100vh-2rem)] rounded-[2.5rem] shadow-2xl p-5 select-none justify-between transition-all duration-300">
-    <div class="overflow-y-auto custom-scrollbar pr-1">
-        <!-- Red, Yellow, Green macOS Control Dots -->
-        <div class="flex items-center space-x-1.5 mb-5 pl-1.5">
-            <span class="w-3 h-3 rounded-full bg-[#ff5f56] inline-block shadow-sm"></span>
-            <span class="w-3 h-3 rounded-full bg-[#ffbd2e] inline-block shadow-sm"></span>
-            <span class="w-3 h-3 rounded-full bg-[#27c93f] inline-block shadow-sm"></span>
-        </div>
-
+<!-- ================= ICONLY DESKTOP SIDEBAR (PATIENT) ================= -->
+<style>
+@media (max-width: 1023px) {
+    #desktop-modular-sidebar-patient { display: none !important; width: 0 !important; height: 0 !important; overflow: hidden !important; border: none !important; padding: 0 !important; margin: 0 !important; }
+}
+@media (min-width: 1024px) {
+    #desktop-modular-sidebar-patient { display: flex !important; width: 270px !important; }
+}
+#desktop-modular-sidebar-patient svg { width: 18px; height: 18px; max-width: 18px; max-height: 18px; }
+</style>
+<aside id="desktop-modular-sidebar-patient" style="position: sticky; top: 1.25rem; align-self: flex-start; max-height: calc(100vh - 2.5rem); z-index: 40;" class="hidden lg:flex flex-col w-[270px] bg-white border border-gray-200/80 flex-shrink-0 sticky top-5 my-5 ml-5 h-[calc(100vh-2.5rem)] rounded-[2.5rem] shadow-sm p-6 select-none justify-between transition-all duration-300 font-poppins">
+    <div class="overflow-y-auto custom-scrollbar pr-1 space-y-6">
+        
         <!-- User Profile Info -->
-        <div class="flex items-center space-x-3.5 mb-6 pl-1.5 pb-5 border-b border-gray-100/60">
+        <div class="flex items-center space-x-3.5 pl-1 pb-5 border-b border-gray-100">
             {% if user.profile_picture %}
-                <img class="h-11 w-11 rounded-2xl object-cover ring-2 ring-emerald-500/30 shadow-md" src="{{ user.profile_picture.url }}" alt="{{ user.username }}">
+                <img class="h-11 w-11 rounded-2xl object-cover ring-2 ring-leaf-green/30 shadow-xs" src="{{ user.profile_picture.url }}" alt="{{ user.username }}">
             {% else %}
-                <div class="h-11 w-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-leaf-green text-white flex items-center justify-center font-bold font-poppins text-base shadow-md shadow-emerald-500/20">{{ user.username|slice:":2"|upper }}</div>
+                <div class="h-11 w-11 rounded-2xl bg-leaf-light text-leaf-green flex items-center justify-center font-extrabold text-base border border-leaf-green/20">{{ user.username|slice:":2"|upper }}</div>
             {% endif %}
             <div class="overflow-hidden">
-                <p class="text-[9px] text-emerald-600 font-black uppercase tracking-wider">Connecté 👋</p>
-                <h4 class="text-xs font-black font-poppins text-gray-800 truncate">
+                <p class="text-[9px] text-leaf-green font-black uppercase tracking-wider flex items-center space-x-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-leaf-green inline-block"></span>
+                    <span>Connecté</span>
+                </p>
+                <h4 class="text-xs font-black text-gray-900 truncate mt-0.5">
                     {% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}
                 </h4>
             </div>
         </div>
 
-        <!-- Section: Navigation Principale (Avec Assistant IA au Milieu) -->
+        <!-- Section: Navigation Principale -->
         <div class="space-y-1.5">
-            <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest pl-2.5 block mb-2">Menu Santé</span>
+            <span class="text-[9px] font-extrabold text-gray-400 uppercase tracking-widest pl-3 block mb-2">Menu Santé</span>
             
             <!-- 1. Accueil / Feed -->
-            <a href="{{ dash_url }}" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-2xl font-bold text-xs transition-all {% if request.path == dash_url %}bg-gradient-to-r from-medical-blue to-blue-600 text-white shadow-lg shadow-blue-500/25 font-black{% else %}text-gray-600 hover:text-medical-blue hover:bg-blue-50/50{% endif %}">
-                <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <a href="{{ dash_url }}" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl font-bold text-xs transition-all duration-200 {% if request.path == dash_url %}bg-leaf-green text-white shadow-[0_8px_20px_rgba(109,190,69,0.3)] font-black{% else %}text-gray-500 hover:text-gray-900 hover:bg-gray-100/80{% endif %}">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1" />
                 </svg>
                 <span>{% translate "Accueil / Feed" %}</span>
             </a>
 
             <!-- 2. Mon Suivi (RDV) -->
-            <a href="{{ suivi_url }}" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-2xl font-bold text-xs transition-all {% if request.path == suivi_url %}bg-gradient-to-r from-emerald-600 to-leaf-green text-white shadow-lg shadow-emerald-500/25 font-black{% else %}text-gray-600 hover:text-leaf-green hover:bg-emerald-50/50{% endif %}">
-                <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <a href="{{ suivi_url }}" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl font-bold text-xs transition-all duration-200 {% if request.path == suivi_url %}bg-leaf-green text-white shadow-[0_8px_20px_rgba(109,190,69,0.3)] font-black{% else %}text-gray-500 hover:text-gray-900 hover:bg-gray-100/80{% endif %}">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 <span>{% translate "Mon Suivi (RDV)" %}</span>
             </a>
 
-            <!-- 3. AU MILIEU : ASSISTANT IA MÉDICAL (Design Silicon Valley Premium) -->
-            <div class="py-1">
-                <a href="{{ chat_url }}" class="relative group block p-3 rounded-2xl transition-all duration-300 transform hover:scale-[1.03] active:scale-[0.98] {% if request.path == chat_url %}bg-slate-900 border-2 border-cyan-400/80 shadow-xl shadow-cyan-500/30{% else %}bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/40 shadow-lg shadow-indigo-500/20 hover:border-cyan-400/60 hover:shadow-cyan-500/25{% endif %}">
-                    <div class="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-cyan-400 animate-ping"></div>
-                    <div class="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-cyan-400 border-2 border-slate-900"></div>
-                    
+            <!-- 3. AU MILIEU : ASSISTANT IA MÉDICAL (Iconly Green Card) -->
+            <div class="py-1.5">
+                <a href="{{ chat_url }}" class="group block p-3.5 rounded-2xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] {% if request.path == chat_url %}bg-leaf-green text-white shadow-[0_8px_25px_rgba(109,190,69,0.4)]{% else %}bg-leaf-light/50 hover:bg-leaf-light border border-leaf-green/30 text-gray-900 shadow-xs{% endif %}">
                     <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 text-white flex items-center justify-center shadow-md shadow-cyan-500/30 flex-shrink-0 group-hover:rotate-12 transition-transform duration-300">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+                        <div class="w-8 h-8 rounded-xl {% if request.path == chat_url %}bg-white text-leaf-green{% else %}bg-leaf-green text-white{% endif %} flex items-center justify-center shadow-xs flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.3" stroke="currentColor" class="w-4 h-4">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 21l-.813-5.096L3 15l5.187-.813L9 9l.813 5.187L15 15l-5.187.813z" />
                             </svg>
                         </div>
                         <div>
                             <div class="flex items-center space-x-1.5">
-                                <span class="text-xs font-black text-white font-poppins tracking-tight">Assistant IA</span>
-                                <span class="text-[8px] bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 font-black px-1.5 py-0.5 rounded-full uppercase">24/7</span>
+                                <span class="text-xs font-black {% if request.path == chat_url %}text-white{% else %}text-gray-900{% endif %} tracking-tight">Assistant IA</span>
+                                <span class="text-[8px] bg-leaf-green text-white font-extrabold px-1.5 py-0.5 rounded-md uppercase leading-none">24/7</span>
                             </div>
-                            <p class="text-[10px] text-cyan-200/80 font-semibold mt-0.5">Consultation en direct</p>
+                            <p class="text-[10px] {% if request.path == chat_url %}text-white/80{% else %}text-leaf-green{% endif %} font-bold mt-0.5">Consultation rapide</p>
                         </div>
                     </div>
                 </a>
             </div>
 
             <!-- 4. Vidéos Conseils (TikTok) -->
-            <a href="{{ videos_url }}" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-2xl font-bold text-xs transition-all {% if request.path == videos_url %}bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/25 font-black{% else %}text-gray-600 hover:text-purple-600 hover:bg-purple-50/50{% endif %}">
-                <svg class="w-4 h-4 text-purple-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <a href="{{ videos_url }}" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl font-bold text-xs transition-all duration-200 {% if request.path == videos_url %}bg-leaf-green text-white shadow-[0_8px_20px_rgba(109,190,69,0.3)] font-black{% else %}text-gray-500 hover:text-gray-900 hover:bg-gray-100/80{% endif %}">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    <circle cx="9" cy="12" r="2" fill="currentColor" />
                 </svg>
                 <span>{% translate "Vidéos Conseils" %}</span>
             </a>
 
             <!-- 5. Pharmacies & Médicaments -->
-            <a href="{{ pharma_url }}" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-2xl font-bold text-xs transition-all {% if request.path == pharma_url %}bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-teal-500/25 font-black{% else %}text-gray-600 hover:text-teal-600 hover:bg-teal-50/50{% endif %}">
-                <svg class="w-4 h-4 text-teal-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <a href="{{ pharma_url }}" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl font-bold text-xs transition-all duration-200 {% if request.path == pharma_url %}bg-leaf-green text-white shadow-[0_8px_20px_rgba(109,190,69,0.3)] font-black{% else %}text-gray-500 hover:text-gray-900 hover:bg-gray-100/80{% endif %}">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                 </svg>
                 <span>{% translate "Pharmacies & Médicaments" %}</span>
@@ -94,10 +96,10 @@
     </div>
 
     <!-- Settings / Raccourcis & Bouton d'Action au Bas -->
-    <div class="space-y-3 pt-4 border-t border-gray-100/60">
+    <div class="space-y-4 pt-4 border-t border-gray-100">
         <!-- Raccourcis Horizontaux -->
-        <div class="flex items-center justify-around bg-gray-50 border border-gray-100/80 rounded-2xl p-1.5 select-none">
-            <a href="{{ settings_url }}" class="p-2 text-gray-500 hover:text-emerald-600 hover:bg-white rounded-xl transition-all shadow-xs" title="Paramètres">
+        <div class="flex items-center justify-around bg-gray-50/80 border border-gray-200/60 rounded-2xl p-1.5 select-none">
+            <a href="{{ settings_url }}" class="p-2 text-gray-500 hover:text-leaf-green hover:bg-white rounded-xl transition-all shadow-xs" title="Paramètres">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             </a>
             <form action="{% url 'accounts:logout' %}" method="post" class="inline">
@@ -109,16 +111,37 @@
         </div>
 
         <!-- Action Card: Trouver un médecin -->
-        <div class="bg-gradient-to-r from-emerald-800 via-emerald-700 to-leaf-green border border-white/15 rounded-3xl p-3.5 text-center shadow-lg text-white flex flex-col items-center space-y-2.5 relative overflow-hidden group">
+        <div class="bg-leaf-green border border-leaf-green/40 rounded-3xl p-4 text-center shadow-[0_10px_25px_rgba(109,190,69,0.25)] text-white flex flex-col items-center space-y-2.5 relative overflow-hidden group">
             <div class="absolute -top-8 -right-8 w-20 h-20 bg-white/10 rounded-full blur-xl pointer-events-none group-hover:scale-150 transition-transform duration-500"></div>
             
-            <button onclick="if(typeof openSearchMedecinsModal === 'function') { openSearchMedecinsModal(); } else { window.location.href='{{ dash_url }}'; }" class="w-10 h-10 rounded-full bg-white text-emerald-900 flex items-center justify-center font-black text-lg shadow-md transition-transform active:scale-95 group-hover:scale-110">
-                +
+            <button onclick="if(typeof openSearchMedecinsModal === 'function') { openSearchMedecinsModal(); } else { window.location.href='{{ dash_url }}'; }" class="w-10 h-10 rounded-full bg-white text-leaf-green flex items-center justify-center shadow-md transition-transform active:scale-95 group-hover:scale-110">
+                <svg class="w-5 h-5 text-leaf-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
             </button>
             <div>
-                <p class="text-[11px] font-black text-white font-poppins tracking-wide">Trouver un médecin</p>
-                <span class="text-[9px] text-emerald-100 font-semibold">Consulter la liste active</span>
+                <p class="text-[11px] font-black text-white tracking-wide">Trouver un médecin</p>
+                <span class="text-[9px] text-white/85 font-bold block mt-0.5">Rechercher un spécialiste</span>
             </div>
         </div>
     </div>
 </aside>
+
+<!-- ================= MOTEUR DE TRADUCTION INTÉGRALE FRANSICK ================= -->
+<div id="google_translate_element" style="display:none;"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+        pageLanguage: 'fr',
+        includedLanguages: 'fr,en,es,ar,de,it,pt,zh-CN',
+        autoDisplay: false
+    }, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<style>
+/* Masquage complet de l'interface technique Google pour conserver l'esthétique premium Fransick Santé */
+#google_translate_element { display: none !important; }
+.goog-te-banner-frame, .goog-te-balloon-frame { display: none !important; }
+.goog-tooltip { display: none !important; }
+body { top: 0px !important; position: static !important; }
+.goog-text-highlight { background: transparent !important; box-shadow: none !important; border: none !important; }
+</style>

@@ -1,0 +1,197 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr" class="bg-[#f0f2f5] font-sans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ site_appearance.app_name }} - Administration{% endblock %}</title>
+    
+    {% if site_appearance.favicon %}
+        <link rel="icon" type="image/x-icon" href="{{ site_appearance.favicon.url }}">
+    {% endif %}
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '{{ site_appearance.primary_color|default:"#1B5FA8" }}',
+                        secondary: '{{ site_appearance.secondary_color|default:"#6DBE45" }}',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Poppins', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; }
+        .active-link { background-color: rgba(27, 95, 168, 0.1); color: var(--primary-color, #1B5FA8); font-weight: 600; }
+        .sidebar-link { transition: all 0.2s ease-in-out; }
+        .sidebar-link:hover { background-color: rgba(0,0,0,0.03); }
+        
+        /* Modals */
+        [x-cloak] { display: none !important; }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="text-slate-800 antialiased h-screen flex overflow-hidden bg-[#f3f5f9]">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-slate-100 h-full flex flex-col justify-between hidden md:flex shrink-0 shadow-sm z-20">
+        <div class="overflow-y-auto">
+            <!-- Logo -->
+            <div class="p-6 flex items-center space-x-3">
+                {% if site_appearance.logo %}
+                    <img src="{{ site_appearance.logo.url }}" alt="{{ site_appearance.app_name }}" class="h-8 object-contain">
+                {% else %}
+                    <div class="font-bold text-2xl tracking-tight text-primary font-heading">{{ site_appearance.app_name }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Profile Info -->
+            <div class="px-6 py-4 flex flex-col items-center border-b border-slate-50">
+                {% if user.profile_picture %}
+                    <img src="{{ user.profile_picture.url }}" class="w-16 h-16 rounded-full object-cover shadow-sm mb-3 border-2 border-primary">
+                {% else %}
+                    <div class="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center font-bold text-2xl mb-3 shadow-sm border-2 border-primary/20">{{ user.username|slice:":2"|upper }}</div>
+                {% endif %}
+                <h3 class="font-semibold text-slate-800 text-sm font-heading">{{ user.get_full_name|default:user.username }}</h3>
+                <span class="text-xs text-slate-400 font-medium bg-slate-100 px-2 py-0.5 rounded-full mt-1">Administrateur</span>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="p-4 space-y-1">
+                <a href="{% url 'administration:dashboard' %}" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-sm sidebar-link {% if request.path == '/administration/' %}active-link{% else %}text-slate-500 font-medium{% endif %}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    <span>Vue d'ensemble</span>
+                </a>
+                
+                <div class="pt-4 pb-1">
+                    <p class="px-4 text-[10px] font-bold uppercase tracking-wider text-slate-400">Gestion</p>
+                </div>
+                
+                <a href="{% url 'administration:doctor_requests' %}" class="flex items-center justify-between px-4 py-3 rounded-xl text-sm sidebar-link {% if '/administration/requests/doctors/' in request.path %}active-link{% else %}text-slate-500 font-medium{% endif %}">
+                    <div class="flex items-center space-x-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                        <span>Requêtes Médecins</span>
+                    </div>
+                </a>
+                
+                <a href="{% url 'administration:pharmacy_requests' %}" class="flex items-center justify-between px-4 py-3 rounded-xl text-sm sidebar-link {% if '/administration/requests/pharmacies/' in request.path %}active-link{% else %}text-slate-500 font-medium{% endif %}">
+                    <div class="flex items-center space-x-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                        <span>Requêtes Pharmacies</span>
+                    </div>
+                </a>
+                
+                <a href="{% url 'administration:users_list' %}" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-sm sidebar-link {% if '/administration/users/' in request.path %}active-link{% else %}text-slate-500 font-medium{% endif %}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <span>Utilisateurs</span>
+                </a>
+                
+                <a href="{% url 'administration:report_list' %}" class="flex items-center justify-between px-4 py-3 rounded-xl text-sm sidebar-link {% if '/administration/reports/' in request.path %}active-link{% else %}text-slate-500 font-medium{% endif %}">
+                    <div class="flex items-center space-x-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        <span>Signalements</span>
+                    </div>
+                </a>
+
+                <div class="pt-4 pb-1">
+                    <p class="px-4 text-[10px] font-bold uppercase tracking-wider text-slate-400">Système</p>
+                </div>
+                
+                <a href="{% url 'administration:analytics' %}" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-sm sidebar-link {% if '/administration/analytics/' in request.path %}active-link{% else %}text-slate-500 font-medium{% endif %}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    <span>Analytiques</span>
+                </a>
+                
+                <a href="{% url 'administration:appearance' %}" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-sm sidebar-link {% if '/administration/appearance/' in request.path %}active-link{% else %}text-slate-500 font-medium{% endif %}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
+                    <span>Apparence</span>
+                </a>
+                
+                <a href="{% url 'administration:static_pages' %}" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-sm sidebar-link {% if '/administration/static-pages/' in request.path %}active-link{% else %}text-slate-500 font-medium{% endif %}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <span>Pages Statiques</span>
+                </a>
+
+                <a href="{% url 'administration:activity_logs' %}" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-sm sidebar-link {% if '/administration/logs/' in request.path %}active-link{% else %}text-slate-500 font-medium{% endif %}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Journal d'activité</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Bottom Actions -->
+        <div class="p-4 border-t border-slate-100">
+            <a href="{% url 'administration:settings' %}" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-sm sidebar-link {% if '/administration/settings/' in request.path %}active-link{% else %}text-slate-500 font-medium{% endif %}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <span>Paramètres compte</span>
+            </a>
+            
+            <form action="{% url 'accounts:logout' %}" method="post" class="mt-2" 
+                  @submit.prevent="$dispatch('open-modal', {
+                      title: 'Déconnexion',
+                      message: 'Voulez-vous vraiment vous déconnecter ?',
+                      actionUrl: '{% url 'accounts:logout' %}',
+                      type: 'danger',
+                      confirmText: 'Se déconnecter'
+                  })">
+                {% csrf_token %}
+                <button type="submit" class="w-full py-3 flex items-center px-4 space-x-3 text-slate-500 hover:text-red-600 font-medium text-sm transition-colors rounded-xl sidebar-link hover:bg-red-50">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    <span>Déconnexion</span>
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative bg-[#f9fafc]">
+        <!-- Topbar -->
+        <header class="h-20 px-8 flex items-center justify-between shrink-0 border-b border-slate-200 bg-white z-10 shadow-sm">
+            <h1 class="text-2xl font-bold tracking-tight text-slate-800 font-heading">{% block header_title %}Dashboard{% endblock %}</h1>
+            <div class="relative w-72 hidden md:block">
+                <input type="text" placeholder="Rechercher..." class="w-full bg-slate-100 border-none rounded-full py-2.5 pl-11 pr-4 text-sm focus:ring-2 focus:ring-primary/20 outline-none text-slate-600 transition-shadow">
+                <svg class="w-4 h-4 text-slate-400 absolute left-4 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+        </header>
+
+        <!-- Content scrollable area -->
+        <div class="flex-1 overflow-auto px-8 pb-12 pt-8">
+            <!-- Messages / Alerts -->
+            {% if messages %}
+            <div class="mb-6 space-y-3">
+                {% for message in messages %}
+                <div class="px-5 py-4 rounded-xl text-sm font-medium shadow-sm {% if message.tags == 'error' %}bg-white border-l-4 border-red-500 text-slate-700{% elif message.tags == 'success' %}bg-white border-l-4 border-secondary text-slate-700{% else %}bg-white border-l-4 border-primary text-slate-700{% endif %} flex justify-between items-center" x-data="{ show: true }" x-show="show">
+                    <div class="flex items-center space-x-3">
+                        {% if message.tags == 'success' %}
+                            <svg class="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        {% elif message.tags == 'error' %}
+                            <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        {% endif %}
+                        <span>{{ message }}</span>
+                    </div>
+                    <button @click="show = false" class="text-slate-400 hover:text-slate-600">&times;</button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    {% include 'components/modal.html' %}
+    {% block extra_body %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,70 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Mes Signalements - {{ site_appearance.app_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-12">
+    <div class="flex justify-between items-end mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800 font-heading">Mes Signalements</h1>
+            <p class="text-slate-500 mt-1">Suivez l'état de vos demandes d'assistance.</p>
+        </div>
+        <a href="{% url 'core:submit_report' %}" class="bg-primary hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-xl shadow-sm transition-colors text-sm flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            Nouveau signalement
+        </a>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <ul class="divide-y divide-slate-100">
+            {% for report in reports %}
+            <li class="p-6">
+                <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="text-xs font-bold px-2.5 py-1 rounded-md bg-slate-100 text-slate-600">{{ report.get_report_type_display }}</span>
+                            {% if report.status == 'new' %}
+                                <span class="text-xs font-bold px-2.5 py-1 rounded-md bg-blue-50 text-blue-600">Nouveau</span>
+                            {% elif report.status == 'in_progress' %}
+                                <span class="text-xs font-bold px-2.5 py-1 rounded-md bg-orange-50 text-orange-600">En cours</span>
+                            {% elif report.status == 'resolved' %}
+                                <span class="text-xs font-bold px-2.5 py-1 rounded-md bg-green-50 text-green-600">Résolu</span>
+                            {% endif %}
+                            <span class="text-xs font-medium text-slate-400">{{ report.created_at|date:"d M Y - H:i" }}</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800">{{ report.title }}</h3>
+                        <p class="text-sm text-slate-600 mt-2 whitespace-pre-wrap">{{ report.description }}</p>
+                        
+                        {% if report.attachment %}
+                            <div class="mt-4">
+                                <a href="{{ report.attachment.url }}" target="_blank" class="inline-flex items-center text-sm font-medium text-primary hover:underline">
+                                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                                    Voir la pièce jointe
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if report.admin_response %}
+                <div class="mt-5 bg-slate-50 p-5 rounded-xl border border-slate-100 relative">
+                    <div class="absolute top-0 left-6 -mt-2 w-4 h-4 bg-slate-50 border-t border-l border-slate-100 transform rotate-45"></div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="w-6 h-6 rounded-full bg-slate-800 text-white flex items-center justify-center text-xs font-bold">A</span>
+                        <span class="text-sm font-bold text-slate-800">Réponse de l'assistance</span>
+                    </div>
+                    <p class="text-sm text-slate-700 whitespace-pre-wrap">{{ report.admin_response }}</p>
+                </div>
+                {% endif %}
+            </li>
+            {% empty %}
+            <li class="p-12 text-center text-slate-500">
+                <svg class="w-12 h-12 text-slate-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                <p class="font-medium">Vous n'avez soumis aucun signalement.</p>
+                <a href="{% url 'core:submit_report' %}" class="inline-block mt-4 text-primary font-semibold hover:underline">Signaler un problème</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

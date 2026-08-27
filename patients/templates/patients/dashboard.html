@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -9,10 +10,19 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        // Verifier le theme
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark')
+        } else {
+          document.documentElement.classList.remove('dark')
+        }
+    </script>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -130,17 +140,17 @@
         }
     </style>
 </head>
-<body class="bg-gray-50/70 font-inter text-gray-800 antialiased overflow-hidden">
+<body class="bg-gray-50/70 font-inter text-gray-800 antialiased overflow-hidden dark:bg-gray-950 dark:text-gray-100 transition-colors duration-300">
 
     <!-- Toast Notification Popup -->
     <div id="toast-notification" class="fixed top-5 right-5 z-50 transform -translate-y-16 opacity-0 transition-all duration-300 pointer-events-none">
-        <div class="bg-gray-900 text-white text-xs font-semibold px-4 py-3 rounded-2xl shadow-xl flex items-center space-x-2 border border-gray-700">
+        <div class="bg-gray-900 dark:bg-gray-800 text-white text-xs font-semibold px-4 py-3 rounded-2xl shadow-xl flex items-center space-x-2 border border-gray-700">
             <svg class="w-4 h-4 text-leaf-green" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
             <span id="toast-message">Notification</span>
         </div>
     </div>
     <!-- App Shell Layout -->
-    <div class="flex h-screen overflow-hidden bg-gray-50/50">
+    <div class="flex h-screen overflow-hidden bg-gray-50/50 dark:bg-gray-950">
         
         <!-- ================= SILICON VALLEY MODULAR DESKTOP SIDEBAR ================= -->
         {% include "patients/sidebar.html" %}
@@ -152,7 +162,7 @@
         <div class="flex-1 flex flex-col min-h-screen overflow-hidden">
             
             <!-- Dashboard Top Header Bar -->
-            <header class="h-20 bg-white border-b border-gray-200/80 px-4 md:px-8 flex items-center justify-between flex-shrink-0 z-30 select-none relative">
+            <header class="h-20 bg-white dark:bg-gray-900 border-b border-gray-200/80 dark:border-gray-800 px-4 md:px-8 flex items-center justify-between flex-shrink-0 z-30 select-none relative transition-colors duration-300">
                 <div class="flex items-center space-x-3 lg:hidden">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-8 h-8 text-leaf-green">
                         <path d="M37 28 C20 28 15 48 30 65 C40 75 50 82 50 82 C50 82 60 75 70 65 C85 48 80 28 63 28" fill="none" stroke="#6DBE45" stroke-width="6" stroke-linecap="round"/>
@@ -198,7 +208,7 @@
                     </button>
 
                     <!-- Notifications Dropdown Panel -->
-                    <div id="notifications-panel" class="hidden absolute right-0 top-12 w-80 sm:w-96 bg-white border border-gray-100 rounded-3xl shadow-2xl z-50 overflow-hidden select-none">
+                    <div id="notifications-panel" class="hidden absolute right-0 top-12 w-80 sm:w-96 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-3xl shadow-2xl z-50 overflow-hidden select-none">
                         <div class="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                             <h4 class="text-xs font-bold font-poppins text-gray-800 flex items-center space-x-1.5">
                                 <span>Notifications</span>
@@ -221,7 +231,9 @@
                         </div>
 
                         <div id="notif-empty-state" class="hidden p-8 text-center space-y-2">
-                            <div class="w-12 h-12 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mx-auto text-xl">🔔</div>
+                            <div class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-400 flex items-center justify-center mx-auto shadow-xs">
+                                <svg class="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                            </div>
                             <h5 class="text-xs font-bold text-gray-700">Aucune nouvelle notification</h5>
                             <p class="text-[10px] text-gray-400">Vous êtes totalement à jour avec vos rappels de santé !</p>
                         </div>
@@ -230,23 +242,25 @@
             </header>
 
             <main class="flex-1 overflow-y-auto p-4 md:p-8 pb-24 lg:pb-8 custom-scrollbar">
-                <!-- ================= MODERN MEDICAL HOME DESIGN (Photo 1) ================= -->
-                <div class="max-w-xl mx-auto lg:mx-0 space-y-6 select-none mb-8">
+                <!-- ================= MODERN MEDICAL HOME DESIGN ================= -->
+                <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 select-none mb-8">
+                    <!-- Left Column: Search & Calendar -->
+                    <div class="lg:col-span-7 space-y-6">
                     
-                    <!-- Search bar (Exact design of the image) -->
-                    <div onclick="openSearchMedecinsModal()" class="w-full bg-[#f1f5f9]/80 border border-gray-200/50 rounded-2xl h-12 flex items-center justify-between px-3.5 hover:border-leaf-green hover:bg-white transition-all cursor-pointer shadow-xs">
+                    <!-- Search bar -->
+                    <div onclick="openSearchMedecinsModal()" class="w-full bg-[#f1f5f9]/80 dark:bg-gray-800/80 border border-gray-200/50 dark:border-gray-700 rounded-2xl h-12 flex items-center justify-between px-3.5 hover:border-leaf-green hover:bg-white dark:hover:bg-gray-700 transition-all cursor-pointer shadow-xs">
                         <div class="flex items-center space-x-3 overflow-hidden flex-1">
-                            <span class="w-7 h-7 rounded-xl bg-leaf-green/10 text-leaf-green flex items-center justify-center flex-shrink-0 font-bold">
-                                📍
+                            <span class="w-7 h-7 rounded-xl bg-leaf-green/10 text-leaf-green flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-leaf-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
                             </span>
-                            <span class="text-gray-400 font-medium text-xs truncate">Search Nearest Available Doctor |</span>
+                            <span class="text-gray-500 font-semibold text-xs truncate">Rechercher le médecin disponible le plus proche...</span>
                         </div>
                     </div>
 
                     <!-- Espace Patient & Calendrier -->
                     <div class="space-y-4">
                         <div class="flex items-center justify-between">
-                            <h3 class="text-sm font-extrabold font-poppins text-gray-800 tracking-tight">Mon Espace & Calendrier</h3>
+                            <h3 class="text-sm font-extrabold font-poppins text-gray-800 dark:text-gray-100 tracking-tight">Mon Espace & Calendrier</h3>
                             <a href="{% url 'patients:settings' %}" class="text-xs text-gray-400 hover:text-leaf-green font-bold">Mon Profil</a>
                         </div>
 
@@ -302,7 +316,7 @@
                     <!-- Upcoming Appointments Section -->
                     <div class="space-y-4">
                         <div class="flex items-center justify-between">
-                            <h3 class="text-sm font-extrabold font-poppins text-gray-800 tracking-tight">Top Médecins Partenaires</h3>
+                            <h3 class="text-sm font-extrabold font-poppins text-gray-800 dark:text-gray-100 tracking-tight">Top Médecins Partenaires</h3>
                             <a href="{% url 'patients:suivi' %}" class="text-xs text-gray-400 hover:text-leaf-green font-bold">Voir Tout</a>
                         </div>
 
@@ -322,7 +336,7 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="doctors-grid-container">
                             {% for doc in medecins_list %}
                             <a href="{% url 'patients:doctor_detail' doc.id %}" 
-                               class="doctor-card-item bg-white border border-gray-150 rounded-3xl p-4 flex flex-col justify-between space-y-4 shadow-xs relative hover:border-leaf-green hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 select-none group"
+                               class="doctor-card-item bg-white dark:bg-gray-900 border border-gray-150 dark:border-gray-800 rounded-3xl p-4 flex flex-col justify-between space-y-4 shadow-xs relative hover:border-leaf-green hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 select-none group"
                                data-speciality="{{ doc.doctor_profile.speciality|default:'Non renseignée'|lower }}">
                                 <div class="flex items-center space-x-3">
                                     {% if doc.profile_picture %}
@@ -362,7 +376,7 @@
                             {% endfor %}
 
                             <!-- Custom Personalized Empty Filter Message (Hidden by default) -->
-                            <div id="no-doctors-filter-message" class="col-span-1 sm:col-span-2 hidden bg-white/95 border border-purple-100 rounded-3xl p-8 text-center flex-col items-center justify-center space-y-3.5 shadow-sm transition-all duration-300">
+                            <div id="no-doctors-filter-message" class="col-span-1 sm:col-span-2 hidden bg-white/95 dark:bg-gray-900/95 border border-purple-100 dark:border-gray-800 rounded-3xl p-8 text-center flex-col items-center justify-center space-y-3.5 shadow-sm transition-all duration-300">
                                 <div class="w-14 h-14 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center mx-auto text-2xl shadow-inner border border-purple-100/50">🔬</div>
                                 <h5 class="text-sm font-bold text-gray-800 font-poppins" id="empty-filter-title">Aucun médecin disponible</h5>
                                 <p class="text-xs text-gray-500 font-medium max-w-sm mx-auto leading-relaxed" id="empty-filter-desc">
@@ -371,6 +385,83 @@
                                 <button type="button" onclick="filterDoctorsByCategory('all', document.querySelector('#doc-filter-pills span:first-child'))" class="px-5 py-2.5 bg-leaf-green hover:bg-leaf-dark text-white text-[11px] font-extrabold rounded-full shadow-md transition-all duration-200 hover:scale-105 active:scale-95 inline-flex items-center space-x-1">
                                     <span>Réinitialiser et afficher tous les médecins</span>
                                 </button>
+                            </div>
+                        </div>
+                    </div>
+                    </div> <!-- End Left Column -->
+
+                    <!-- Right Column: Smartwatch Vitals (Heart Widget) -->
+                    <div class="lg:col-span-5 space-y-6">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-extrabold font-poppins text-gray-800 tracking-tight">Patient Care Journey</h3>
+                            <div class="flex space-x-2">
+                                <span class="bg-gray-100 text-gray-600 px-3 py-1 text-[10px] font-bold rounded-full shadow-sm">Overview</span>
+                                <span class="text-gray-400 px-2 py-1 text-[10px] font-bold hover:text-gray-600 cursor-pointer">Anatomy</span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white border border-gray-100 rounded-[2.5rem] p-6 shadow-sm relative overflow-visible flex flex-col h-full min-h-[400px]">
+                            <div class="grid grid-cols-2 gap-4 z-10 relative">
+                                <!-- Procedures -->
+                                <div class="bg-gradient-to-br from-[#f8fafc] to-white border border-gray-100/80 rounded-3xl p-5 shadow-xs">
+                                    <div class="flex items-center space-x-2 mb-3">
+                                        <div class="w-7 h-7 rounded-full bg-blue-50/50 text-blue-500 flex items-center justify-center font-bold shadow-inner">
+                                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+                                        </div>
+                                        <span class="text-[10px] font-bold text-gray-800">Cardiac Procedures</span>
+                                    </div>
+                                    <div class="flex justify-between items-end mt-5">
+                                        <div>
+                                            <p class="text-[10px] text-gray-400 font-semibold mb-1">Planned</p>
+                                            <p class="text-3xl font-extrabold font-poppins text-gray-900 tracking-tight">380 <span class="text-[9px] text-emerald-500 ml-1 font-bold">↗ 150</span></p>
+                                        </div>
+                                        <div class="pb-1">
+                                            <p class="text-[9px] text-gray-400 font-semibold mb-1">Urgent</p>
+                                            <p class="text-lg font-bold font-poppins text-gray-900">180 <span class="text-[9px] text-red-500 ml-0.5">↘ 110</span></p>
+                                        </div>
+                                    </div>
+                                    <div class="mt-5 bg-[#f1f5f9] rounded-full h-6 flex items-center overflow-hidden p-0.5 relative shadow-inner">
+                                        <div class="bg-[#1d4ed8] h-full text-white text-[10px] font-extrabold px-3 rounded-full flex items-center justify-start shadow-md" style="width: 89%;">89%</div>
+                                    </div>
+                                </div>
+
+                                <!-- Recovery -->
+                                <div class="bg-white border border-gray-100 rounded-3xl p-5 shadow-xs relative">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div class="flex items-center space-x-2">
+                                            <div class="w-7 h-7 rounded-xl bg-gray-50 flex items-center justify-center text-gray-600 shadow-inner">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                                            </div>
+                                            <span class="text-[10px] font-bold text-gray-800">Heart Recovery</span>
+                                        </div>
+                                        <span class="text-[10px] font-extrabold text-gray-900">72 bpm</span>
+                                    </div>
+                                    <div class="flex justify-between mt-5">
+                                        <div>
+                                            <p class="text-[10px] text-gray-400 font-semibold mb-0.5">Recovery progress</p>
+                                            <p class="text-3xl font-extrabold font-poppins text-gray-900 tracking-tight">70%</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-[9px] text-gray-400 font-semibold mb-0.5">Avg today</p>
+                                            <p class="text-[10px] font-bold text-gray-800">70/100</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex space-x-1.5 mt-5 h-9">
+                                        <div class="flex-1 bg-[#1d4ed8] rounded-lg shadow-sm"></div>
+                                        <div class="flex-1 bg-[#1d4ed8] rounded-lg shadow-sm"></div>
+                                        <div class="flex-1 bg-[#1d4ed8] rounded-lg shadow-sm"></div>
+                                        <div class="flex-1 bg-[#f1f5f9] rounded-lg shadow-inner"></div>
+                                        <div class="flex-1 bg-[#f1f5f9] rounded-lg shadow-inner"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 3D Heart Image overlay -->
+                            <div class="absolute -bottom-16 -right-16 w-[350px] h-[350px] z-0 pointer-events-none opacity-95 group transition-transform hover:scale-105 duration-700">
+                                <img src="{% static 'images/3d_heart.png' %}" alt="3D Heart" class="w-full h-full object-contain drop-shadow-[0_20px_30px_rgba(220,38,38,0.25)] mix-blend-multiply" style="filter: contrast(1.1) saturate(1.2);">
+                                <!-- Floating dots -->
+                                <div class="absolute top-1/4 left-1/4 w-5 h-5 bg-white/90 backdrop-blur rounded-full shadow-[0_0_15px_rgba(255,255,255,1)] flex items-center justify-center text-[8px] font-extrabold text-gray-900 ring-4 ring-red-100/50 animate-bounce" style="animation-duration: 3s;">+2</div>
+                                <div class="absolute bottom-1/3 right-1/4 w-4 h-4 bg-white/90 backdrop-blur rounded-full shadow-[0_0_15px_rgba(255,255,255,1)] flex items-center justify-center text-[7px] font-extrabold text-gray-900 ring-4 ring-red-100/50 animate-bounce" style="animation-duration: 2.5s; animation-delay: 1s;">+1</div>
                             </div>
                         </div>
                     </div>
@@ -385,8 +476,8 @@
                         <!-- DYNAMIC REAL VIDEOS PUBLISHED IN SQLITE BY DOCTORS (Dr. Wada) -->
                         {% if videos_list %}
                             {% for vid in videos_list %}
-                            <div class="bg-white border border-purple-100 rounded-3xl shadow-md overflow-hidden select-none" id="real-vid-card-{{ vid.id }}">
-                                <div class="p-4 flex items-center justify-between border-b border-gray-50 bg-purple-50/30">
+                            <div class="bg-white dark:bg-gray-900 border border-purple-100 dark:border-gray-800 rounded-3xl shadow-md overflow-hidden select-none" id="real-vid-card-{{ vid.id }}">
+                                <div class="p-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-800 bg-purple-50/30 dark:bg-gray-800/30">
                                     <a href="{% url 'patients:doctor_detail' vid.author.id %}" class="flex items-center space-x-3 group">
                                         <div class="w-11 h-11 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold text-xs shadow-md border-2 border-purple-300">
                                             Dr
@@ -410,7 +501,7 @@
                                         </svg>
                                     </div>
                                     <span class="mt-4 bg-purple-600 text-white font-extrabold text-[10px] uppercase tracking-wider px-4 py-1.5 rounded-full z-20 shadow-lg border border-purple-400/50">
-                                        Regarder la capsule vidéo du Dr. {{ vid.author.get_full_name|default:vid.author.username }} 📹
+                                        Regarder la vidéo - Dr. {{ vid.author.get_full_name|default:vid.author.username }}
                                     </span>
                                     <h4 class="text-white font-bold text-lg mt-3 z-20 font-poppins max-w-md">{{ vid.title }}</h4>
                                 </div>
@@ -424,7 +515,7 @@
 
                                 <div class="px-4 py-2 flex items-center justify-between text-xs text-gray-400 font-semibold border-t border-b border-gray-50 bg-purple-50/20">
                                     <div class="flex items-center space-x-1.5 text-purple-700 font-bold">
-                                        <span class="w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center text-[10px]">❤️</span>
+                                        <span class="w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center text-[9px] font-black">+</span>
                                         <span id="real-likes-{{ vid.id }}">{{ vid.likes_count }}</span> <span>Réactions</span>
                                     </div>
                                     <a href="{% url 'patients:doctor_detail' vid.author.id %}" class="text-purple-600 hover:underline font-bold text-[10px]">Voir la page du Dr. {{ vid.author.get_full_name|default:vid.author.username }} ➔</a>
@@ -433,7 +524,6 @@
                             {% endfor %}
                         {% else %}
                             <div class="bg-white border border-purple-100 rounded-3xl p-8 text-center text-gray-500 shadow-sm font-medium text-xs">
-                                <span class="block text-2xl mb-2">📹</span>
                                 Aucune capsule vidéo publiée par les médecins praticiens dans la base de données actuellement.
                             </div>
                         {% endif %}
@@ -442,13 +532,13 @@
 
                     <!-- Right Column: Médecins Inscrits -->
                     <div class="lg:col-span-4 space-y-6">
-                        <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-xs select-none">
-                            <div class="flex items-center justify-between mb-4 border-b border-gray-50 pb-3">
-                                <h3 class="text-sm font-bold text-gray-800 font-poppins">Médecins Inscrits</h3>
-                                <button type="button" onclick="openSearchMedecinsModal()" class="text-[10px] text-medical-blue hover:underline font-bold">Chercher 🔍</button>
+                        <div class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-3xl p-6 shadow-xs select-none">
+                            <div class="flex items-center justify-between mb-4 border-b border-gray-50 dark:border-gray-800 pb-3">
+                                <h3 class="text-sm font-bold text-gray-800 dark:text-gray-100 font-poppins">Médecins Inscrits</h3>
+                                <button type="button" onclick="openSearchMedecinsModal()" class="text-[10px] text-medical-blue hover:underline font-bold">Rechercher</button>
                             </div>
                             
-                            <div class="space-y-3">
+                            <div class="space-y-3" id="doctors-sidebar-widget">
                                 {% if medecins_list %}
                                     {% for doc in medecins_list %}
                                     <div class="p-3 rounded-2xl bg-purple-50/40 border border-purple-100 flex items-center justify-between hover:border-purple-300 transition-colors">
@@ -1246,6 +1336,151 @@
             let dateStr = today.toLocaleDateString('fr-FR', options);
             dateField.innerText = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
         }
+
+        // ================= TEMPS RÉEL : ACTUALISATION DYNAMIQUE DES MÉDECINS =================
+        let currentDoctorsCount = {{ medecins_list|length|default:0 }};
+        let lastDoctorsHash = "";
+
+        function buildNoDoctorsMessage() {
+            return `
+            <div id="no-doctors-filter-message" class="col-span-1 sm:col-span-2 hidden bg-white/95 border border-purple-100 rounded-3xl p-8 text-center flex-col items-center justify-center space-y-3.5 shadow-sm transition-all duration-300">
+                <div class="w-14 h-14 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center mx-auto text-2xl shadow-inner border border-purple-100/50">🔬</div>
+                <h5 class="text-sm font-bold text-gray-800 font-poppins" id="empty-filter-title">Aucun médecin disponible</h5>
+                <p class="text-xs text-gray-500 font-medium max-w-sm mx-auto leading-relaxed" id="empty-filter-desc">
+                    Aucun médecin ne correspond actuellement au filtre sélectionné. Tous nos praticiens affichés correspondent exclusivement à notre base de données médicale réelle.
+                </p>
+                <button type="button" onclick="filterDoctorsByCategory('all', document.querySelector('#doc-filter-pills span:first-child'))" class="px-5 py-2.5 bg-leaf-green hover:bg-leaf-dark text-white text-[11px] font-extrabold rounded-full shadow-md transition-all duration-200 hover:scale-105 active:scale-95 inline-flex items-center space-x-1">
+                    <span>Réinitialiser et afficher tous les médecins</span>
+                </button>
+            </div>`;
+        }
+
+        async function fetchLiveMedecins() {
+            try {
+                const response = await fetch('/patients/api/medecins/live/');
+                if (!response.ok) return;
+                const data = await response.json();
+                
+                if (data.status === 'success' && data.medecins) {
+                    const newHash = JSON.stringify(data.medecins.map(m => m.id + m.full_title_name + m.speciality + m.rating));
+                    if (lastDoctorsHash && lastDoctorsHash === newHash) {
+                        return;
+                    }
+                    
+                    const isFirstRun = (lastDoctorsHash === "");
+                    const hasNewDoctor = (data.count > currentDoctorsCount) && !isFirstRun;
+                    
+                    lastDoctorsHash = newHash;
+                    currentDoctorsCount = data.count;
+
+                    // 1. Mise à jour de la grille principale
+                    const gridContainer = document.getElementById('doctors-grid-container');
+                    if (gridContainer) {
+                        let gridHtml = '';
+                        if (data.medecins.length === 0) {
+                            gridHtml += `<div class="col-span-1 sm:col-span-2 p-8 text-center text-xs text-gray-400 bg-white rounded-3xl border border-gray-150 shadow-sm">Aucun médecin disponible actuellement dans la base de données.</div>`;
+                        } else {
+                            data.medecins.forEach(doc => {
+                                let avatarHtml = doc.profile_picture_url ? 
+                                    `<img src="${doc.profile_picture_url}" class="w-11 h-11 rounded-full object-cover border-2 border-white shadow-sm" alt="${doc.username}">` :
+                                    `<div class="w-11 h-11 rounded-full bg-leaf-light text-leaf-green flex items-center justify-center font-extrabold text-xs shadow-sm border-2 border-white font-poppins flex-shrink-0">Dr</div>`;
+                                    
+                                gridHtml += `
+                                <a href="${doc.detail_url}" 
+                                   class="doctor-card-item bg-white border border-gray-150 rounded-3xl p-4 flex flex-col justify-between space-y-4 shadow-xs relative hover:border-leaf-green hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 select-none group"
+                                   data-speciality="${doc.speciality_lower}">
+                                    <div class="flex items-center space-x-3">
+                                        ${avatarHtml}
+                                        <div class="overflow-hidden">
+                                            <h4 class="text-xs font-extrabold text-gray-900 group-hover:text-leaf-green transition-colors truncate">${doc.full_title_name}</h4>
+                                            <p class="text-[10px] text-gray-500 font-bold truncate">${doc.speciality}</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between pt-2.5 border-t border-gray-100">
+                                        <div class="space-y-0.5">
+                                            <div class="flex items-center space-x-1 text-[10px] font-extrabold text-amber-500">
+                                                <span>★</span> <span>${doc.rating}</span>
+                                            </div>
+                                            <span class="text-[9px] text-gray-400 font-bold block">${doc.years_of_experience} ans d'exp.</span>
+                                        </div>
+                                        <span class="w-8 h-8 rounded-full bg-gray-50 group-hover:bg-leaf-green group-hover:text-white text-gray-400 flex items-center justify-center transition-all duration-200 shadow-inner group-hover:shadow-md">
+                                            ➔
+                                        </span>
+                                    </div>
+                                </a>`;
+                            });
+                        }
+                        gridHtml += buildNoDoctorsMessage();
+                        gridContainer.innerHTML = gridHtml;
+                    }
+
+                    // 2. Mise à jour de la liste latérale
+                    const sidebarWidget = document.getElementById('doctors-sidebar-widget');
+                    if (sidebarWidget) {
+                        if (data.medecins.length === 0) {
+                            sidebarWidget.innerHTML = `<p class="text-xs text-gray-400 font-medium text-center py-2">Aucun médecin inscrit pour l'instant.</p>`;
+                        } else {
+                            let sideHtml = '';
+                            data.medecins.forEach(doc => {
+                                sideHtml += `
+                                <div class="p-3 rounded-2xl bg-purple-50/40 border border-purple-100 flex items-center justify-between hover:border-purple-300 transition-colors">
+                                    <a href="${doc.detail_url}" class="flex items-center space-x-3 group">
+                                        <div class="w-9 h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">Dr</div>
+                                        <div>
+                                            <h5 class="text-xs font-bold text-gray-900 group-hover:underline">${doc.full_title_name}</h5>
+                                            <p class="text-[9px] text-purple-600 font-bold">Voir la page complète ➔</p>
+                                        </div>
+                                    </a>
+                                    <button type="button" onclick="showToast('Prise de rendez-vous avec ${doc.full_title_name.replace(/'/g, "\\'")}')" class="px-2.5 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-[9px] font-bold rounded-lg uppercase">RDV</button>
+                                </div>`;
+                            });
+                            sidebarWidget.innerHTML = sideHtml;
+                        }
+                    }
+
+                    // 3. Mise à jour de la recherche dans la modale
+                    const searchGroup = document.getElementById('search-med-group');
+                    if (searchGroup) {
+                        if (data.medecins.length === 0) {
+                            searchGroup.innerHTML = `<p class="text-[10px] text-gray-400 font-medium py-1">Aucun médecin trouvé.</p>`;
+                        } else {
+                            let searchHtml = '';
+                            data.medecins.forEach(doc => {
+                                searchHtml += `
+                                <div class="doc-search-item p-3 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between hover:border-medical-blue transition-all" data-name="${doc.search_term}">
+                                    <a href="${doc.detail_url}" class="flex items-center space-x-3 group">
+                                        <div class="w-9 h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">Dr</div>
+                                        <div>
+                                            <h5 class="text-xs font-bold text-gray-800 group-hover:underline">${doc.full_title_name}</h5>
+                                            <p class="text-[9px] text-purple-600 font-bold">Consulter la page complète ➔</p>
+                                        </div>
+                                    </a>
+                                    <button type="button" onclick="closeSearchMedecinsModal(); window.location.href='${doc.detail_url}';" class="px-3 py-2 bg-purple-100 hover:bg-purple-600 hover:text-white text-purple-700 font-bold text-[10px] rounded-xl tracking-wide uppercase transition-colors">RDV / Appel</button>
+                                </div>`;
+                            });
+                            searchGroup.innerHTML = searchHtml;
+                        }
+                    }
+
+                    // Réappliquer le filtre actif
+                    const activeFilterBtn = document.querySelector('.doc-filter-btn.bg-leaf-green');
+                    if (activeFilterBtn && typeof filterDoctorsByCategory === 'function') {
+                        filterDoctorsByCategory(activeFilterBtn.innerText.toLowerCase().trim(), activeFilterBtn);
+                    }
+
+                    if (hasNewDoctor && typeof showToast === 'function') {
+                        showToast("👨‍⚕️ Un nouveau médecin est en ligne et disponible sur la plateforme !");
+                    }
+                }
+            } catch (e) {
+                console.error("Erreur lors de la synchronisation en temps réel des médecins :", e);
+            }
+        }
+
+        setInterval(fetchLiveMedecins, 5000);
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchLiveMedecins();
+        });
     </script>
 </body>
 </html>

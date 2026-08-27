@@ -70,28 +70,28 @@
         <div class="flex-1 flex flex-col min-h-screen overflow-hidden">
             
             <!-- Dashboard Top Header Bar -->
-            <header class="h-20 bg-white border-b border-gray-200/80 px-4 md:px-8 flex items-center justify-between flex-shrink-0 z-30 select-none relative">
-                <div class="flex items-center space-x-3 lg:hidden">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-8 h-8 text-medical-blue">
-                        <path d="M37 28 C20 28 15 48 30 65 C40 75 50 82 50 82 C50 82 60 75 70 65 C85 48 80 28 63 28" fill="none" stroke="#1B5FA8" stroke-width="6" stroke-linecap="round"/>
-                        <circle cx="37" cy="28" r="4.5" fill="#38BDF8" />
-                        <circle cx="63" cy="28" r="4.5" fill="#38BDF8" />
-                        <path d="M30 65 C22 55 15 55 12 60 C8 65 14 74 22 72" fill="none" stroke="#1B5FA8" stroke-width="6" stroke-linecap="round"/>
-                        <circle cx="22" cy="72" r="6" fill="#14467d" />
-                        <path d="M43 46 H57 M50 39 V53" stroke="#38BDF8" stroke-width="5.5" stroke-linecap="round" />
-                        <path d="M48 68 L58 60 L60 72 Z" fill="#15803d" />
-                        <path d="M50 82 C68 76 83 60 83 38 C83 55 70 70 50 82 Z" fill="#6DBE45" />
-                        <path d="M50 82 C55 70 65 60 83 38" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
-                    </svg>
-                    <span class="font-poppins font-bold text-lg text-medical-blue tracking-tight">Fransick Praticien</span>
+                <div class="flex items-center space-x-3 sm:space-x-4">
+                    {% if user.profile_picture %}
+                        <img class="h-11 w-11 sm:h-12 sm:w-12 rounded-2xl object-cover ring-2 ring-medical-blue/30 shadow-sm flex-shrink-0" src="{{ user.profile_picture.url }}" alt="{{ user.username }}">
+                    {% else %}
+                        <div class="h-11 w-11 sm:h-12 sm:w-12 rounded-2xl bg-gradient-to-tr from-medical-blue to-cyan-500 text-white flex items-center justify-center font-bold font-poppins text-base sm:text-lg shadow-sm flex-shrink-0">
+                            {{ user.first_name|slice:":1"|default:user.username|slice:":1" }}{{ user.last_name|slice:":1" }}
+                        </div>
+                    {% endif %}
+                    <div>
+                        <div class="flex flex-wrap items-center gap-1 sm:gap-2">
+                            <h2 class="text-sm sm:text-base md:text-lg font-black font-poppins text-gray-900 leading-tight">
+                                Dr. {% if user.last_name %}{{ user.first_name }} {{ user.last_name }}{% else %}{{ user.username }}{% endif %}
+                            </h2>
+                            <span class="inline-block bg-blue-50 text-medical-blue text-[9px] font-extrabold px-2 py-0.5 rounded-md uppercase tracking-wider border border-blue-100/80">
+                                {% if user.doctor_profile.speciality %}{{ user.doctor_profile.speciality }}{% else %}Praticien{% endif %}
+                            </span>
+                        </div>
+                        <p class="text-[10px] sm:text-xs text-gray-400 font-medium mt-0.5">Paramètres & Configuration de votre Espace Cabinet</p>
+                    </div>
                 </div>
 
-                <div class="hidden lg:block">
-                    <h2 class="text-lg font-bold font-poppins text-gray-800">{% translate "Paramètres & Gestion du Cabinet" %}</h2>
-                    <p class="text-xs text-gray-400 font-semibold">Configurez votre profil médical et vos spécialités en ligne</p>
-                </div>
-
-                <!-- Right Avatar & Quick Info -->
+                <!-- Right Quick Actions -->
                 <div class="flex items-center space-x-3.5">
                     <button type="button" onclick="openModal('modal-profile')" class="flex items-center space-x-2 bg-medical-light/60 hover:bg-medical-light px-3.5 py-2 rounded-2xl transition-all border border-medical-blue/20 text-medical-blue font-bold text-xs">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
@@ -100,7 +100,7 @@
                 </div>
             </header>
 
-            <main class="flex-1 overflow-y-auto p-4 md:p-8 pb-24 lg:pb-8 custom-scrollbar">
+            <main class="flex-1 overflow-y-auto p-4 md:p-8 pb-32 lg:pb-8 custom-scrollbar">
                 
                 <!-- Django Messages Alerts -->
                 {% if messages %}
@@ -142,7 +142,7 @@
                         </div>
                         
                         <button type="button" onclick="openModal('modal-profile')" class="z-10 w-full md:w-auto px-6 py-3.5 rounded-2xl bg-white text-medical-blue font-bold text-xs hover:bg-blue-50 transition-all transform active:scale-95 shadow-lg shadow-black/15 text-center flex-shrink-0">
-                            ✨ Configurer mon Profil
+                            Configurer mon Profil
                         </button>
                     </div>
 
@@ -154,47 +154,61 @@
                         </div>
                         <div class="divide-y divide-gray-100">
                             <!-- Modifier Spécialité et Bio -->
-                            <button type="button" onclick="openModal('modal-profile')" class="w-full px-6 py-4.5 flex items-center justify-between hover:bg-blue-50/30 transition-colors focus:outline-none group">
-                                <div class="flex items-center space-x-4">
-                                    <div class="w-10 h-10 rounded-2xl bg-medical-light text-medical-blue flex items-center justify-center font-bold text-lg group-hover:scale-110 transition-transform">
-                                        🩺
+                            <button type="button" onclick="openModal('modal-profile')" class="w-full px-6 py-5 flex items-center justify-between hover:bg-blue-50/40 transition-colors focus:outline-none group">
+                                <div class="flex items-start space-x-4">
+                                    <div class="w-11 h-11 rounded-2xl bg-medical-light text-medical-blue flex items-center justify-center font-bold text-xs font-poppins group-hover:scale-105 transition-transform shadow-xs flex-shrink-0 mt-0.5">
+                                        MD
                                     </div>
                                     <div class="text-left">
-                                        <h5 class="text-sm font-bold text-gray-800">Spécialité, Biographie & Expérience</h5>
-                                        <p class="text-xs text-gray-400 mt-0.5">Modifiez vos diplômes, votre spécialité et vos années d'exercice</p>
+                                        <div class="flex items-center gap-2">
+                                            <h5 class="text-sm font-black text-gray-800 font-poppins">Spécialité, Biographie & Expérience</h5>
+                                            <span class="bg-blue-50 text-medical-blue text-[10px] font-bold px-2 py-0.5 rounded-full border border-blue-100">{{ user.doctor_profile.speciality|default:"Non configuré" }}</span>
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1 line-clamp-1"><span class="italic">{{ user.doctor_profile.about|default:"Cliquez pour rédiger votre présentation pour les patients..." }}</span></p>
+                                        <div class="flex items-center gap-4 mt-2 text-[11px] text-gray-400 font-bold">
+                                            <span>Expérience : {{ user.doctor_profile.years_of_experience|default:"0" }} an(s)</span>
+                                            <span>Ordre : {{ user.doctor_profile.license_number|default:"Non renseigné" }}</span>
+                                        </div>
                                     </div>
                                 </div>
-                                <span class="text-xs font-bold text-medical-blue group-hover:underline flex items-center gap-1">Modifier <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></span>
+                                <span class="px-3.5 py-2 rounded-xl bg-gray-100 group-hover:bg-medical-blue group-hover:text-white text-xs font-extrabold text-gray-700 transition-all flex items-center gap-1 flex-shrink-0 shadow-xs uppercase tracking-wider">Modifier</span>
                             </button>
 
                             <!-- Coordonnées et Horaires -->
-                            <button type="button" onclick="openModal('modal-profile')" class="w-full px-6 py-4.5 flex items-center justify-between hover:bg-blue-50/30 transition-colors focus:outline-none group">
-                                <div class="flex items-center space-x-4">
-                                    <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-leaf-green flex items-center justify-center font-bold text-lg group-hover:scale-110 transition-transform">
-                                        🏥
+                            <button type="button" onclick="openModal('modal-profile')" class="w-full px-6 py-5 flex items-center justify-between hover:bg-blue-50/40 transition-colors focus:outline-none group">
+                                <div class="flex items-start space-x-4">
+                                    <div class="w-11 h-11 rounded-2xl bg-emerald-50 text-leaf-green flex items-center justify-center font-bold text-xs font-poppins group-hover:scale-105 transition-transform shadow-xs flex-shrink-0 mt-0.5">
+                                        LOC
                                     </div>
                                     <div class="text-left">
-                                        <h5 class="text-sm font-bold text-gray-800">Adresse du Cabinet & Horaires d'Ouverture</h5>
-                                        <p class="text-xs text-gray-400 mt-0.5">Gérez le lieu de consultation et vos disponibilités hebdomadaires</p>
+                                        <div class="flex items-center gap-2">
+                                            <h5 class="text-sm font-black text-gray-800 font-poppins">Adresse du Cabinet & Horaires d'Ouverture</h5>
+                                            <span class="bg-emerald-50 text-leaf-green text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-100">{{ user.doctor_profile.clinic_name|default:"Cabinet Privé" }}</span>
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1"><span class="font-semibold">{{ user.doctor_profile.clinic_address|default:"Adresse non définie, cliquez pour configurer..." }}</span></p>
+                                        <div class="flex items-center gap-4 mt-2 text-[11px] text-gray-400 font-bold">
+                                            <span>Horaires : {{ user.doctor_profile.schedule|default:"Lun - Ven (08h - 17h)" }}</span>
+                                            <span>Tél : {{ user.phone_number|default:"Non renseigné" }}</span>
+                                        </div>
                                     </div>
                                 </div>
-                                <span class="text-xs font-bold text-leaf-green group-hover:underline flex items-center gap-1">Gérer <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></span>
+                                <span class="px-3.5 py-2 rounded-xl bg-emerald-50 group-hover:bg-leaf-green group-hover:text-white text-xs font-extrabold text-leaf-green transition-all flex items-center gap-1 flex-shrink-0 shadow-xs uppercase tracking-wider">Gérer</span>
                             </button>
                         </div>
                     </div>
 
-                    <!-- ================= GROUP 2: SÉCURITÉ & CONNEXION ================= -->
+                    <!-- ================= GROUP 2: SÉCURITÉ, PRÉFÉRENCES & CONNEXION ================= -->
                     <div class="bg-white border border-gray-100 rounded-3xl shadow-md overflow-hidden select-none">
                         <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
-                            <h4 class="text-xs font-black text-gray-400 uppercase tracking-widest font-poppins">Sécurité & Identifiants</h4>
+                            <h4 class="text-xs font-black text-gray-400 uppercase tracking-widest font-poppins">Sécurité & Préférences</h4>
                             <span class="text-[11px] font-bold text-purple-600 bg-purple-50 px-2.5 py-1 rounded-full">Privé & Confidentiel</span>
                         </div>
                         <div class="divide-y divide-gray-100">
                             <!-- Mot de passe -->
                             <button type="button" onclick="openModal('modal-password')" class="w-full px-6 py-4.5 flex items-center justify-between hover:bg-purple-50/20 transition-colors focus:outline-none group">
                                 <div class="flex items-center space-x-4">
-                                    <div class="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-lg group-hover:scale-110 transition-transform">
-                                        🔐
+                                    <div class="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-xs font-poppins group-hover:scale-105 transition-transform">
+                                        SEC
                                     </div>
                                     <div class="text-left">
                                         <h5 class="text-sm font-bold text-gray-800">Modifier le mot de passe</h5>
@@ -207,8 +221,8 @@
                             <!-- Toggle Notifications -->
                             <div class="px-6 py-4.5 flex items-center justify-between">
                                 <div class="flex items-center space-x-4">
-                                    <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-lg">
-                                        🔔
+                                    <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xs font-poppins">
+                                        NOTIF
                                     </div>
                                     <div class="text-left">
                                         <h5 class="text-sm font-bold text-gray-800">Alertes de Nouveaux Patients</h5>
@@ -220,18 +234,41 @@
                                     <label for="toggle-notif" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300"></label>
                                 </div>
                             </div>
+
+                            <!-- Langue de l'interface -->
+                            <div class="px-6 py-4.5 flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-10 h-10 rounded-2xl bg-blue-50 text-medical-blue flex items-center justify-center font-bold text-xs font-poppins">
+                                        FR/EN
+                                    </div>
+                                    <div class="text-left">
+                                        <h5 class="text-sm font-bold text-gray-800">Langue de l'interface</h5>
+                                        <p class="text-xs text-gray-400 mt-0.5">Sélectionnez la langue d'affichage de la plateforme</p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <form action="{% url 'set_language' %}" method="post" class="inline">
+                                        {% csrf_token %}
+                                        <input name="next" type="hidden" value="{{ request.path }}">
+                                        <select name="language" onchange="this.form.submit()" class="bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-xl px-4 py-2 text-xs font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-medical-blue cursor-pointer transition-all">
+                                            <option value="fr" {% if request.LANGUAGE_CODE == 'fr' %}selected{% endif %}>Français (FR)</option>
+                                            <option value="en" {% if request.LANGUAGE_CODE == 'en' %}selected{% endif %}>English (EN)</option>
+                                        </select>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- ================= GROUP 3: SUPPORT & IA MÉDICALE ================= -->
                     <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 shadow-xl text-white border border-indigo-500/30 flex flex-col md:flex-row items-center justify-between gap-6">
                         <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-400 to-blue-600 flex items-center justify-center font-black text-xl shadow-lg shadow-cyan-500/30">
-                                ⚡
+                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-400 to-blue-600 flex items-center justify-center font-black text-xs font-poppins shadow-lg shadow-cyan-500/30">
+                                IA
                             </div>
                             <div>
                                 <h4 class="text-base font-black font-poppins tracking-tight">Assistant IA Diagnostique 24/7</h4>
-                                <p class="text-xs text-cyan-200/80 mt-0.5">Votre intelligence artificielle d'aide au diagnostic est configurée avec Groq Cloud (Ultra-Rapide).</p>
+                                <p class="text-xs text-cyan-200/80 mt-0.5">Votre outil virtuel d'aide au diagnostic clinique en temps réel.</p>
                             </div>
                         </div>
                         <a href="{% url 'ia_assistant:chat' %}" class="w-full md:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 font-black text-xs text-white shadow-lg shadow-cyan-500/25 transition-all text-center flex-shrink-0">

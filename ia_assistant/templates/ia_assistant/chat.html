@@ -4,15 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>{% translate "Dr. Fransick IA Médical" %}</title>
+    <title>{% if is_doctor %}Fransick IA Pro • Diagnostic & Décision Clinique{% else %}Dr. Fransick IA Médical 24/7{% endif %}</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Tailwind CSS CDN with Typography Plugin for Professional Markdown Rendering -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN with Typography Plugin -->
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <!-- Marked.js CDN for Markdown generation -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Alpine.js -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script>
         tailwind.config = {
             theme: {
@@ -39,34 +41,49 @@
             overflow: hidden;
             background-color: #f8fafc;
         }
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
         /* Markdown override inside AI speech bubbles */
         .prose h3 {
             color: #14467d !important;
             font-size: 1.05rem !important;
+            font-weight: 800 !important;
             margin-bottom: 0.5rem !important;
-            margin-top: 0.3rem !important;
+            margin-top: 0.4rem !important;
+            font-family: 'Poppins', sans-serif !important;
         }
         .prose p {
-            margin-top: 0.35rem !important;
-            margin-bottom: 0.35rem !important;
+            margin-top: 0.4rem !important;
+            margin-bottom: 0.4rem !important;
+            line-height: 1.6 !important;
         }
-        .prose ul {
-            margin-top: 0.35rem !important;
-            margin-bottom: 0.35rem !important;
+        .prose ul, .prose ol {
+            margin-top: 0.4rem !important;
+            margin-bottom: 0.4rem !important;
+            padding-left: 1.25rem !important;
         }
         .prose li {
-            margin-top: 0.15rem !important;
-            margin-bottom: 0.15rem !important;
+            margin-top: 0.2rem !important;
+            margin-bottom: 0.2rem !important;
         }
         .prose hr {
-            margin-top: 0.7rem !important;
-            margin-bottom: 0.7rem !important;
-            border-color: #cbd5e1 !important;
+            margin-top: 0.8rem !important;
+            margin-bottom: 0.8rem !important;
+            border-color: #e2e8f0 !important;
         }
+        .prose strong {
+            color: #0f172a !important;
+            font-weight: 700 !important;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     </style>
 </head>
 <body class="bg-[#f8fafc] text-gray-800 font-sans antialiased h-full overflow-hidden select-none">
@@ -74,7 +91,6 @@
     <!-- Toast Notification Popup -->
     <div id="toast-notification" class="fixed top-6 right-6 z-50 transform -translate-y-16 opacity-0 pointer-events-none transition-all duration-300">
         <div class="bg-gray-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center space-x-3 border border-gray-800">
-            <span class="text-lg">ℹ️</span>
             <span id="toast-message" class="text-xs font-bold font-poppins">Message</span>
         </div>
     </div>
@@ -82,210 +98,407 @@
     <!-- App Shell Layout (Sidebar + Main Content) -->
     <div class="flex h-screen overflow-hidden bg-gray-50/50">
         
-        <!-- ================= SILICON VALLEY MODULAR DESKTOP SIDEBAR ================= -->
-        {% include "patients/sidebar.html" %}
+        <!-- ================= DYNAMIC ROLE-BASED SIDEBAR (DESKTOP ONLY - NO MOBILE BOTTOM NAV ON CHAT) ================= -->
+        {% if is_doctor %}
+            {% include "medecins/sidebar.html" %}
+        {% else %}
+            {% include "patients/sidebar.html" %}
+        {% endif %}
 
-        <!-- ================= SILICON VALLEY FLOATING CURVED BOTTOM NAV (MOBILE) ================= -->
-        {% include "patients/bottom_nav.html" %}
-
-        <!-- ================= MAIN CHAT CONTENT AREA ================= -->
-        <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
+        <!-- ================= MAIN CONTENT WRAPPER ================= -->
+        <div class="flex-1 flex flex-col sm:flex-row h-screen overflow-hidden relative">
             
-            <!-- Top App Navigation Header (Ultra-Compact & Stunning on Mobile) -->
-            <header class="h-16 sm:h-20 bg-gradient-to-r from-medical-blue via-medical-dark to-slate-900 text-white px-3 sm:px-6 flex items-center justify-between shadow-lg z-30 shrink-0 border-b border-white/10">
+            <!-- ================= LATERAL PANEL: HISTORIQUE DES CONVERSATIONS ================= -->
+            <aside id="conversations-panel" class="hidden md:flex flex-col w-72 lg:w-80 bg-white border-r border-gray-200/80 flex-shrink-0 h-full z-20 transition-all duration-300">
                 
-                <!-- Left: Retour Button (Icon-only on mobile, label on PC) -->
-                {% if request.user.role == 'medecin' %}
-                    <a href="{% url 'medecins:dashboard' %}" class="w-9 h-9 sm:w-auto sm:h-auto sm:px-3.5 sm:py-2 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center sm:space-x-1.5 text-white transition-all shadow-xs active:scale-95 text-xs font-bold shrink-0" title="Retour au Tableau de Bord">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-                        </svg>
-                        <span class="hidden sm:inline">Retour</span>
-                    </a>
-                {% else %}
-                    <a href="{% url 'patients:dashboard' %}" class="w-9 h-9 sm:w-auto sm:h-auto sm:px-3.5 sm:py-2 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center sm:space-x-1.5 text-white transition-all shadow-xs active:scale-95 text-xs font-bold shrink-0" title="Retour à l'Accueil">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-                        </svg>
-                        <span class="hidden sm:inline">Retour</span>
-                    </a>
-                {% endif %}
+                <!-- Panel Header -->
+                <div class="p-4 border-b border-gray-100 bg-gray-50/60 flex flex-col space-y-3.5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-black uppercase tracking-widest {% if is_doctor %}text-medical-blue{% else %}text-leaf-green{% endif %} font-poppins flex items-center gap-1.5">
+                            <span>Mes Consultations IA</span>
+                        </span>
+                        <span class="bg-gray-200/80 text-gray-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full">{{ conversations|length }} session(s)</span>
+                    </div>
 
-                <!-- Center: Dr. Fransick IA Branding (Clean & Resizable) -->
-                <div class="flex items-center space-x-2 sm:space-x-3 min-w-0 overflow-hidden px-2">
-                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-leaf-green flex items-center justify-center text-base sm:text-xl shadow-md border border-white/20 text-white font-bold shrink-0">
-                        🩺
-                    </div>
-                    <div class="min-w-0 overflow-hidden">
-                        <h1 class="text-xs sm:text-base font-extrabold font-poppins text-white truncate tracking-wide">
-                            Dr. Fransick IA
-                        </h1>
-                        <p class="text-[9px] sm:text-xs text-emerald-300 font-semibold flex items-center space-x-1.5 truncate">
-                            <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-400 inline-block animate-ping shrink-0"></span>
-                            <span class="truncate text-slate-200">En ligne 24/7</span>
-                        </p>
-                    </div>
+                    <!-- + NOUVELLE CONVERSATION BUTTON -->
+                    <a href="{% url 'ia_assistant:api_new' %}" class="w-full py-3 px-4 rounded-2xl {% if is_doctor %}bg-gradient-to-r from-medical-blue via-indigo-700 to-medical-dark hover:brightness-110 shadow-indigo-500/20{% else %}bg-gradient-to-r from-emerald-600 to-leaf-green hover:brightness-110 shadow-emerald-500/20{% endif %} text-white font-black font-poppins text-xs shadow-lg transition-all flex items-center justify-center space-x-2 transform active:scale-95 text-center">
+                        <span>+ Nouvelle Consultation IA</span>
+                    </a>
                 </div>
 
-                <!-- Right: Reset Discussion Button (Icon-only on mobile) -->
-                <button onclick="clearDiscussion()" class="w-9 h-9 sm:w-auto sm:h-auto sm:px-3.5 sm:py-2 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-400/40 text-red-200 flex items-center justify-center sm:space-x-1.5 transition-all active:scale-95 shadow-md shrink-0" title="Réinitialiser la discussion">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.3">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    <span class="hidden sm:inline text-xs font-extrabold">Réinitialiser</span>
-                </button>
-            </header>
-
-            <!-- Main Fullscreen Chat Area (With smooth scroll padding so messages stay above input) -->
-            <main class="flex-1 bg-gradient-to-b from-slate-50 via-white to-slate-50/50 overflow-y-auto p-3 sm:p-6 space-y-4 sm:space-y-5 custom-scrollbar" id="chat-messages">
-                
-                <!-- Welcome Message from AI -->
-                <div class="flex items-start space-x-2.5 sm:space-x-3 max-w-[92%] sm:max-w-[82%]">
-                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-medical-blue to-medical-dark text-white flex items-center justify-center flex-shrink-0 text-base sm:text-lg shadow-md border border-white/20 font-bold">
-                        🩺
-                    </div>
-                    <div class="bg-white text-gray-800 p-4 sm:p-5 rounded-3xl rounded-tl-none text-xs sm:text-sm leading-relaxed shadow-md border border-gray-200/80 space-y-2">
-                        <div class="flex items-center justify-between border-b border-gray-100 pb-2">
-                            <span class="font-extrabold text-medical-blue font-poppins text-xs sm:text-sm flex items-center gap-1.5">
-                                <span>Dr. Fransick IA</span>
-                                <span class="text-[9px] px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded font-extrabold">IA 24/7</span>
-                            </span>
-                            <span class="text-[10px] text-gray-400 font-medium">En ligne</span>
-                        </div>
-                        <div class="prose prose-sm prose-slate max-w-none text-gray-700 font-medium">
-                            <p class="text-gray-800 font-semibold">Bonjour et bienvenue ! Je suis votre assistant médical d'excellence 🩺</p>
-                            <p>Je réponds en temps réel à <strong>toutes vos questions de santé et du quotidien</strong> : analyse de symptômes, posologies des traitements, conseils d'hygiène de vie et orientation personnalisée.</p>
-                            <p class="text-[11px] bg-emerald-50 text-emerald-800 p-2 sm:p-2.5 rounded-xl border border-emerald-200 mt-2 font-medium flex items-center gap-2">
-                                <span class="shrink-0">🛡️</span>
-                                <span><strong>Sécurité garantie :</strong> Mes conseils complètent mais ne remplacent nullement une consultation médicale chez l'un de nos praticiens certifiés.</span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Render Past Persistent History with Markdown parser -->
-                {% for msg in chat_history %}
-                    {% if msg.sender == 'user' %}
-                        <div class="flex items-start space-x-2 sm:space-x-3 max-w-[90%] sm:max-w-[80%] ml-auto justify-end">
-                            <div class="bg-gradient-to-r from-medical-blue to-medical-dark text-white p-3.5 sm:p-4 rounded-3xl rounded-tr-none text-xs sm:text-sm leading-relaxed shadow-md font-medium border border-blue-900/30">
-                                <p>{{ msg.content }}</p>
+                <!-- Conversations List -->
+                <div class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
+                    {% if conversations %}
+                        {% for conv in conversations %}
+                            <div class="group relative rounded-2xl transition-all {% if active_conversation and active_conversation.id == conv.id %}bg-blue-50/80 border-2 border-medical-blue/30 text-medical-blue shadow-xs font-extrabold{% else %}bg-gray-50/60 hover:bg-gray-100 border border-gray-200/50 text-gray-700 font-semibold{% endif %}">
+                                <a href="{% url 'ia_assistant:chat_conversation' conv.id %}" class="block p-3.5 pr-10 truncate text-xs font-poppins transition-all">
+                                    <span class="block truncate text-sm {% if active_conversation and active_conversation.id == conv.id %}text-medical-blue font-black{% else %}text-gray-800{% endif %}">{{ conv.title }}</span>
+                                    <span class="text-[10px] {% if active_conversation and active_conversation.id == conv.id %}text-medical-blue/70{% else %}text-gray-400{% endif %} font-medium mt-1 block">
+                                        {{ conv.updated_at|date:"d/m/Y à H:i" }}
+                                    </span>
+                                </a>
+                                <!-- Bouton Suppression Session -->
+                                <button type="button" onclick="deleteConversation({{ conv.id }}, event)" class="absolute right-2.5 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all opacity-80 group-hover:opacity-100 focus:outline-none" title="Supprimer cette conversation">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
                             </div>
-                            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-2xl bg-gradient-to-br from-leaf-green to-emerald-700 text-white flex items-center justify-center flex-shrink-0 text-xs sm:text-sm font-extrabold shadow-md">
-                                {{ user.username|slice:":1"|upper|default:"U" }}
-                            </div>
-                        </div>
+                        {% endfor %}
                     {% else %}
-                        <div class="flex items-start space-x-2.5 sm:space-x-3 max-w-[92%] sm:max-w-[82%]">
-                            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-medical-blue to-medical-dark text-white flex items-center justify-center flex-shrink-0 text-base sm:text-lg shadow-md border border-white/20 font-bold">
-                                🩺
-                            </div>
-                            <div class="bg-white text-gray-800 p-4 sm:p-5 rounded-3xl rounded-tl-none text-xs sm:text-sm leading-relaxed shadow-md border border-gray-200/80">
-                                <div class="flex items-center justify-between border-b border-gray-100 pb-2 mb-2">
-                                    <span class="font-extrabold text-medical-blue font-poppins text-xs">Dr. Fransick IA</span>
-                                    <span class="text-[10px] text-gray-400 font-medium">{{ msg.timestamp|date:"H:i" }}</span>
-                                </div>
-                                <div class="ai-history-msg prose prose-sm prose-slate max-w-none text-gray-800 font-medium" data-raw="{{ msg.content }}">
-                                    {{ msg.content }}
-                                </div>
-                            </div>
+                        <div class="p-8 text-center text-gray-400 space-y-2">
+                            <div class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-400 flex items-center justify-center mx-auto text-xs font-bold font-poppins">IA</div>
+                            <p class="text-xs font-medium">Aucune discussion enregistrée.<br>Lancez votre première question !</p>
                         </div>
                     {% endif %}
-                {% endfor %}
+                </div>
 
-            </main>
-
-            <!-- Bottom Input Form Bar (Harmonized with bottom_nav on mobile via pb-[94px]) -->
-            <footer class="bg-white/95 backdrop-blur-xl border-t border-gray-200/90 px-3 sm:px-6 pt-3 pb-[94px] lg:py-4 shadow-2xl shrink-0 z-40 relative">
-                <form id="chat-form" class="max-w-4xl mx-auto flex items-center gap-2 sm:gap-3" onsubmit="event.preventDefault(); sendMessage();">
-                    {% csrf_token %}
-                    <div class="flex-grow relative flex items-center min-w-0">
-                        <input type="text" id="chat-input" placeholder="{% translate 'Poser une question médicale...' %}" class="w-full pl-3.5 pr-8 sm:pl-4 sm:pr-10 py-3 sm:py-3.5 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-medical-blue focus:border-transparent text-xs sm:text-sm text-gray-800 placeholder-gray-400 font-medium transition-all bg-slate-50 shadow-inner" required autocomplete="off">
-                        <span class="absolute right-3 text-gray-400 hover:text-medical-blue transition-colors text-xs sm:text-base cursor-pointer" title="Assistant IA 24/7">✨</span>
-                    </div>
-                    <button type="submit" id="btn-send" class="bg-gradient-to-r from-medical-blue to-medical-dark hover:from-medical-dark hover:to-medical-blue text-white font-extrabold w-11 h-11 sm:w-auto sm:h-auto sm:px-6 sm:py-3.5 rounded-2xl transition-all shadow-md shadow-medical-blue/20 active:scale-95 flex items-center justify-center sm:space-x-2 text-xs sm:text-sm uppercase tracking-wider shrink-0 cursor-pointer" title="Envoyer">
-                        <span class="hidden sm:inline font-extrabold">Envoyer</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.3" stroke="currentColor" class="w-5 h-5 shrink-0">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
-                        </svg>
+                <!-- Clear All Button at bottom of lateral panel -->
+                <div class="p-3 border-t border-gray-100 bg-gray-50/40">
+                    <button type="button" onclick="clearDiscussion()" class="w-full py-2.5 px-3 rounded-xl bg-red-50 text-red-600 font-extrabold text-[11px] hover:bg-red-100/80 transition-colors flex items-center justify-center space-x-2">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        <span>Effacer tout mon historique</span>
                     </button>
-                </form>
-            </footer>
+                </div>
+            </aside>
+
+            <!-- ================= CHAT ARENA ================= -->
+            <div class="flex-1 flex flex-col h-full overflow-hidden relative bg-[#f8fafc]">
+                
+                <!-- Top App Navigation Header -->
+                <header class="h-16 sm:h-20 bg-gradient-to-r {% if is_doctor %}from-slate-950 via-indigo-950 to-medical-dark{% else %}from-medical-blue via-medical-dark to-slate-900{% endif %} text-white px-3.5 sm:px-6 flex items-center justify-between shadow-md z-30 shrink-0 border-b border-white/10">
+                    
+                    <!-- Left: Bouton Retour & Switcher de conversations sur Mobile -->
+                    <div class="flex items-center space-x-2.5 sm:space-x-4">
+                        {% if is_doctor %}
+                            <a href="{% url 'medecins:dashboard' %}" class="w-9 h-9 sm:w-auto sm:h-auto sm:px-3.5 sm:py-2 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center sm:space-x-1.5 text-white transition-all shadow-xs text-xs font-bold shrink-0" title="Retour au Tableau de Bord">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                                </svg>
+                                <span class="hidden sm:inline font-poppins">Tableau de Bord</span>
+                            </a>
+                        {% else %}
+                            <a href="{% url 'patients:dashboard' %}" class="w-9 h-9 sm:w-auto sm:h-auto sm:px-3.5 sm:py-2 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center sm:space-x-1.5 text-white transition-all shadow-xs text-xs font-bold shrink-0" title="Retour à l'Accueil">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                                </svg>
+                                <span class="hidden sm:inline font-poppins">Accueil</span>
+                            </a>
+                        {% endif %}
+
+                        <!-- Mobile Button to toggle conversations panel -->
+                        <button type="button" onclick="toggleMobileConversationsModal()" class="md:hidden px-3 py-1.5 rounded-xl bg-white/15 text-white text-xs font-extrabold flex items-center space-x-1.5 border border-white/20">
+                            <span>Sessions ({{ conversations|length }})</span>
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+
+                        <div class="flex items-center space-x-3 hidden sm:flex">
+                            <div class="relative">
+                                <div class="w-10 h-10 rounded-2xl {% if is_doctor %}bg-gradient-to-tr from-cyan-400 to-blue-600{% else %}bg-leaf-green{% endif %} text-white flex items-center justify-center font-extrabold text-xs shadow-md font-poppins border-2 border-white/20">
+                                    IA
+                                </div>
+                                <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white animate-pulse"></span>
+                            </div>
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <h1 class="text-sm sm:text-base font-black font-poppins text-white tracking-tight">
+                                        {% if is_doctor %}Fransick IA Pro • Aide à la Décision Clinique{% else %}Dr. Fransick IA Médical 24/7{% endif %}
+                                    </h1>
+                                    <span class="hidden xl:inline-block bg-cyan-400/20 text-cyan-300 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-cyan-400/30">Assistant Fransick</span>
+                                </div>
+                                <p class="text-[10px] sm:text-xs text-blue-200/80 font-semibold truncate">
+                                    {% if is_doctor %}Méthodologie Diagnostique & Pharmacologie • Confidentialité Garantie{% else %}Votre médecin virtuel d'élite • Réponse en temps réel à toutes vos questions{% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Controls (Audio Synthesis Toggle & Nouvelle Consultation) -->
+                    <div class="flex items-center space-x-2.5">
+                        <button type="button" id="toggle-audio-btn" onclick="toggleAudioSynthesis()" class="p-2 sm:px-3 sm:py-2 rounded-xl bg-white/10 hover:bg-white/20 text-blue-100 hover:text-white text-xs font-extrabold flex items-center space-x-1.5 transition-all border border-white/10" title="Activer / Désactiver la voix verbale de l'IA">
+                            <span id="audio-status-icon" class="text-xs uppercase font-poppins font-black">Audio</span>
+                            <span class="hidden sm:inline">Voix : <span id="audio-status-text" class="text-rose-300">Désactivée</span></span>
+                        </button>
+                    </div>
+                </header>
+
+                <!-- ================= MOBILE CONVERSATIONS MODAL DRAWER ================= -->
+                <div id="mobile-conversations-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex flex-col p-4 md:hidden">
+                    <div class="bg-white rounded-3xl overflow-hidden flex flex-col max-h-[85vh] shadow-2xl border border-gray-200 animate-fade-in">
+                        <div class="p-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+                            <h3 class="text-sm font-black text-gray-900 font-poppins">Mes Consultations IA ({{ conversations|length }})</h3>
+                            <button type="button" onclick="toggleMobileConversationsModal()" class="p-2 text-gray-400 hover:text-gray-700 bg-gray-200/50 rounded-full">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+                        <div class="p-3 bg-white">
+                            <a href="{% url 'ia_assistant:api_new' %}" class="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-medical-blue to-blue-700 text-white font-black text-xs shadow-md block text-center">+ Nouvelle Consultation IA</a>
+                        </div>
+                        <div class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2 divide-y divide-gray-50">
+                            {% for conv in conversations %}
+                                <div class="flex items-center justify-between py-2 px-3 rounded-2xl {% if active_conversation and active_conversation.id == conv.id %}bg-blue-50 font-bold text-medical-blue{% else %}text-gray-700{% endif %}">
+                                    <a href="{% url 'ia_assistant:chat_conversation' conv.id %}" class="truncate flex-1 text-xs">
+                                        <span class="block font-bold">{{ conv.title }}</span>
+                                        <span class="text-[10px] text-gray-400 font-normal">{{ conv.updated_at|date:"d/m/Y à H:i" }}</span>
+                                    </a>
+                                    <button type="button" onclick="deleteConversation({{ conv.id }}, event)" class="text-gray-400 hover:text-red-500 text-[10px] font-bold p-2 ml-2">Supprimer</button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================= CHAT MESSAGES SCROLL AREA ================= -->
+                <main id="chat-messages" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 custom-scrollbar pb-28 lg:pb-6">
+                    
+                    <!-- WELCOME BANNER (Always shows at the beginning of active conversation or blank state) -->
+                    <div class="animate-fade-in bg-gradient-to-br {% if is_doctor %}from-indigo-950 via-slate-900 to-blue-950 border border-indigo-400/30 text-white{% else %}from-medical-blue/5 via-blue-50/50 to-slate-50 border border-medical-blue/10 text-gray-800{% endif %} rounded-3xl p-5 sm:p-7 shadow-sm text-center max-w-2xl mx-auto my-3 space-y-3">
+                        <div class="w-14 h-14 rounded-3xl {% if is_doctor %}bg-gradient-to-tr from-cyan-400 to-blue-600 shadow-cyan-500/30{% else %}bg-medical-blue shadow-blue-500/20{% endif %} text-white flex items-center justify-center font-black text-base mx-auto shadow-xl font-poppins">
+                            IA
+                        </div>
+                        <h2 class="text-base sm:text-xl font-black font-poppins {% if is_doctor %}text-white{% else %}text-medical-blue{% endif %} tracking-tight">
+                            {% if is_doctor %}
+                                Bienvenue dans votre Espace IA Praticien, Dr. {% if user.last_name %}{{ user.last_name }}{% else %}{{ user.username }}{% endif %}
+                            {% else %}
+                                Bonjour, je suis votre médecin virtuel Dr. Fransick IA !
+                            {% endif %}
+                        </h2>
+                        <p class="text-xs sm:text-sm {% if is_doctor %}text-blue-100{% else %}text-gray-600{% endif %} leading-relaxed max-w-xl mx-auto font-medium">
+                            {% if is_doctor %}
+                                Spécialiste virtuel en médecine clinique, je vous accompagne dans vos analyses différentielles, le calcul des posologies pédiatriques et adultes, l'évaluation des interactions médicamenteuses et la littérature scientifique de pointe.
+                            {% else %}
+                                Posez-moi absolument toutes vos questions sur la santé, vos symptômes ou vos traitements médicaux. Mes réponses s'adaptent dynamiquement avec une précision clinique en temps réel.
+                            {% endif %}
+                        </p>
+
+                        <!-- QUICK SUGGESTIONS PILLS -->
+                        <div class="pt-2 flex flex-wrap items-center justify-center gap-2">
+                            {% if is_doctor %}
+                                <button type="button" onclick="insertQuickPrompt('Quelle est la conduite à tenir clinique actuelle devant une crise hypertensive aiguë chez l\'adulte ?')" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-cyan-300 font-extrabold text-[11px] border border-cyan-400/30 transition-all transform active:scale-95 shadow-2xs">Crise Hypertensive Aiguë</button>
+                                <button type="button" onclick="insertQuickPrompt('Quelles sont les interactions majeures et contre-indications cliniques entre l\'amoxicilline-acide clavulanique et les anticoagulants ?')" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-cyan-300 font-extrabold text-[11px] border border-cyan-400/30 transition-all transform active:scale-95 shadow-2xs">Interactions Anticoagulants</button>
+                                <button type="button" onclick="insertQuickPrompt('Propose une liste de diagnostics différentiels structurée pour une dyspnée aiguë non fébrile d\'apparition brutale.')" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-cyan-300 font-extrabold text-[11px] border border-cyan-400/30 transition-all transform active:scale-95 shadow-2xs">Dyspnée Aiguë Différentiels</button>
+                            {% else %}
+                                <button type="button" onclick="insertQuickPrompt('J\'ai de la fièvre et des maux de tête depuis ce matin, quelles sont les premières précautions à prendre ?')" class="px-3 py-2 rounded-xl bg-white hover:bg-blue-50 text-medical-blue font-extrabold text-xs border border-blue-100 transition-all transform active:scale-95 shadow-2xs">Fièvre et maux de tête</button>
+                                <button type="button" onclick="insertQuickPrompt('Quels sont les remèdes naturels les plus efficaces pour lutter contre les brûlures d\'estomac et le reflux ?')" class="px-3 py-2 rounded-xl bg-white hover:bg-blue-50 text-medical-blue font-extrabold text-xs border border-blue-100 transition-all transform active:scale-95 shadow-2xs">Brûlures d'estomac & reflux</button>
+                                <button type="button" onclick="insertQuickPrompt('Comment renforcer mon système immunitaire rapidement à l\'approche de la saison des pluies ?')" class="px-3 py-2 rounded-xl bg-white hover:bg-blue-50 text-medical-blue font-extrabold text-xs border border-blue-100 transition-all transform active:scale-95 shadow-2xs">Renforcer mon immunité</button>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- CHAT HISTORY FOR ACTIVE CONVERSATION -->
+                    {% for msg in chat_history %}
+                        {% if msg.sender == "user" %}
+                            <div class="animate-fade-in flex items-start justify-end space-x-2.5 sm:space-x-3">
+                                <div class="bg-gradient-to-r {% if is_doctor %}from-medical-blue to-indigo-700{% else %}from-medical-blue to-blue-700{% endif %} text-white p-4 sm:p-5 rounded-3xl rounded-tr-none text-xs sm:text-sm font-semibold leading-relaxed shadow-md max-w-[85%] sm:max-w-[75%] font-inter">
+                                    <div class="flex items-center justify-end border-b border-white/10 pb-1.5 mb-2">
+                                        <span class="text-[10px] text-blue-200 font-poppins">{% if is_doctor %}Dr. {{ user.username }}{% else %}Vous ({% translate "Patient" %}){% endif %} • {{ msg.timestamp|date:"H:i" }}</span>
+                                    </div>
+                                    <div class="whitespace-pre-wrap break-words">{{ msg.content }}</div>
+                                </div>
+                                {% if user.profile_picture %}
+                                    <img class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl object-cover ring-2 ring-medical-blue/30 shadow-md flex-shrink-0" src="{{ user.profile_picture.url }}" alt="{{ user.username }}">
+                                {% else %}
+                                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl {% if is_doctor %}bg-slate-900{% else %}bg-medical-blue{% endif %} text-white font-extrabold flex items-center justify-center text-sm shadow-md flex-shrink-0 font-poppins">{% if is_doctor %}Dr{% else %}Me{% endif %}</div>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="animate-fade-in flex items-start space-x-2.5 sm:space-x-3 max-w-[95%] sm:max-w-[84%]">
+                                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl {% if is_doctor %}bg-gradient-to-tr from-cyan-500 to-indigo-800 text-white{% else %}bg-gradient-to-br from-medical-blue to-medical-dark text-white{% endif %} flex items-center justify-center flex-shrink-0 text-xs sm:text-sm shadow-lg border border-white/20 font-black font-poppins">IA</div>
+                                <div class="bg-white text-gray-800 p-4 sm:p-6 rounded-3xl rounded-tl-none text-xs sm:text-sm leading-relaxed shadow-md border border-gray-200/80">
+                                    <div class="flex items-center justify-between border-b border-gray-100 pb-2 mb-3">
+                                        <span class="font-black {% if is_doctor %}text-indigo-900{% else %}text-medical-blue{% endif %} font-poppins text-xs flex items-center gap-1.5">
+                                            <span>{% if is_doctor %}Fransick IA Pro (Diagnostic){% else %}Dr. Fransick IA (Médecin){% endif %}</span>
+                                            <span class="text-[9px] px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full font-black">Vérifié</span>
+                                        </span>
+                                        <span class="text-[10px] text-gray-400 font-semibold">{{ msg.timestamp|date:"d/m/Y H:i" }}</span>
+                                    </div>
+                                    <div class="prose prose-sm prose-slate max-w-none text-gray-800 font-semibold leading-relaxed">
+                                        <div class="markdown-content" data-raw-text="{{ msg.content|escape }}"></div>
+                                    </div>
+                                    
+                                    {% if not is_doctor %}
+                                    <!-- AVERTISSEMENT MEDICAL PATIENT -->
+                                    <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-[10px] text-gray-400">
+                                        <span>Conseil IA : En cas de doute prolongé, réservez chez nos spécialistes.</span>
+                                        <a href="{% url 'consultations:list' %}" class="text-medical-blue font-bold hover:underline">Consulter un médecin →</a>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </main>
+
+                <!-- ================= FIXED BOTTOM INPUT BAR ================= -->
+                <div class="bg-white/95 backdrop-blur-xl border-t border-gray-200/80 p-3 sm:p-4 absolute bottom-0 left-0 right-0 z-40 shadow-2xl">
+                    <form id="chat-form" onsubmit="sendAIMessage(event)" class="max-w-4xl mx-auto flex items-end space-x-2 sm:space-x-3">
+                        {% csrf_token %}
+                        <div class="flex-1 relative">
+                            <textarea id="chat-input" rows="1" placeholder="{% if is_doctor %}Saisissez un cas patient, une question clinique ou une posologie...{% else %}Décrivez vos symptômes ou posez votre question de santé...{% endif %}" class="w-full pl-4 pr-12 py-3.5 bg-slate-50 border border-gray-200 focus:border-medical-blue focus:ring-2 focus:ring-blue-100 rounded-2xl text-xs sm:text-sm font-medium text-gray-800 placeholder-gray-400 resize-none transition-all custom-scrollbar max-h-36" onkeydown="handleEnterKey(event)" oninput="autoGrow(this)"></textarea>
+                            
+                            <button type="button" onclick="alert('Importation d\'analyses ou d\'images médicales bientôt disponible !')" class="absolute right-3.5 bottom-3.5 text-gray-400 hover:text-medical-blue transition-colors" title="Joindre un document ou résultat d'analyse">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <button type="submit" id="send-button" class="w-12 h-12 sm:w-14 sm:h-12 rounded-2xl {% if is_doctor %}bg-gradient-to-r from-cyan-500 to-blue-700 hover:from-cyan-400 hover:to-blue-600 shadow-cyan-500/30{% else %}bg-gradient-to-r from-medical-blue to-medical-dark hover:from-medical-dark hover:to-medical-blue shadow-blue-500/20{% endif %} text-white flex items-center justify-center font-bold shadow-lg transition-all transform active:scale-95 focus:outline-none shrink-0" title="Envoyer au Dr. Fransick IA">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.3" stroke="currentColor" class="w-5 h-5 sm:w-6 sm:h-6 rotate-[-15deg] translate-x-0.5">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- JAVASCRIPT CHAT ENGINE WITH MARKDOWN RENDERER -->
+    <!-- JAVASCRIPT & AJAX LOGIC FOR USER-ISOLATED CONVERSATIONS -->
     <script>
         const apiChatUrl = "{% url 'ia_assistant:api_chat' %}";
-        const apiClearUrl = "{% url 'ia_assistant:api_clear' %}";
+        let currentConversationId = {% if active_conversation %}{{ active_conversation.id }}{% else %}null{% endif %};
+        let audioSynthesisActive = false;
+        let currentUtterance = null;
 
-        function scrollToBottom() {
-            const messages = document.getElementById('chat-messages');
-            if (messages) {
-                messages.scrollTo({ top: messages.scrollHeight, behavior: 'smooth' });
+        // Nettoyage strict des émojis conformément au design Fransick Santé
+        function removeEmojis(str) {
+            if (!str) return '';
+            return str.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]|[\u2300-\u23FF]|\u2600-\u26FF)/g, '');
+        }
+
+        // Render markdown content immediately upon loading existing chat
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.marked) {
+                marked.setOptions({ breaks: true, gfm: true });
+                document.querySelectorAll('.markdown-content').forEach(el => {
+                    let rawText = el.getAttribute('data-raw-text') || '';
+                    if (rawText) {
+                        rawText = removeEmojis(rawText);
+                        el.innerHTML = marked.parse(rawText);
+                    }
+                });
             }
-        }
-
-        // Configuration du parseur Markdown (Marked.js)
-        if (typeof marked !== 'undefined') {
-            marked.setOptions({
-                breaks: true,
-                gfm: true
-            });
-        }
-
-        function renderMarkdown(text) {
-            if (typeof marked !== 'undefined') {
-                return marked.parse(text);
-            }
-            return escapeHtml(text);
-        }
-
-        window.addEventListener('load', () => {
-            // Convertir l'historique brut en beau HTML Markdown formaté
-            document.querySelectorAll('.ai-history-msg').forEach(el => {
-                const rawText = el.getAttribute('data-raw') || el.innerText;
-                if (rawText) {
-                    el.innerHTML = renderMarkdown(rawText);
-                }
-            });
             scrollToBottom();
+            setTimeout(() => { document.getElementById('chat-input').focus(); }, 100);
         });
 
-        function sendMessage() {
-            const input = document.getElementById('chat-input');
-            const messages = document.getElementById('chat-messages');
-            const btnSend = document.getElementById('btn-send');
-            const text = input.value.trim();
-            if (!text) return;
+        function renderMarkdown(text) {
+            text = removeEmojis(text);
+            if (window.marked) {
+                return marked.parse(text);
+            }
+            return escapeHtml(text).replace(/\n/g, '<br>');
+        }
 
-            // 1. Ajouter le message utilisateur
+        function scrollToBottom() {
+            const container = document.getElementById('chat-messages');
+            if (container) {
+                container.scrollTop = container.scrollHeight + 500;
+            }
+        }
+
+        function autoGrow(element) {
+            element.style.height = "5px";
+            element.style.height = (element.scrollHeight) + "px";
+        }
+
+        function handleEnterKey(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendAIMessage(event);
+            }
+        }
+
+        function insertQuickPrompt(promptText) {
+            const input = document.getElementById('chat-input');
+            input.value = promptText;
+            autoGrow(input);
+            input.focus();
+        }
+
+        function toggleMobileConversationsModal() {
+            const modal = document.getElementById('mobile-conversations-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        function toggleAudioSynthesis() {
+            audioSynthesisActive = !audioSynthesisActive;
+            const text = document.getElementById('audio-status-text');
+            
+            if (audioSynthesisActive) {
+                text.innerText = "Active";
+                text.className = "text-emerald-300 font-bold";
+                showToast("Synthèse vocale activée. L'IA lira ses réponses.");
+            } else {
+                text.innerText = "Désactivée";
+                text.className = "text-rose-300 font-bold";
+                if (window.speechSynthesis && window.speechSynthesis.speaking) {
+                    window.speechSynthesis.cancel();
+                }
+                showToast("Synthèse vocale désactivée.");
+            }
+        }
+
+        function speakText(text) {
+            if (!audioSynthesisActive || !('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            
+            // Clean markdown tokens for clear pronunciation
+            const cleanText = text.replace(/[*#_>`]/g, '').replace(/(\n)+/g, ' ');
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = 'fr-FR';
+            utterance.rate = 1.05;
+            utterance.pitch = 1.0;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function sendAIMessage(event) {
+            if (event) event.preventDefault();
+            const input = document.getElementById('chat-input');
+            const btnSend = document.getElementById('send-button');
+            const text = input.value.trim();
+
+            if (!text) {
+                showToast("Veuillez poser une question à l'assistant IA.");
+                return;
+            }
+
+            input.value = '';
+            input.style.height = 'auto';
+
+            const messages = document.getElementById('chat-messages');
+            
+            // 1. Append User Message Bubble
             const userMsg = document.createElement('div');
-            userMsg.className = 'flex items-start space-x-2 sm:space-x-3 max-w-[90%] sm:max-w-[80%] ml-auto justify-end';
+            userMsg.className = 'animate-fade-in flex items-start justify-end space-x-2.5 sm:space-x-3';
             userMsg.innerHTML = `
-                <div class="bg-gradient-to-r from-medical-blue to-medical-dark text-white p-3.5 sm:p-4 rounded-3xl rounded-tr-none text-xs sm:text-sm leading-relaxed shadow-md font-medium border border-blue-900/30">
-                    <p>${escapeHtml(text)}</p>
+                <div class="bg-gradient-to-r {% if is_doctor %}from-medical-blue to-indigo-700{% else %}from-medical-blue to-blue-700{% endif %} text-white p-4 sm:p-5 rounded-3xl rounded-tr-none text-xs sm:text-sm font-semibold leading-relaxed shadow-md max-w-[85%] sm:max-w-[75%] font-inter">
+                    <div class="flex items-center justify-end border-b border-white/10 pb-1.5 mb-2">
+                        <span class="text-[10px] text-blue-200 font-poppins">{% if is_doctor %}Dr. {{ user.username }}{% else %}Vous{% endif %} • À l'instant</span>
+                    </div>
+                    <div class="whitespace-pre-wrap break-words">${escapeHtml(text)}</div>
                 </div>
-                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-2xl bg-gradient-to-br from-leaf-green to-emerald-700 text-white flex items-center justify-center flex-shrink-0 text-xs sm:text-sm font-extrabold shadow-md">
-                    {{ user.username|slice:":1"|upper|default:"U" }}
-                </div>
+                {% if user.profile_picture %}
+                    <img class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl object-cover ring-2 ring-medical-blue/30 shadow-md flex-shrink-0" src="{{ user.profile_picture.url }}" alt="{{ user.username }}">
+                {% else %}
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl {% if is_doctor %}bg-slate-900{% else %}bg-medical-blue{% endif %} text-white font-extrabold flex items-center justify-center text-sm shadow-md flex-shrink-0 font-poppins">{% if is_doctor %}Dr{% else %}Me{% endif %}</div>
+                {% endif %}
             `;
             messages.appendChild(userMsg);
-            input.value = '';
             scrollToBottom();
 
-            // 2. Bulle de chargement "Analyse clinique en cours..."
-            const typingId = 'typing-' + Date.now();
+            // 2. Append Typing Indicator Bubble
+            const typingId = 'typing-indicator-' + Date.now();
             const typingMsg = document.createElement('div');
             typingMsg.id = typingId;
-            typingMsg.className = 'flex items-start space-x-2.5 sm:space-x-3 max-w-[92%] sm:max-w-[82%]';
+            typingMsg.className = 'animate-fade-in flex items-start space-x-2.5 sm:space-x-3 max-w-[92%] sm:max-w-[82%]';
             typingMsg.innerHTML = `
-                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-medical-blue to-medical-dark text-white flex items-center justify-center flex-shrink-0 text-base sm:text-lg shadow-md border border-white/20 font-bold animate-pulse">🩺</div>
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl {% if is_doctor %}bg-gradient-to-tr from-cyan-500 to-indigo-800 text-white{% else %}bg-gradient-to-br from-medical-blue to-medical-dark text-white{% endif %} flex items-center justify-center flex-shrink-0 text-xs sm:text-sm shadow-md border border-white/20 font-bold font-poppins animate-pulse">IA</div>
                 <div class="bg-white text-gray-600 p-3.5 sm:p-4 rounded-3xl rounded-tl-none text-xs sm:text-sm leading-relaxed shadow-md border border-gray-200/80 flex items-center space-x-2.5">
-                    <span class="font-extrabold text-medical-blue font-poppins text-xs">Analyse en cours...</span>
+                    <span class="font-extrabold {% if is_doctor %}text-indigo-900{% else %}text-medical-blue{% endif %} font-poppins text-xs">Analyse clinique en cours...</span>
                     <span class="flex space-x-1">
                         <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-emerald-500 rounded-full animate-bounce"></span>
-                        <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-medical-blue rounded-full animate-bounce [animation-delay:0.2s]"></span>
-                        <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-purple-500 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+                        <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-cyan-400 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+                        <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:0.4s]"></span>
                     </span>
                 </div>
             `;
@@ -294,14 +507,17 @@
             btnSend.disabled = true;
             btnSend.classList.add('opacity-50', 'cursor-not-allowed');
 
-            // 3. Requete AJAX vers l'API Backend Django
+            // 3. Requete AJAX vers l'API Django
             fetch(apiChatUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
                 },
-                body: JSON.stringify({ message: text })
+                body: JSON.stringify({ 
+                    message: text,
+                    conversation_id: currentConversationId
+                })
             })
             .then(res => res.json())
             .then(data => {
@@ -309,26 +525,37 @@
                 if (typingEl) typingEl.remove();
 
                 if (data.status === 'success') {
+                    // Update current conversation ID if newly created
+                    if (data.conversation_id) {
+                        currentConversationId = data.conversation_id;
+                        // Mettre à jour l'URL sans recharger la page
+                        const newUrl = "/ia_assistant/c/" + data.conversation_id + "/";
+                        if (window.history && window.history.replaceState) {
+                            window.history.replaceState(null, "", newUrl);
+                        }
+                    }
+
                     const aiMsg = document.createElement('div');
-                    aiMsg.className = 'flex items-start space-x-2.5 sm:space-x-3 max-w-[92%] sm:max-w-[82%]';
+                    aiMsg.className = 'animate-fade-in flex items-start space-x-2.5 sm:space-x-3 max-w-[95%] sm:max-w-[84%]';
                     aiMsg.innerHTML = `
-                        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-medical-blue to-medical-dark text-white flex items-center justify-center flex-shrink-0 text-base sm:text-lg shadow-md border border-white/20 font-bold">🩺</div>
-                        <div class="bg-white text-gray-800 p-4 sm:p-5 rounded-3xl rounded-tl-none text-xs sm:text-sm leading-relaxed shadow-md border border-gray-200/80">
-                            <div class="flex items-center justify-between border-b border-gray-100 pb-2 mb-2">
-                                <span class="font-extrabold text-medical-blue font-poppins text-xs flex items-center gap-1">
-                                    <span>Dr. Fransick IA</span>
-                                    <span class="text-[9px] px-1 py-0.2 bg-emerald-50 text-emerald-700 rounded font-bold">Vérifié</span>
+                        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl {% if is_doctor %}bg-gradient-to-tr from-cyan-500 to-indigo-800 text-white{% else %}bg-gradient-to-br from-medical-blue to-medical-dark text-white{% endif %} flex items-center justify-center flex-shrink-0 text-xs sm:text-sm shadow-md border border-white/20 font-bold font-poppins">IA</div>
+                        <div class="bg-white text-gray-800 p-4 sm:p-6 rounded-3xl rounded-tl-none text-xs sm:text-sm leading-relaxed shadow-md border border-gray-200/80">
+                            <div class="flex items-center justify-between border-b border-gray-100 pb-2 mb-3">
+                                <span class="font-black {% if is_doctor %}text-indigo-900{% else %}text-medical-blue{% endif %} font-poppins text-xs flex items-center gap-1.5">
+                                    <span>{% if is_doctor %}Fransick IA Pro (Diagnostic){% else %}Dr. Fransick IA (Médecin){% endif %}</span>
+                                    <span class="text-[9px] px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full font-black">Vérifié</span>
                                 </span>
-                                <span class="text-[10px] text-gray-400 font-medium">À l'instant</span>
+                                <span class="text-[10px] text-gray-400 font-semibold">À l'instant</span>
                             </div>
-                            <div class="prose prose-sm prose-slate max-w-none text-gray-800 font-medium">
+                            <div class="prose prose-sm prose-slate max-w-none text-gray-800 font-semibold leading-relaxed">
                                 ${renderMarkdown(data.reply)}
                             </div>
                         </div>
                     `;
                     messages.appendChild(aiMsg);
+                    speakText(data.reply);
                 } else {
-                    showToast('Erreur : ' + (data.message || 'Impossible de joindre l\'IA'));
+                    showToast('Erreur : ' + (data.message || "Impossible de joindre l'IA"));
                 }
                 scrollToBottom();
                 btnSend.disabled = false;
@@ -344,10 +571,26 @@
             });
         }
 
-        function clearDiscussion() {
-            if (!confirm('Voulez-vous vraiment effacer l\'historique de discussion avec le Dr. Fransick IA ?')) return;
+        function deleteConversation(convId, event) {
+            if (event) {
+                event.stopPropagation();
+                event.preventDefault();
+            }
+            window.dispatchEvent(new CustomEvent('open-modal', {
+                detail: {
+                    title: 'Supprimer la consultation',
+                    message: 'Voulez-vous supprimer definitivement cette consultation IA ?',
+                    confirmEvent: 'ia-delete-conversation',
+                    confirmEventDetail: convId,
+                    type: 'danger',
+                    confirmText: 'Supprimer'
+                }
+            }));
+        }
 
-            fetch(apiClearUrl, {
+        window.addEventListener('ia-delete-conversation', function(e) {
+            const convId = e.detail;
+            fetch(`/ia_assistant/api/delete/${convId}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -357,7 +600,35 @@
             .then(res => res.json())
             .then(data => {
                 if (data.status === 'success') {
-                    window.location.reload();
+                    window.location.href = "{% url 'ia_assistant:chat' %}";
+                }
+            });
+        });
+
+        function clearDiscussion() {
+            window.dispatchEvent(new CustomEvent('open-modal', {
+                detail: {
+                    title: 'Effacer l\'historique',
+                    message: 'Voulez-vous vraiment effacer TOUTES vos consultations et votre historique avec l\'assistant IA ?',
+                    confirmEvent: 'ia-clear-discussion',
+                    type: 'danger',
+                    confirmText: 'Effacer'
+                }
+            }));
+        }
+
+        window.addEventListener('ia-clear-discussion', function() {
+            fetch("{% url 'ia_assistant:api_clear' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    window.location.href = "{% url 'ia_assistant:chat' %}";
                 }
             });
         }
@@ -388,5 +659,7 @@
             }
         }
     </script>
+    
+    {% include 'components/modal.html' %}
 </body>
 </html>

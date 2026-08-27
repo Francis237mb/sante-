@@ -1,0 +1,332 @@
+{% extends 'administration/admin_base.html' %}
+
+{% block title %}{{ site_appearance.app_name }} - Profil de {{ target_user.get_full_name|default:target_user.username }}{% endblock %}
+{% block header_title %}Profil Utilisateur{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <button onclick="history.back()" class="inline-flex items-center text-sm font-semibold text-slate-500 hover:text-primary transition-colors">
+        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        Retour
+    </button>
+</div>
+
+<div class="space-y-6">
+    <!-- En-tête du profil -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-visible relative">
+        <div class="p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-6">
+            <div class="shrink-0">
+                {% if target_user.profile_picture %}
+                    <img src="{{ target_user.profile_picture.url }}" class="w-24 h-24 rounded-full object-cover shadow-md border-2 border-white">
+                {% else %}
+                    <div class="w-24 h-24 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold text-3xl shadow-md border-2 border-white">
+                        {{ target_user.username|slice:":2"|upper }}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="flex-1 text-center md:text-left">
+                <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+                    <div>
+                        <div class="flex flex-col md:flex-row md:items-center gap-3">
+                            <h2 class="text-2xl font-bold text-slate-800 font-heading">{{ target_user.get_full_name|default:target_user.username }}</h2>
+                            <div class="flex items-center justify-center gap-2">
+                                <span class="px-2.5 py-0.5 text-xs font-bold rounded-lg 
+                                    {% if target_user.role == 'admin' %}bg-slate-800 text-white
+                                    {% elif target_user.role == 'medecin' %}bg-primary/10 text-primary
+                                    {% elif target_user.role == 'pharmacie' %}bg-secondary/10 text-secondary
+                                    {% else %}bg-slate-100 text-slate-600{% endif %}">
+                                    {{ target_user.get_role_display }}
+                                </span>
+                                {% if target_user.is_active %}
+                                    <span class="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-lg bg-green-50 text-green-600 text-xs font-semibold">
+                                        <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                                        <span>Actif</span>
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-lg bg-red-50 text-red-600 text-xs font-semibold">
+                                        <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                                        <span>Suspendu</span>
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <p class="text-slate-500 font-medium mt-1">{{ target_user.email }}</p>
+                    </div>
+                    
+                    <!-- Actions Administrateur -->
+                    {% if target_user != request.user %}
+                    <div class="flex items-center gap-2" x-data="{ openOptions: false }">
+                        <button type="button" 
+                                @click.prevent="$dispatch('open-modal', {
+                                    title: 'Changer le statut',
+                                    message: 'Êtes-vous sûr de vouloir changer le statut de {{ target_user.username }} ?',
+                                    actionUrl: '{% url 'administration:user_toggle_status' target_user.pk %}',
+                                    type: '{% if target_user.is_active %}danger{% else %}success{% endif %}',
+                                    confirmText: '{% if target_user.is_active %}Suspendre{% else %}Réactiver{% endif %}'
+                                })"
+                                class="px-4 py-2 text-sm font-semibold rounded-xl shadow-sm transition-colors focus:ring-2 focus:ring-offset-2 {% if target_user.is_active %}bg-red-50 text-red-600 hover:bg-red-100{% else %}bg-green-50 text-green-600 hover:bg-green-100{% endif %}">
+                            {% if target_user.is_active %}Suspendre{% else %}Réactiver{% endif %}
+                        </button>
+
+                        <div class="relative">
+                            <button @click="openOptions = !openOptions" @click.away="openOptions = false" class="p-2 bg-slate-50 text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
+                            </button>
+                            <div x-show="openOptions" x-cloak class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-50">
+                                <button type="button" 
+                                        @click="openOptions = false; $dispatch('open-modal', {
+                                            title: 'Réinitialiser le mot de passe',
+                                            message: 'Un lien de réinitialisation sera envoyé à {{ target_user.email }}. Continuer ?',
+                                            actionUrl: '{% url 'administration:user_reset_password' target_user.pk %}',
+                                            type: 'info',
+                                            confirmText: 'Envoyer le lien'
+                                        })"
+                                        class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                                    Réinitialiser mot de passe
+                                </button>
+                                <button type="button" 
+                                        @click="openOptions = false; $dispatch('open-modal', {
+                                            title: 'Désactiver le compte',
+                                            message: 'Désactiver temporairement ce compte. L\'utilisateur ne pourra plus se connecter.',
+                                            actionUrl: '{% url 'administration:user_deactivate' target_user.pk %}',
+                                            type: 'danger',
+                                            confirmText: 'Désactiver'
+                                        })"
+                                        class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                                    Désactiver le compte
+                                </button>
+                                <button type="button" 
+                                        @click="openOptions = false; $dispatch('open-modal', {
+                                            title: 'Archiver l\'utilisateur',
+                                            message: 'L\'utilisateur sera archivé et masqué des listes actives.',
+                                            actionUrl: '{% url 'administration:user_archive' target_user.pk %}',
+                                            type: 'danger',
+                                            confirmText: 'Archiver'
+                                        })"
+                                        class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                    Archiver
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="mt-6 flex flex-wrap justify-center md:justify-start gap-4">
+                    {% if target_user.phone_number %}
+                    <div class="flex items-center text-sm text-slate-600">
+                        <svg class="w-4 h-4 mr-2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                        {{ target_user.phone_number }}
+                    </div>
+                    {% endif %}
+                    <div class="flex items-center text-sm text-slate-600">
+                        <svg class="w-4 h-4 mr-2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        Inscrit le {{ target_user.date_joined|date:"d M Y" }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Informations spécifiques selon le rôle -->
+        <div class="lg:col-span-1 space-y-6">
+            {% if doctor_profile %}
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="px-5 py-4 border-b border-slate-100 bg-slate-50/50">
+                    <h3 class="font-bold text-slate-800">Informations Professionnelles</h3>
+                </div>
+                <div class="p-5 space-y-4">
+                    <div>
+                        <span class="block text-xs font-semibold text-slate-400 uppercase">Spécialité</span>
+                        <span class="text-sm font-medium text-slate-700">{{ doctor_profile.speciality|default:"Non renseignée" }}</span>
+                    </div>
+                    <div>
+                        <span class="block text-xs font-semibold text-slate-400 uppercase">Structure d'exercice</span>
+                        <span class="text-sm font-medium text-slate-700">{{ doctor_profile.hospital_affiliation|default:doctor_profile.clinic_name|default:"Non renseignée" }}</span>
+                    </div>
+                    <div>
+                        <span class="block text-xs font-semibold text-slate-400 uppercase">Numéro d'ordre</span>
+                        <span class="text-sm font-medium text-slate-700 font-mono">{{ doctor_profile.license_number|default:"Non renseigné" }}</span>
+                    </div>
+                    <div>
+                        <span class="block text-xs font-semibold text-slate-400 uppercase">Statut de vérification</span>
+                        {% if doctor_profile.verification_status == 'verified' %}
+                            <span class="text-sm font-bold text-secondary">Vérifié le {{ doctor_profile.verified_at|date:"d/m/Y" }}</span>
+                        {% elif doctor_profile.verification_status == 'pending' %}
+                            <span class="text-sm font-bold text-orange-500">En attente</span>
+                        {% else %}
+                            <span class="text-sm font-bold text-red-500">Refusé</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="px-5 py-4 border-b border-slate-100 bg-slate-50/50">
+                    <h3 class="font-bold text-slate-800">Documents justificatifs</h3>
+                </div>
+                <div class="p-5 space-y-3">
+                    {% if doctor_profile.diploma_document %}
+                        <a href="{{ doctor_profile.diploma_document.url }}" target="_blank" class="flex items-center p-3 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-colors group">
+                            <svg class="w-5 h-5 text-slate-400 group-hover:text-primary mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                            <span class="text-sm font-medium text-slate-700 group-hover:text-primary">Diplôme médical</span>
+                        </a>
+                    {% endif %}
+                    {% if doctor_profile.professional_card_document %}
+                        <a href="{{ doctor_profile.professional_card_document.url }}" target="_blank" class="flex items-center p-3 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-colors group">
+                            <svg class="w-5 h-5 text-slate-400 group-hover:text-primary mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            <span class="text-sm font-medium text-slate-700 group-hover:text-primary">Carte professionnelle</span>
+                        </a>
+                    {% endif %}
+                    {% if doctor_profile.identity_document %}
+                        <a href="{{ doctor_profile.identity_document.url }}" target="_blank" class="flex items-center p-3 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-colors group">
+                            <svg class="w-5 h-5 text-slate-400 group-hover:text-primary mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path></svg>
+                            <span class="text-sm font-medium text-slate-700 group-hover:text-primary">Pièce d'identité</span>
+                        </a>
+                    {% endif %}
+                    {% if not doctor_profile.diploma_document and not doctor_profile.identity_document and not doctor_profile.professional_card_document %}
+                        <p class="text-sm text-slate-500 italic">Aucun document fourni.</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if pharmacy_profile %}
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="px-5 py-4 border-b border-slate-100 bg-slate-50/50">
+                    <h3 class="font-bold text-slate-800">Informations Pharmacie</h3>
+                </div>
+                <div class="p-5 space-y-4">
+                    <div>
+                        <span class="block text-xs font-semibold text-slate-400 uppercase">Nom de la pharmacie</span>
+                        <span class="text-sm font-medium text-slate-700">{{ pharmacy_profile.pharmacy_name }}</span>
+                    </div>
+                    <div>
+                        <span class="block text-xs font-semibold text-slate-400 uppercase">Adresse</span>
+                        <span class="text-sm font-medium text-slate-700">{{ pharmacy_profile.address }}</span>
+                    </div>
+                    <div>
+                        <span class="block text-xs font-semibold text-slate-400 uppercase">Téléphone</span>
+                        <span class="text-sm font-medium text-slate-700 font-mono">{{ pharmacy_profile.phone|default:"Non renseigné" }}</span>
+                    </div>
+                    <div>
+                        <span class="block text-xs font-semibold text-slate-400 uppercase">Statut de vérification</span>
+                        {% if pharmacy_profile.verification_status == 'verified' %}
+                            <span class="text-sm font-bold text-secondary">Vérifié le {{ pharmacy_profile.verified_at|date:"d/m/Y" }}</span>
+                        {% elif pharmacy_profile.verification_status == 'pending' %}
+                            <span class="text-sm font-bold text-orange-500">En attente</span>
+                        {% else %}
+                            <span class="text-sm font-bold text-red-500">Refusé</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="px-5 py-4 border-b border-slate-100 bg-slate-50/50">
+                    <h3 class="font-bold text-slate-800">Documents justificatifs</h3>
+                </div>
+                <div class="p-5 space-y-3">
+                    {% if pharmacy_profile.registre_commerce %}
+                        <a href="{{ pharmacy_profile.registre_commerce.url }}" target="_blank" class="flex items-center p-3 border border-slate-200 rounded-xl hover:border-secondary hover:bg-secondary/5 transition-colors group">
+                            <svg class="w-5 h-5 text-slate-400 group-hover:text-secondary mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                            <span class="text-sm font-medium text-slate-700 group-hover:text-secondary">Registre de commerce</span>
+                        </a>
+                    {% endif %}
+                    {% if pharmacy_profile.autorisation_exercice %}
+                        <a href="{{ pharmacy_profile.autorisation_exercice.url }}" target="_blank" class="flex items-center p-3 border border-slate-200 rounded-xl hover:border-secondary hover:bg-secondary/5 transition-colors group">
+                            <svg class="w-5 h-5 text-slate-400 group-hover:text-secondary mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            <span class="text-sm font-medium text-slate-700 group-hover:text-secondary">Autorisation d'exercice</span>
+                        </a>
+                    {% endif %}
+                    {% if not pharmacy_profile.registre_commerce and not pharmacy_profile.autorisation_exercice %}
+                        <p class="text-sm text-slate-500 italic">Aucun document fourni.</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Activité, Consultations et Ordonnances -->
+        <div class="lg:col-span-2 space-y-6">
+            
+            {% if target_user.role == 'medecin' or target_user.role == 'patient' %}
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="px-6 py-5 border-b border-slate-100 bg-white flex justify-between items-center">
+                    <h3 class="font-bold text-slate-800 font-heading">Historique Médical</h3>
+                    <div class="flex space-x-2 text-sm">
+                        <span class="px-2 py-1 bg-slate-50 rounded-lg text-slate-600 font-semibold">{{ consultations|length }} consultations</span>
+                        <span class="px-2 py-1 bg-slate-50 rounded-lg text-slate-600 font-semibold">{{ ordonnances|length }} ordonnances</span>
+                    </div>
+                </div>
+                <div class="p-0">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-slate-500">
+                            <thead class="text-xs text-slate-400 uppercase bg-slate-50 border-b border-slate-100">
+                                <tr>
+                                    <th class="px-6 py-3 font-bold">Date & Type</th>
+                                    <th class="px-6 py-3 font-bold">{% if target_user.role == 'medecin' %}Patient{% else %}Médecin{% endif %}</th>
+                                    <th class="px-6 py-3 font-bold">Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for rdv in consultations|slice:":5" %}
+                                <tr class="border-b border-slate-50 hover:bg-slate-50/50">
+                                    <td class="px-6 py-3">
+                                        <span class="block font-medium text-slate-800">{{ rdv.date|date:"d/m/Y" }} à {{ rdv.time_slot }}</span>
+                                        <span class="text-xs text-slate-500">{{ rdv.get_consultation_type_display }}</span>
+                                    </td>
+                                    <td class="px-6 py-3 font-medium text-slate-700">
+                                        {% if target_user.role == 'medecin' %}
+                                            {{ rdv.patient.get_full_name|default:rdv.patient.username }}
+                                        {% else %}
+                                            Dr. {{ rdv.doctor.get_full_name|default:rdv.doctor.username }}
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-6 py-3">
+                                        <span class="text-xs font-semibold px-2 py-1 rounded-md bg-slate-100 text-slate-600">{{ rdv.get_status_display }}</span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="3" class="px-6 py-8 text-center text-slate-400 italic">Aucune consultation.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="px-6 py-5 border-b border-slate-100 bg-white">
+                    <h3 class="font-bold text-slate-800 font-heading">Journal d'Activité Récent</h3>
+                </div>
+                <div class="p-0">
+                    <ul class="divide-y divide-slate-100">
+                        {% for log in activity_logs %}
+                        <li class="px-6 py-4 hover:bg-slate-50/50 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-2">
+                            <div>
+                                <span class="block text-sm font-semibold text-slate-800">{{ log.get_action_type_display }}</span>
+                                <span class="block text-sm text-slate-600">{{ log.action }}</span>
+                                {% if log.content_object %}
+                                    <span class="inline-block mt-1 text-xs font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-500">{{ log.content_object }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="text-right">
+                                <span class="block text-xs font-medium text-slate-400">{{ log.created_at|date:"d/m/Y H:i" }}</span>
+                                <span class="block text-[10px] text-slate-300">{{ log.ip_address|default:"" }}</span>
+                            </div>
+                        </li>
+                        {% empty %}
+                        <li class="px-6 py-8 text-center text-slate-400 italic">Aucune activité enregistrée.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}

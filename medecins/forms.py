@@ -45,7 +45,13 @@ class DoctorProfileForm(forms.ModelForm):
             self.fields['last_name'].initial = self.instance.last_name
 
     def clean_email(self):
-        return self.cleaned_data.get('email')
+        email = self.cleaned_data.get('email', '').lower().strip()
+        qs = CustomUser.objects.filter(email__iexact=email)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError("Cette adresse email est déjà utilisée par un autre utilisateur.")
+        return email
 
     def save(self, commit=True):
         user = super().save(commit=commit)

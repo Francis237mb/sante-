@@ -1,0 +1,80 @@
+{% extends 'administration/admin_base.html' %}
+
+{% block title %}{{ site_appearance.app_name }} - Statistiques{% endblock %}
+{% block header_title %}Statistiques et Rapports{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+        <h2 class="text-lg font-bold text-slate-800 font-heading mb-4">Inscriptions (6 derniers mois)</h2>
+        <div class="h-72 w-full">
+            <canvas id="usersChart"></canvas>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+        <h2 class="text-lg font-bold text-slate-800 font-heading mb-4">Répartition des Rôles</h2>
+        <div class="h-72 w-full flex justify-center">
+            <canvas id="rolesChart"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_body %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const primaryColor = '{{ site_appearance.primary_color|default:"#1B5FA8" }}';
+        const secondaryColor = '{{ site_appearance.secondary_color|default:"#6DBE45" }}';
+        
+        // Graphique Inscriptions
+        const ctxUsers = document.getElementById('usersChart').getContext('2d');
+        new Chart(ctxUsers, {
+            type: 'bar',
+            data: {
+                labels: {{ users_chart_labels|safe|default:"[]" }},
+                datasets: [{
+                    label: 'Nouvelles inscriptions',
+                    data: {{ users_chart_data|safe|default:"[]" }},
+                    backgroundColor: primaryColor,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // Graphique Rôles
+        const ctxRoles = document.getElementById('rolesChart').getContext('2d');
+        new Chart(ctxRoles, {
+            type: 'doughnut',
+            data: {
+                labels: {{ roles_chart_labels|safe|default:"[]" }},
+                datasets: [{
+                    data: {{ roles_chart_data|safe|default:"[]" }},
+                    backgroundColor: [
+                        primaryColor,
+                        secondaryColor,
+                        '#64748b',
+                        '#f59e0b'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

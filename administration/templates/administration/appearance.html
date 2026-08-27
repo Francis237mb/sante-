@@ -1,0 +1,227 @@
+{% extends 'administration/admin_base.html' %}
+
+{% block title %}{{ site_appearance.app_name }} - Apparence{% endblock %}
+{% block header_title %}Personnalisation de l'Apparence{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden max-w-4xl mx-auto">
+    <div class="px-6 py-5 border-b border-slate-100 bg-white">
+        <h2 class="text-lg font-bold text-slate-800 font-heading">Paramètres généraux</h2>
+        <p class="text-sm text-slate-500 mt-1">Ces paramètres modifieront dynamiquement l'apparence de toute la plateforme.</p>
+    </div>
+    
+    <div class="p-6 md:p-8">
+        <form method="post" enctype="multipart/form-data" class="space-y-8">
+            {% csrf_token %}
+            
+            <!-- Informations de base -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Nom de l'application</label>
+                    <input type="text" name="app_name" value="{{ form.app_name.value|default:site_appearance.app_name }}" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-primary/20 outline-none text-slate-800 transition-shadow">
+                    {% if form.app_name.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ form.app_name.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Texte d'accroche (Page d'accueil)</label>
+                    <input type="text" name="hero_text" value="{{ form.hero_text.value|default:site_appearance.hero_text }}" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-primary/20 outline-none text-slate-800 transition-shadow">
+                </div>
+                
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Description courte (Page d'accueil)</label>
+                    <textarea name="hero_description" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-primary/20 outline-none text-slate-800 transition-shadow">{{ form.hero_description.value|default:site_appearance.hero_description }}</textarea>
+                </div>
+            </div>
+
+            <hr class="border-slate-100">
+
+            <!-- Couleurs -->
+            <div>
+                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 font-heading">Charte Graphique</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div x-data="{ color: '{{ form.primary_color.value|default:site_appearance.primary_color }}' }">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Couleur Principale</label>
+                        <div class="flex items-center space-x-3">
+                            <input type="color" name="primary_color" x-model="color" class="h-10 w-10 rounded-lg cursor-pointer border border-slate-200 p-0.5">
+                            <input type="text" x-model="color" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-sm focus:ring-2 focus:ring-primary/20 outline-none uppercase font-mono text-slate-600" readonly>
+                        </div>
+                    </div>
+                    
+                    <div x-data="{ color: '{{ form.secondary_color.value|default:site_appearance.secondary_color }}' }">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Couleur Secondaire</label>
+                        <div class="flex items-center space-x-3">
+                            <input type="color" name="secondary_color" x-model="color" class="h-10 w-10 rounded-lg cursor-pointer border border-slate-200 p-0.5">
+                            <input type="text" x-model="color" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-sm focus:ring-2 focus:ring-secondary/20 outline-none uppercase font-mono text-slate-600" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="border-slate-100">
+
+            <!-- Fichiers -->
+            <div>
+                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 font-heading">Images</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Logo -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Logo du site</label>
+                        <div class="flex items-center space-x-4 mb-3">
+                            <div class="w-16 h-16 bg-white border border-slate-200 rounded-lg flex items-center justify-center overflow-hidden">
+                                {% if site_appearance.logo %}
+                                    <img src="{{ site_appearance.logo.url }}" class="max-w-full max-h-full object-contain p-1">
+                                {% else %}
+                                    <span class="text-xs text-slate-400">Aucun</span>
+                                {% endif %}
+                            </div>
+                            <div class="flex-1">
+                                <input type="file" name="logo" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-colors">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Favicon -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Favicon</label>
+                        <div class="flex items-center space-x-4 mb-3">
+                            <div class="w-12 h-12 bg-white border border-slate-200 rounded-lg flex items-center justify-center overflow-hidden">
+                                {% if site_appearance.favicon %}
+                                    <img src="{{ site_appearance.favicon.url }}" class="max-w-full max-h-full object-contain p-1">
+                                {% else %}
+                                    <span class="text-xs text-slate-400">Aucun</span>
+                                {% endif %}
+                            </div>
+                            <div class="flex-1">
+                                <input type="file" name="favicon" accept="image/x-icon,image/png" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-colors">
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-400">Format .ico ou .png, carré (ex: 32x32px)</p>
+                    </div>
+
+                    <!-- Image Principale -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 md:col-span-2">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Image principale de la page d'accueil</label>
+                        <div class="flex items-center space-x-4 mb-3">
+                            <div class="w-24 h-16 bg-white border border-slate-200 rounded-lg flex items-center justify-center overflow-hidden">
+                                {% if site_appearance.hero_image %}
+                                    <img src="{{ site_appearance.hero_image.url }}" class="max-w-full max-h-full object-cover">
+                                {% else %}
+                                    <span class="text-xs text-slate-400">Aucune</span>
+                                {% endif %}
+                            </div>
+                            <div class="flex-1">
+                                <input type="file" name="hero_image" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-colors">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="border-slate-100">
+
+            <!-- Réseaux Sociaux & Contact -->
+            <div>
+                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 font-heading">Réseaux Sociaux & Contact</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Lien Facebook</label>
+                        <input type="url" name="facebook_url" value="{{ form.facebook_url.value|default:site_appearance.facebook_url|default:'' }}" placeholder="https://facebook.com/..." class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-sm focus:ring-2 focus:ring-primary/20 outline-none text-slate-600">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Lien Twitter (X)</label>
+                        <input type="url" name="twitter_url" value="{{ form.twitter_url.value|default:site_appearance.twitter_url|default:'' }}" placeholder="https://twitter.com/..." class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-sm focus:ring-2 focus:ring-primary/20 outline-none text-slate-600">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Lien Instagram</label>
+                        <input type="url" name="instagram_url" value="{{ form.instagram_url.value|default:site_appearance.instagram_url|default:'' }}" placeholder="https://instagram.com/..." class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-sm focus:ring-2 focus:ring-primary/20 outline-none text-slate-600">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Lien LinkedIn</label>
+                        <input type="url" name="linkedin_url" value="{{ form.linkedin_url.value|default:site_appearance.linkedin_url|default:'' }}" placeholder="https://linkedin.com/..." class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-sm focus:ring-2 focus:ring-primary/20 outline-none text-slate-600">
+                    </div>
+                    <div class="md:col-span-2 mt-2 border-t border-slate-100 pt-4"></div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Email de Contact</label>
+                        <input type="email" name="contact_email" value="{{ form.contact_email.value|default:site_appearance.contact_email }}" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-sm focus:ring-2 focus:ring-primary/20 outline-none text-slate-600">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Téléphone de Contact</label>
+                        <input type="text" name="contact_phone" value="{{ form.contact_phone.value|default:site_appearance.contact_phone }}" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-sm focus:ring-2 focus:ring-primary/20 outline-none text-slate-600">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Adresse</label>
+                        <input type="text" name="contact_address" value="{{ form.contact_address.value|default:site_appearance.contact_address }}" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-sm focus:ring-2 focus:ring-primary/20 outline-none text-slate-600">
+                    </div>
+                </div>
+            </div>
+
+            <hr class="border-slate-100">
+
+            <!-- Fonctionnalités (Toggles) -->
+            <div>
+                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 font-heading">Fonctionnalités</h3>
+                <div class="space-y-4">
+                    <label class="flex items-center space-x-3 cursor-pointer">
+                        <div class="relative">
+                            <input type="checkbox" name="maintenance_mode" class="sr-only" {% if site_appearance.maintenance_mode %}checked{% endif %}>
+                            <div class="w-10 h-6 bg-slate-200 rounded-full shadow-inner transition-colors peer-checked:bg-primary"></div>
+                            <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4"></div>
+                        </div>
+                        <span class="text-sm font-medium text-slate-700">Mode Maintenance (bloque l'accès au site pour le public)</span>
+                    </label>
+                    <label class="flex items-center space-x-3 cursor-pointer">
+                        <div class="relative">
+                            <input type="checkbox" name="enable_ia_assistant" class="sr-only" {% if site_appearance.enable_ia_assistant %}checked{% endif %}>
+                            <div class="w-10 h-6 bg-slate-200 rounded-full shadow-inner transition-colors peer-checked:bg-primary"></div>
+                            <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4"></div>
+                        </div>
+                        <span class="text-sm font-medium text-slate-700">Activer l'assistant IA</span>
+                    </label>
+                    <label class="flex items-center space-x-3 cursor-pointer">
+                        <div class="relative">
+                            <input type="checkbox" name="enable_payments" class="sr-only" {% if site_appearance.enable_payments %}checked{% endif %}>
+                            <div class="w-10 h-6 bg-slate-200 rounded-full shadow-inner transition-colors peer-checked:bg-primary"></div>
+                            <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4"></div>
+                        </div>
+                        <span class="text-sm font-medium text-slate-700">Activer le module de paiement</span>
+                    </label>
+                </div>
+            </div>
+
+            <script>
+                // Script pour les toggles Tailwind
+                document.querySelectorAll('input[type="checkbox"].sr-only').forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        const bg = this.nextElementSibling;
+                        const dot = bg.nextElementSibling;
+                        if(this.checked) {
+                            bg.classList.add('bg-primary');
+                            bg.classList.remove('bg-slate-200');
+                            dot.classList.add('translate-x-4');
+                        } else {
+                            bg.classList.remove('bg-primary');
+                            bg.classList.add('bg-slate-200');
+                            dot.classList.remove('translate-x-4');
+                        }
+                    });
+                    // Initialize state
+                    if(checkbox.checked) {
+                        checkbox.nextElementSibling.classList.add('bg-primary');
+                        checkbox.nextElementSibling.classList.remove('bg-slate-200');
+                        checkbox.nextElementSibling.nextElementSibling.classList.add('translate-x-4');
+                    }
+                });
+            </script>
+
+            <!-- Bouton submit -->
+            <div class="flex justify-end pt-4">
+                <button type="submit" class="px-6 py-3 bg-primary hover:bg-blue-700 text-white text-sm font-bold rounded-xl shadow-sm transition-colors">
+                    Sauvegarder les modifications
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

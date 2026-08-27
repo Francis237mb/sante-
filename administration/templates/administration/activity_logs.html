@@ -1,0 +1,109 @@
+{% extends 'administration/admin_base.html' %}
+
+{% block title %}{{ site_appearance.app_name }} - Journal d'activité{% endblock %}
+{% block header_title %}Journal d'activité{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+    <div class="px-6 py-5 border-b border-slate-100 bg-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <h2 class="text-lg font-bold text-slate-800 font-heading">Historique des actions sensibles</h2>
+        
+        <form method="get" class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+            <select name="action_type" class="bg-slate-50 border border-slate-200 text-slate-600 text-sm rounded-xl focus:ring-primary focus:border-primary block p-2.5 outline-none w-full sm:w-auto" onchange="this.form.submit()">
+                <option value="">Tous les types d'actions</option>
+                <option value="connexion" {% if request.GET.action_type == 'connexion' %}selected{% endif %}>Connexion / Déconnexion</option>
+                <option value="inscription" {% if request.GET.action_type == 'inscription' %}selected{% endif %}>Inscription</option>
+                <option value="profil" {% if request.GET.action_type == 'profil' %}selected{% endif %}>Profil</option>
+                <option value="consultation" {% if request.GET.action_type == 'consultation' %}selected{% endif %}>Consultation</option>
+                <option value="ordonnance" {% if request.GET.action_type == 'ordonnance' %}selected{% endif %}>Ordonnance</option>
+                <option value="signalement" {% if request.GET.action_type == 'signalement' %}selected{% endif %}>Signalement</option>
+                <option value="admin" {% if request.GET.action_type == 'admin' %}selected{% endif %}>Administration</option>
+            </select>
+            
+            <select name="role" class="bg-slate-50 border border-slate-200 text-slate-600 text-sm rounded-xl focus:ring-primary focus:border-primary block p-2.5 outline-none w-full sm:w-auto" onchange="this.form.submit()">
+                <option value="">Tous les utilisateurs</option>
+                <option value="patient" {% if request.GET.role == 'patient' %}selected{% endif %}>Patients</option>
+                <option value="medecin" {% if request.GET.role == 'medecin' %}selected{% endif %}>Médecins</option>
+                <option value="pharmacie" {% if request.GET.role == 'pharmacie' %}selected{% endif %}>Pharmacies</option>
+                <option value="admin" {% if request.GET.role == 'admin' %}selected{% endif %}>Admins</option>
+            </select>
+            
+            <div class="relative w-full sm:w-64">
+                <input type="text" name="search" value="{{ request.GET.search|default:'' }}" placeholder="Rechercher (utilisateur, action)..." class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary/20 outline-none text-slate-600 transition-shadow">
+                <svg class="w-4 h-4 text-slate-400 absolute left-4 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+        </form>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left text-slate-500">
+            <thead class="text-xs text-slate-400 uppercase bg-slate-50 border-b border-slate-100">
+                <tr>
+                    <th scope="col" class="px-6 py-4 font-bold tracking-wider">Date & Heure</th>
+                    <th scope="col" class="px-6 py-4 font-bold tracking-wider">Administrateur</th>
+                    <th scope="col" class="px-6 py-4 font-bold tracking-wider">Action</th>
+                    <th scope="col" class="px-6 py-4 font-bold tracking-wider">Cible</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr class="bg-white border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                    <td class="px-6 py-4 font-medium text-slate-700">
+                        {{ log.created_at|date:"d/m/Y H:i" }}
+                    </td>
+                    <td class="px-6 py-4 font-medium text-slate-900">
+                        {% if log.user %}
+                            <a href="{% url 'administration:user_detail' log.user.pk %}" class="hover:text-primary transition-colors hover:underline">
+                                {{ log.user.get_full_name|default:log.user.username }}
+                                <span class="text-xs text-slate-400 block">{{ log.user.get_role_display }}</span>
+                            </a>
+                        {% else %}
+                            <span class="text-slate-400 italic">Anonyme / Système</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="text-slate-800 font-semibold block">{{ log.get_action_type_display }}</span>
+                        <span class="text-slate-500 text-xs">{{ log.action }}</span>
+                    </td>
+                    <td class="px-6 py-4 text-slate-600">
+                        {% if log.content_object %}
+                            <span class="px-2 py-1 bg-slate-100 rounded text-xs">{{ log.content_object }}</span>
+                        {% else %}
+                            <span class="text-slate-400">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="px-6 py-12 text-center text-slate-500">
+                        Aucun journal d'activité enregistré.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    {% if page_obj.has_other_pages %}
+    <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-center">
+        <nav class="flex items-center space-x-1">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-200 transition-colors">Précédent</a>
+            {% endif %}
+            
+            {% for i in paginator.page_range %}
+                {% if page_obj.number == i %}
+                    <span class="px-3 py-1.5 rounded-lg text-sm font-bold bg-primary text-white">{{ i }}</span>
+                {% else %}
+                    <a href="?page={{ i }}" class="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-200 transition-colors">{{ i }}</a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-200 transition-colors">Suivant</a>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

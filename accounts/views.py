@@ -6,7 +6,7 @@ from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.contrib.auth import login as auth_login
 from django.views.generic.edit import CreateView
 from django.contrib import messages
-from django.views.decorators.csrf import csrf_exempt
+
 from django.utils.decorators import method_decorator
 from .forms import CustomUserCreationForm
 
@@ -14,6 +14,8 @@ def get_dashboard_url_for_user(user):
     if not user or not user.is_authenticated:
         return 'core:home'
     role = getattr(user, 'role', None)
+    if role == 'admin' or getattr(user, 'is_superuser', False) or getattr(user, 'is_staff', False):
+        return 'administration:dashboard'
     if role == 'patient':
         return 'patients:dashboard'
     elif role == 'medecin':
@@ -22,7 +24,6 @@ def get_dashboard_url_for_user(user):
         return 'pharmacies:list'
     return 'core:home'
 
-@method_decorator(csrf_exempt, name='dispatch')
 class LoginPatientView(DjangoLoginView):
     template_name = 'accounts/login_patient.html'
     redirect_authenticated_user = True
@@ -42,7 +43,6 @@ class LoginPatientView(DjangoLoginView):
             messages.info(self.request, f"Vous êtes connecté en tant que {user.get_role_display()}.")
         return redirect(get_dashboard_url_for_user(user))
 
-@method_decorator(csrf_exempt, name='dispatch')
 class LoginMedecinView(DjangoLoginView):
     template_name = 'accounts/login_medecin.html'
     redirect_authenticated_user = True
@@ -56,13 +56,23 @@ class LoginMedecinView(DjangoLoginView):
         return reverse_lazy(get_dashboard_url_for_user(self.request.user))
 
     def form_valid(self, form):
-        auth_login(self.request, form.get_user())
-        user = self.request.user
+        user = form.get_user()
+        if user.role == 'medecin':
+            profile = getattr(user, 'doctor_profile', None)
+            if profile and not getattr(profile, 'is_verified', True):
+                status = getattr(profile, 'verification_status', 'pending')
+                if status == 'rejected':
+                    reason = getattr(profile, 'rejection_reason', '') or "Votre candidature n'a pas été retenue par notre équipe."
+                    messages.error(self.request, f"❌ Votre demande d'inscription médecin a été refusée. Motif : {reason}")
+                else:
+                    messages.warning(self.request, "⏳ Votre compte médecin est actuellement en attente de validation par notre équipe administrative. Vous recevrez une notification dès que votre accès sera autorisé.")
+                return redirect('accounts:login_medecin')
+
+        auth_login(self.request, user)
         if user.role != 'medecin':
             messages.info(self.request, f"Vous êtes connecté en tant que {user.get_role_display()}.")
         return redirect(get_dashboard_url_for_user(user))
 
-@method_decorator(csrf_exempt, name='dispatch')
 class LoginPharmacieView(DjangoLoginView):
     template_name = 'accounts/login_pharmacie.html'
     redirect_authenticated_user = True
@@ -82,11 +92,9 @@ class LoginPharmacieView(DjangoLoginView):
             messages.info(self.request, f"Vous êtes connecté en tant que {user.get_role_display()}.")
         return redirect(get_dashboard_url_for_user(user))
 
-@method_decorator(csrf_exempt, name='dispatch')
 class LogoutView(DjangoLogoutView):
     next_page = 'core:home'
 
-@method_decorator(csrf_exempt, name='dispatch')
 class RegisterView(CreateView):
     template_name = 'accounts/register.html'
     form_class = CustomUserCreationForm
@@ -98,5 +106,21 @@ class RegisterView(CreateView):
 
     def form_valid(self, form):
         user = form.save()
-        auth_login(self.request, user)
-        return redirect(get_dashboard_url_for_user(user))
+        if user.role == 'medecin':
+            messages.success(
+                self.request,
+                "🩺 Votre demande d'inscription a été envoyée. Vous recevrez une notification une fois votre compte validé par notre équipe administrative avant de pouvoir vous identifier."
+            )
+            return redirect('accounts:login_medecin')
+        elif user.role == 'pharmacie':
+            messages.success(
+                self.request,
+                "Votre compte a été créé avec succès. Veuillez vous identifier pour accéder à votre espace personnel."
+            )
+            return redirect('accounts:login_pharmacie')
+        
+        messages.success(
+            self.request, 
+            "Votre compte a été créé avec succès. Veuillez vous identifier pour accéder à votre espace personnel."
+        )
+        return redirect('accounts:login_patient')

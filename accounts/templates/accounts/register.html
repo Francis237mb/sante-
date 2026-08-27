@@ -71,12 +71,28 @@
                 </div>
             {% endif %}
 
-            <!-- Registration Form -->
-            <form id="register-form" method="POST" class="space-y-4">
+            <!-- Progress Bar (Visible ONLY for Médecin) -->
+            <div id="doctor-progress-bar" class="hidden mb-6 transition-all duration-500">
+                <div class="flex items-center justify-between text-xs font-bold font-poppins mb-2 px-1">
+                    <span id="step-label-1" class="text-medical-blue transition-colors">1. Informations de base</span>
+                    <span id="step-label-2" class="text-gray-300 transition-colors">2. Professionnel</span>
+                    <span id="step-label-3" class="text-gray-300 transition-colors">3. Documents</span>
+                </div>
+                <div class="relative w-full h-2.5 bg-gray-100 rounded-full overflow-hidden p-0.5 shadow-inner">
+                    <div id="progress-fill" class="h-full bg-medical-blue rounded-full transition-all duration-500 w-1/3 shadow-sm"></div>
+                </div>
+                <div class="flex justify-between mt-1 px-1 text-[10px] text-gray-400 font-medium">
+                    <span>Étape 1 sur 3</span>
+                    <span id="step-subtitle">Données personnelles & identifiants</span>
+                </div>
+            </div>
+
+            <!-- Registration Form (Supports multipart/form-data for document uploads) -->
+            <form id="register-form" method="POST" enctype="multipart/form-data" class="space-y-4">
                 {% csrf_token %}
                 
                 <!-- Role Selector Tabs -->
-                <div class="space-y-1.5">
+                <div class="space-y-1.5" id="role-selector-container">
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">
                         {% translate "Je m'inscris en tant que" %}
                     </label>
@@ -100,121 +116,311 @@
                     </div>
                 </div>
 
-                <!-- Username Input -->
-                <div class="space-y-1">
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">
-                        {% translate "Nom d'utilisateur" %}
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
-                            <!-- User Icon -->
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0zM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                            </svg>
+                <!-- ========================================== -->
+                <!-- ÉTAPE 1 : INFORMATIONS DE BASE (TOUS RÔLES) -->
+                <!-- ========================================== -->
+                <div id="step-1-container" class="space-y-4 transition-all duration-300">
+                    <!-- Username Input -->
+                    <div class="space-y-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">
+                            {% translate "Nom d'utilisateur" %} <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0zM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                </svg>
+                            </div>
+                            <input type="text" name="username" id="id_username" value="{{ form.username.value|default:'' }}" placeholder="Choisissez un pseudo ou votre nom public" class="input-field w-full pl-11 pr-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-leaf-green focus:border-transparent transition-all text-sm font-medium bg-gray-50/50 focus:bg-white" required>
                         </div>
-                        <input type="text" name="username" id="id_username" value="{{ form.username.value|default:'' }}" placeholder="Choisissez un pseudo" class="input-field w-full pl-11 pr-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-leaf-green focus:border-transparent transition-all text-sm font-medium bg-gray-50/50 focus:bg-white" required>
                     </div>
-                </div>
 
-                <!-- Email Input -->
-                <div class="space-y-1">
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">
-                        {% translate "Adresse Email" %}
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
-                            <!-- Envelope Icon -->
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
-                            </svg>
+                    <!-- Email Input -->
+                    <div class="space-y-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">
+                            {% translate "Adresse Email" %} <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                                </svg>
+                            </div>
+                            <input type="email" name="email" id="id_email" value="{{ form.email.value|default:'' }}" placeholder="Saisissez votre adresse email active" class="input-field w-full pl-11 pr-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-leaf-green focus:border-transparent transition-all text-sm font-medium bg-gray-50/50 focus:bg-white" required>
                         </div>
-                        <input type="email" name="email" id="id_email" value="{{ form.email.value|default:'' }}" placeholder="Saisissez votre adresse email" class="input-field w-full pl-11 pr-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-leaf-green focus:border-transparent transition-all text-sm font-medium bg-gray-50/50 focus:bg-white" required>
                     </div>
-                </div>
 
-                <!-- Phone Input -->
-                <div class="space-y-1">
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">
-                        {% translate "Numéro de téléphone" %}
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
-                            <!-- Phone Icon -->
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-2.824-1.502-5.132-3.81-6.634-6.634l1.3-1.02c.362-.272.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
-                            </svg>
+                    <!-- Phone Input -->
+                    <div class="space-y-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">
+                            {% translate "Numéro de téléphone" %}
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-2.824-1.502-5.132-3.81-6.634-6.634l1.3-1.02c.362-.272.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
+                                </svg>
+                            </div>
+                            <input type="tel" name="phone_number" id="id_phone_number" value="{{ form.phone_number.value|default:'' }}" placeholder="Ex: +237 600 000 000" class="input-field w-full pl-11 pr-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-leaf-green focus:border-transparent transition-all text-sm font-medium bg-gray-50/50 focus:bg-white">
                         </div>
-                        <input type="tel" name="phone_number" id="id_phone_number" value="{{ form.phone_number.value|default:'' }}" placeholder="Ex: +237 600 000 000" class="input-field w-full pl-11 pr-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-leaf-green focus:border-transparent transition-all text-sm font-medium bg-gray-50/50 focus:bg-white">
                     </div>
-                </div>
 
-                <!-- Password Input -->
-                <div class="space-y-1">
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">
-                        {% translate "Mot de passe" %}
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
-                            <!-- Lock Icon -->
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-                            </svg>
+                    <!-- Password Input -->
+                    <div class="space-y-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">
+                            {% translate "Mot de passe" %} <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                                </svg>
+                            </div>
+                            <input type="password" name="password1" id="id_password1" placeholder="Saisissez un mot de passe fort" class="password-input input-field w-full pl-11 pr-11 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-leaf-green focus:border-transparent transition-all text-sm font-medium bg-gray-50/50 focus:bg-white" required>
+                            <button type="button" class="toggle-password-btn absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-leaf-green transition-colors focus:outline-none">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 eye-closed">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 hidden eye-open">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                  <circle cx="12" cy="12" r="3" />
+                                </svg>
+                            </button>
                         </div>
-                        <input type="password" name="password1" id="id_password1" placeholder="Saisissez un mot de passe fort" class="password-input input-field w-full pl-11 pr-11 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-leaf-green focus:border-transparent transition-all text-sm font-medium bg-gray-50/50 focus:bg-white" required>
-                        <button type="button" class="toggle-password-btn absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-leaf-green transition-colors focus:outline-none">
-                            <!-- Eye Closed Icon -->
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 eye-closed">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
-                            </svg>
-                            <!-- Eye Open Icon -->
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 hidden eye-open">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                              <circle cx="12" cy="12" r="3" />
-                            </svg>
+                    </div>
+
+                    <!-- Password Confirm Input -->
+                    <div class="space-y-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">
+                            {% translate "Confirmez le mot de passe" %} <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                                </svg>
+                            </div>
+                            <input type="password" name="password2" id="id_password2" placeholder="Confirmez votre mot de passe" class="password-input input-field w-full pl-11 pr-11 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-leaf-green focus:border-transparent transition-all text-sm font-medium bg-gray-50/50 focus:bg-white" required>
+                            <button type="button" class="toggle-password-btn absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-leaf-green transition-colors focus:outline-none">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 eye-closed">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 hidden eye-open">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                  <circle cx="12" cy="12" r="3" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Terms Acceptance -->
+                    <div class="flex items-start space-x-2.5 text-xs pt-1 select-none">
+                        <input type="checkbox" name="terms_accepted" id="accept-terms" {% if form.terms_accepted.value %}checked{% endif %} class="w-4 h-4 mt-0.5 rounded-md border-gray-300 text-leaf-green focus:ring-leaf-green cursor-pointer" required>
+                        <label for="accept-terms" class="text-gray-600 font-semibold cursor-pointer">
+                            {% translate "J'ai lu et j'accepte sans réserve les" %} <a href="{% url 'core:cgu' %}" target="_blank" class="text-medical-blue font-bold hover:underline">{% translate "Conditions Générales d'Utilisation" %}</a> {% translate "de la plateforme Fransick." %}
+                        </label>
+                    </div>
+
+                    <!-- Step 1 Action Button -->
+                    <div class="pt-4" id="step-1-btn-container">
+                        <button type="submit" id="submit-btn" class="w-full bg-leaf-green hover:bg-leaf-dark text-white font-bold py-3.5 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 transform active:scale-[0.98] text-sm text-center tracking-wide uppercase">
+                            {% translate "Créer mon compte" %}
+                        </button>
+                        <button type="button" id="next-to-step-2" class="hidden w-full bg-medical-blue hover:bg-medical-dark text-white font-bold py-3.5 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 transform active:scale-[0.98] text-sm flex items-center justify-center space-x-2 tracking-wide uppercase">
+                            <span>{% translate "Suivant" %}</span>
+                            <span class="text-xs opacity-80">(2/3 - Infos prof.) ➔</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Password Confirm Input -->
-                <div class="space-y-1">
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">
-                        {% translate "Confirmez le mot de passe" %}
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
-                            <!-- Lock Icon -->
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-                            </svg>
+                <!-- ========================================== -->
+                <!-- ÉTAPE 2 : INFORMATIONS PROFESSIONNELLES (MÉDECIN) -->
+                <!-- ========================================== -->
+                <div id="step-2-container" class="hidden space-y-4 transition-all duration-300">
+                    <div class="p-4 rounded-2xl bg-blue-50/50 border border-blue-100 text-xs text-blue-900 font-medium flex items-center space-x-3">
+                        <span class="text-2xl">🏥</span>
+                        <div>Veuillez fournir vos coordonnées d'exercice et votre numéro d'ordre officiel. Ce numéro doit être unique.</div>
+                    </div>
+
+                    <!-- Spécialité Médicale -->
+                    <div class="space-y-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">
+                            {% translate "Spécialité Médicale" %} <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <select name="speciality" id="id_speciality" class="input-field w-full px-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-medical-blue focus:border-transparent transition-all text-sm font-medium bg-gray-50/50 focus:bg-white text-gray-700 cursor-pointer">
+                                <option value="" disabled selected>Sélectionnez votre spécialité</option>
+                                <option value="Généraliste" {% if form.speciality.value == "Généraliste" %}selected{% endif %}>Médecine Générale</option>
+                                <option value="Pédiatre" {% if form.speciality.value == "Pédiatre" %}selected{% endif %}>Pédiatrie</option>
+                                <option value="Cardiologue" {% if form.speciality.value == "Cardiologue" %}selected{% endif %}>Cardiologie</option>
+                                <option value="Gynécologue-Obstétricien" {% if form.speciality.value == "Gynécologue-Obstétricien" %}selected{% endif %}>Gynécologie & Obstétrique</option>
+                                <option value="Dermatologue" {% if form.speciality.value == "Dermatologue" %}selected{% endif %}>Dermatologie</option>
+                                <option value="Neurologue" {% if form.speciality.value == "Neurologue" %}selected{% endif %}>Neurologie</option>
+                                <option value="Ophtalmologue" {% if form.speciality.value == "Ophtalmologue" %}selected{% endif %}>Ophtalmologie</option>
+                                <option value="Psychiatre" {% if form.speciality.value == "Psychiatre" %}selected{% endif %}>Psychiatrie</option>
+                                <option value="Chirurgien" {% if form.speciality.value == "Chirurgien" %}selected{% endif %}>Chirurgie Générale & Spécialisée</option>
+                                <option value="Orthopédiste" {% if form.speciality.value == "Orthopédiste" %}selected{% endif %}>Orthopédie & Traumatologie</option>
+                                <option value="ORL" {% if form.speciality.value == "ORL" %}selected{% endif %}>ORL (Oto-rhino-laryngologie)</option>
+                                <option value="Urologue" {% if form.speciality.value == "Urologue" %}selected{% endif %}>Urologie</option>
+                                <option value="Radiologue" {% if form.speciality.value == "Radiologue" %}selected{% endif %}>Radiologie & Imagerie</option>
+                                <option value="Oncologue" {% if form.speciality.value == "Oncologue" %}selected{% endif %}>Oncologie</option>
+                                <option value="Anesthésiste" {% if form.speciality.value == "Anesthésiste" %}selected{% endif %}>Anesthésie-Réanimation</option>
+                                <option value="Autre Spécialiste" {% if form.speciality.value == "Autre Spécialiste" %}selected{% endif %}>Autre spécialité médicale</option>
+                            </select>
                         </div>
-                        <input type="password" name="password2" id="id_password2" placeholder="Confirmez votre mot de passe" class="password-input input-field w-full pl-11 pr-11 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-leaf-green focus:border-transparent transition-all text-sm font-medium bg-gray-50/50 focus:bg-white" required>
-                        <button type="button" class="toggle-password-btn absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-leaf-green transition-colors focus:outline-none">
-                            <!-- Eye Closed Icon -->
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 eye-closed">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
-                            </svg>
-                            <!-- Eye Open Icon -->
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 hidden eye-open">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                              <circle cx="12" cy="12" r="3" />
-                            </svg>
+                    </div>
+
+                    <!-- Numéro d'Ordre -->
+                    <div class="space-y-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider flex justify-between">
+                            <span>{% translate "Numéro d'Ordre National" %} <span class="text-red-500">*</span></span>
+                            <span class="text-blue-600 font-normal normal-case">Unique & obligatoire</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 font-bold text-sm">#</div>
+                            <input type="text" name="license_number" id="id_license_number" value="{{ form.license_number.value|default:'' }}" placeholder="Ex: ONMC-849201 ou Numéro de licence" class="input-field w-full pl-11 pr-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-medical-blue focus:border-transparent transition-all text-sm font-medium bg-gray-50/50 focus:bg-white font-mono uppercase">
+                        </div>
+                    </div>
+
+                    <!-- Hôpital / Structure de rattachement -->
+                    <div class="space-y-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">
+                            {% translate "Hôpital / Structure de santé actuelle" %} <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="hospital_affiliation" id="id_hospital_affiliation" value="{{ form.hospital_affiliation.value|default:'' }}" placeholder="Nom de votre hôpital, clinique ou cabinet d'exercice" class="input-field w-full px-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-medical-blue focus:border-transparent transition-all text-sm font-medium bg-gray-50/50 focus:bg-white">
+                    </div>
+
+                    <!-- Adresse Complète -->
+                    <div class="space-y-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">
+                            {% translate "Adresse complète du cabinet / hôpital" %} <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="address" id="id_address" value="{{ form.address.value|default:'' }}" placeholder="Rue, quartier, numéro de bâtiment..." class="input-field w-full px-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-medical-blue focus:border-transparent transition-all text-sm font-medium bg-gray-50/50 focus:bg-white">
+                    </div>
+
+                    <!-- Ville & Région -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                {% translate "Ville" %} <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="city" id="id_city" value="{{ form.city.value|default:'' }}" placeholder="Ex: Douala" class="input-field w-full px-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-medical-blue focus:border-transparent transition-all text-sm font-medium bg-gray-50/50 focus:bg-white">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                {% translate "Région / Province" %} <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="region" id="id_region" value="{{ form.region.value|default:'' }}" placeholder="Ex: Littoral" class="input-field w-full px-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-medical-blue focus:border-transparent transition-all text-sm font-medium bg-gray-50/50 focus:bg-white">
+                        </div>
+                    </div>
+
+                    <!-- Step 2 Action Buttons -->
+                    <div class="flex space-x-3 pt-4">
+                        <button type="button" id="back-to-step-1" class="w-1/3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3.5 rounded-2xl transition-all duration-200 text-xs uppercase tracking-wider flex items-center justify-center">
+                            <span>⬅ Précédent</span>
+                        </button>
+                        <button type="button" id="next-to-step-3" class="w-2/3 bg-medical-blue hover:bg-medical-dark text-white font-bold py-3.5 rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 transform active:scale-[0.98] text-xs uppercase tracking-wide flex items-center justify-center space-x-1.5">
+                            <span>Suivant</span>
+                            <span class="opacity-80">(3/3 - Documents) ➔</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Terms Acceptance -->
-                <div class="flex items-start space-x-2.5 text-xs pt-1 select-none">
-                    <input type="checkbox" id="accept-terms" class="w-4 h-4 mt-0.5 rounded-md border-gray-300 cursor-pointer" required>
-                    <label for="accept-terms" class="text-gray-500 font-semibold cursor-pointer">
-                        {% translate "J'accepte les conditions d'utilisation et les politiques de confidentialité de Fransick." %}
-                    </label>
-                </div>
+                <!-- ========================================== -->
+                <!-- ÉTAPE 3 : DOCUMENTS JUSTIFICATIFS (MÉDECIN) -->
+                <!-- ========================================== -->
+                <div id="step-3-container" class="hidden space-y-4 transition-all duration-300">
+                    <div class="p-4 rounded-2xl bg-amber-50 border border-amber-100 text-xs text-amber-900 font-medium">
+                        <div class="font-bold flex items-center space-x-1.5 mb-1">
+                            <span>🔒 Confidentialité & Validation</span>
+                        </div>
+                        <span>Vos documents justificatifs sont stockés de façon sécurisée et analysés uniquement par notre comité médical. Formats acceptés : <strong>PDF, JPG, PNG</strong> (Max <strong>5 Mo</strong> par fichier).</span>
+                    </div>
 
-                <!-- Action Button -->
-                <div class="pt-4">
-                    <button type="submit" id="submit-btn" class="w-full bg-leaf-green hover:bg-leaf-dark text-white font-bold py-3.5 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 transform active:scale-[0.98] text-sm text-center tracking-wide uppercase">
-                        {% translate "Créer mon compte" %}
-                    </button>
+                    <!-- Diplôme Médical Upload Box -->
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+                            1. Diplôme(s) médical(aux) de docteur en médecine <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative border-2 border-dashed border-gray-200 hover:border-medical-blue/60 rounded-2xl p-4 bg-gray-50/50 transition-all text-center group cursor-pointer" onclick="document.getElementById('id_diploma_document').click();">
+                            <input type="file" name="diploma_document" id="id_diploma_document" accept=".pdf,.jpg,.jpeg,.png" class="hidden file-upload-input" data-target="preview-diploma">
+                            <div id="preview-diploma-empty" class="space-y-1 pointer-events-none">
+                                <div class="w-10 h-10 mx-auto bg-blue-100 text-medical-blue rounded-full flex items-center justify-center font-bold text-lg group-hover:scale-110 transition-transform">📜</div>
+                                <div class="text-xs font-bold text-medical-blue">Cliquez pour téléverser votre diplôme</div>
+                                <div class="text-[10px] text-gray-400">PDF, JPG ou PNG (Max 5 Mo)</div>
+                            </div>
+                            <div id="preview-diploma" class="hidden flex items-center justify-between p-2 rounded-xl bg-green-50 border border-green-200 text-left">
+                                <div class="flex items-center space-x-2.5 overflow-hidden">
+                                    <span class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center font-bold text-sm shrink-0">✓</span>
+                                    <div class="truncate">
+                                        <div class="text-xs font-bold text-green-900 truncate file-name-text">diplome.pdf</div>
+                                        <div class="text-[10px] text-green-700 font-semibold file-size-text">2.4 Mo</div>
+                                    </div>
+                                </div>
+                                <button type="button" class="px-2.5 py-1 rounded-lg bg-white border border-gray-200 text-[10px] font-bold text-gray-600 hover:text-red-600 hover:border-red-200 shadow-xs transition-all shrink-0" onclick="event.stopPropagation(); document.getElementById('id_diploma_document').click();">Remplacer</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Carte Professionnelle / Attestation Ordre -->
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+                            2. Carte professionnelle / Attestation d'inscription à l'Ordre <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative border-2 border-dashed border-gray-200 hover:border-medical-blue/60 rounded-2xl p-4 bg-gray-50/50 transition-all text-center group cursor-pointer" onclick="document.getElementById('id_professional_card_document').click();">
+                            <input type="file" name="professional_card_document" id="id_professional_card_document" accept=".pdf,.jpg,.jpeg,.png" class="hidden file-upload-input" data-target="preview-card">
+                            <div id="preview-card-empty" class="space-y-1 pointer-events-none">
+                                <div class="w-10 h-10 mx-auto bg-blue-100 text-medical-blue rounded-full flex items-center justify-center font-bold text-lg group-hover:scale-110 transition-transform">🪪</div>
+                                <div class="text-xs font-bold text-medical-blue">Cliquez pour téléverser votre carte ou attestation</div>
+                                <div class="text-[10px] text-gray-400">PDF, JPG ou PNG (Max 5 Mo)</div>
+                            </div>
+                            <div id="preview-card" class="hidden flex items-center justify-between p-2 rounded-xl bg-green-50 border border-green-200 text-left">
+                                <div class="flex items-center space-x-2.5 overflow-hidden">
+                                    <span class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center font-bold text-sm shrink-0">✓</span>
+                                    <div class="truncate">
+                                        <div class="text-xs font-bold text-green-900 truncate file-name-text">carte_ordre.pdf</div>
+                                        <div class="text-[10px] text-green-700 font-semibold file-size-text">1.1 Mo</div>
+                                    </div>
+                                </div>
+                                <button type="button" class="px-2.5 py-1 rounded-lg bg-white border border-gray-200 text-[10px] font-bold text-gray-600 hover:text-red-600 hover:border-red-200 shadow-xs transition-all shrink-0" onclick="event.stopPropagation(); document.getElementById('id_professional_card_document').click();">Remplacer</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pièce d'identité -->
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+                            3. Pièce d'identité officielle en cours de validité <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative border-2 border-dashed border-gray-200 hover:border-medical-blue/60 rounded-2xl p-4 bg-gray-50/50 transition-all text-center group cursor-pointer" onclick="document.getElementById('id_identity_document').click();">
+                            <input type="file" name="identity_document" id="id_identity_document" accept=".pdf,.jpg,.jpeg,.png" class="hidden file-upload-input" data-target="preview-id">
+                            <div id="preview-id-empty" class="space-y-1 pointer-events-none">
+                                <div class="w-10 h-10 mx-auto bg-blue-100 text-medical-blue rounded-full flex items-center justify-center font-bold text-lg group-hover:scale-110 transition-transform">🆔</div>
+                                <div class="text-xs font-bold text-medical-blue">Cliquez pour téléverser votre CNI ou Passeport</div>
+                                <div class="text-[10px] text-gray-400">PDF, JPG ou PNG (Max 5 Mo)</div>
+                            </div>
+                            <div id="preview-id" class="hidden flex items-center justify-between p-2 rounded-xl bg-green-50 border border-green-200 text-left">
+                                <div class="flex items-center space-x-2.5 overflow-hidden">
+                                    <span class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center font-bold text-sm shrink-0">✓</span>
+                                    <div class="truncate">
+                                        <div class="text-xs font-bold text-green-900 truncate file-name-text">cni_recto_verso.pdf</div>
+                                        <div class="text-[10px] text-green-700 font-semibold file-size-text">3.0 Mo</div>
+                                    </div>
+                                </div>
+                                <button type="button" class="px-2.5 py-1 rounded-lg bg-white border border-gray-200 text-[10px] font-bold text-gray-600 hover:text-red-600 hover:border-red-200 shadow-xs transition-all shrink-0" onclick="event.stopPropagation(); document.getElementById('id_identity_document').click();">Remplacer</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 Action Buttons -->
+                    <div class="flex space-x-3 pt-4">
+                        <button type="button" id="back-to-step-2" class="w-1/3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3.5 rounded-2xl transition-all duration-200 text-xs uppercase tracking-wider flex items-center justify-center">
+                            <span>⬅ Précédent</span>
+                        </button>
+                        <button type="submit" id="final-submit-btn" class="w-2/3 bg-medical-blue hover:bg-medical-dark text-white font-bold py-3.5 rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 transform active:scale-[0.98] text-xs uppercase tracking-wide flex items-center justify-center space-x-1.5">
+                            <span>Soumettre ma demande ✓</span>
+                        </button>
+                    </div>
                 </div>
             </form>
 
@@ -242,12 +448,105 @@
     const brandColumn = document.getElementById('brand-column');
     const logoSpinner = document.getElementById('logo-spinner');
     const submitBtn = document.getElementById('submit-btn');
+    const nextToStep2Btn = document.getElementById('next-to-step-2');
     const loginLink = document.getElementById('login-redirect-link');
     
     const inputs = document.querySelectorAll('.input-field');
     const toggleBtns = document.querySelectorAll('.toggle-password-btn');
     const decorShape1 = document.getElementById('decor-shape-1');
     const decorShape2 = document.getElementById('decor-shape-2');
+
+    // Multi-Step elements
+    const doctorProgressBar = document.getElementById('doctor-progress-bar');
+    const progressFill = document.getElementById('progress-fill');
+    const stepSubtitle = document.getElementById('step-subtitle');
+    const stepLabel1 = document.getElementById('step-label-1');
+    const stepLabel2 = document.getElementById('step-label-2');
+    const stepLabel3 = document.getElementById('step-label-3');
+
+    const step1Container = document.getElementById('step-1-container');
+    const step2Container = document.getElementById('step-2-container');
+    const step3Container = document.getElementById('step-3-container');
+
+    let currentStep = 1;
+
+    function setStep(step) {
+        currentStep = step;
+        step1Container.classList.add('hidden');
+        step2Container.classList.add('hidden');
+        step3Container.classList.add('hidden');
+
+        stepLabel1.className = "text-gray-300 transition-colors";
+        stepLabel2.className = "text-gray-300 transition-colors";
+        stepLabel3.className = "text-gray-300 transition-colors";
+
+        if (step === 1) {
+            step1Container.classList.remove('hidden');
+            stepLabel1.className = "text-medical-blue transition-colors";
+            progressFill.style.width = "33%";
+            stepSubtitle.innerText = "Données personnelles & identifiants";
+        } else if (step === 2) {
+            step2Container.classList.remove('hidden');
+            stepLabel2.className = "text-medical-blue transition-colors";
+            progressFill.style.width = "66%";
+            stepSubtitle.innerText = "Informations de pratique médicale";
+        } else if (step === 3) {
+            step3Container.classList.remove('hidden');
+            stepLabel3.className = "text-medical-blue transition-colors";
+            progressFill.style.width = "100%";
+            stepSubtitle.innerText = "Justificatifs & validation";
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Helper function to validate Step 1 fields
+    function validateStep1() {
+        const username = document.getElementById('id_username');
+        const email = document.getElementById('id_email');
+        const pass1 = document.getElementById('id_password1');
+        const pass2 = document.getElementById('id_password2');
+        const terms = document.getElementById('accept-terms');
+
+        if (!username.checkValidity()) { username.reportValidity(); return false; }
+        if (!email.checkValidity()) { email.reportValidity(); return false; }
+        if (!pass1.checkValidity()) { pass1.reportValidity(); return false; }
+        if (!pass2.checkValidity()) { pass2.reportValidity(); return false; }
+        if (pass1.value !== pass2.value) {
+            alert("Les mots de passe saisis ne sont pas identiques.");
+            pass2.focus();
+            return false;
+        }
+        if (!terms.checked) {
+            alert("Vous devez accepter les Conditions Générales d'Utilisation pour continuer.");
+            terms.focus();
+            return false;
+        }
+        return true;
+    }
+
+    // Helper function to validate Step 2 fields
+    function validateStep2() {
+        const spec = document.getElementById('id_speciality');
+        const license = document.getElementById('id_license_number');
+        const hosp = document.getElementById('id_hospital_affiliation');
+        const addr = document.getElementById('id_address');
+        const city = document.getElementById('id_city');
+        const region = document.getElementById('id_region');
+
+        if (!spec.value) { alert("Veuillez sélectionner votre spécialité médicale."); spec.focus(); return false; }
+        if (!license.value.trim()) { alert("Le numéro d'Ordre National est obligatoire."); license.focus(); return false; }
+        if (!hosp.value.trim()) { alert("Veuillez renseigner votre structure ou établissement de rattachement."); hosp.focus(); return false; }
+        if (!addr.value.trim()) { alert("L'adresse de votre cabinet ou établissement est obligatoire."); addr.focus(); return false; }
+        if (!city.value.trim()) { alert("Veuillez indiquer votre ville d'exercice."); city.focus(); return false; }
+        if (!region.value.trim()) { alert("Veuillez indiquer votre région d'exercice."); region.focus(); return false; }
+        return true;
+    }
+
+    // Attach step navigation events
+    if (nextToStep2Btn) nextToStep2Btn.addEventListener('click', () => { if (validateStep1()) setStep(2); });
+    document.getElementById('back-to-step-1').addEventListener('click', () => setStep(1));
+    document.getElementById('next-to-step-3').addEventListener('click', () => { if (validateStep2()) setStep(3); });
+    document.getElementById('back-to-step-2').addEventListener('click', () => setStep(2));
 
     // Helper functions to apply colors based on role
     function setRoleTheme(role) {
@@ -269,9 +568,11 @@
             btn.classList.remove('hover:text-leaf-green', 'hover:text-medical-blue', 'hover:text-orange-500');
         });
 
-        // Set inputs default checkbox focus color
-        const checkbox = document.getElementById('accept-terms');
-        checkbox.classList.remove('text-leaf-green', 'focus:ring-leaf-green', 'text-medical-blue', 'focus:ring-medical-blue', 'text-orange-500', 'focus:ring-orange-500');
+        // Reset step view to Step 1 on role switch
+        step2Container.classList.add('hidden');
+        step3Container.classList.add('hidden');
+        step1Container.classList.remove('hidden');
+        currentStep = 1;
 
         // Apply new role theme
         if (role === 'patient') {
@@ -284,13 +585,15 @@
             brandColumn.className = "lg:col-span-5 hidden lg:flex flex-col items-center justify-center bg-gradient-to-br from-leaf-light to-leaf-light/50 p-12 border-r border-gray-100 select-none relative transition-all duration-500";
             logoSpinner.className = "absolute inset-0 rounded-full border-4 border-leaf-green/10 border-t-leaf-green animate-spin";
             
-            submitBtn.className = "w-full bg-leaf-green hover:bg-leaf-dark text-white font-bold py-3.5 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 transform active:scale-[0.98] text-sm text-center tracking-wide uppercase";
+            submitBtn.className = "w-full bg-leaf-green hover:bg-leaf-dark text-white font-bold py-3.5 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 transform active:scale-[0.98] text-sm text-center tracking-wide uppercase block";
+            nextToStep2Btn.className = "hidden";
+            doctorProgressBar.classList.add('hidden');
+
             loginLink.className = "text-leaf-green hover:text-leaf-dark font-bold hover:underline transition-all ml-1.5 uppercase tracking-wide";
             loginLink.href = "{% url 'accounts:login_patient' %}";
             
             inputs.forEach(input => { input.classList.add('focus:ring-leaf-green'); });
             toggleBtns.forEach(btn => { btn.classList.add('hover:text-leaf-green'); });
-            checkbox.classList.add('text-leaf-green', 'focus:ring-leaf-green');
             
             decorShape1.className = "absolute top-10 right-10 w-24 h-24 bg-leaf-light/40 rounded-full blur-2xl transition-all duration-500";
             decorShape2.className = "absolute bottom-10 left-10 w-36 h-36 bg-medical-light/20 rounded-full blur-3xl transition-all duration-500";
@@ -305,13 +608,16 @@
             brandColumn.className = "lg:col-span-5 hidden lg:flex flex-col items-center justify-center bg-gradient-to-br from-medical-light to-blue-50/50 p-12 border-r border-gray-100 select-none relative transition-all duration-500";
             logoSpinner.className = "absolute inset-0 rounded-full border-4 border-medical-blue/10 border-t-medical-blue animate-spin";
             
-            submitBtn.className = "w-full bg-medical-blue hover:bg-medical-dark text-white font-bold py-3.5 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 transform active:scale-[0.98] text-sm text-center tracking-wide uppercase";
+            submitBtn.className = "hidden";
+            nextToStep2Btn.className = "w-full bg-medical-blue hover:bg-medical-dark text-white font-bold py-3.5 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 transform active:scale-[0.98] text-sm flex items-center justify-center space-x-2 tracking-wide uppercase";
+            doctorProgressBar.classList.remove('hidden');
+            setStep(1);
+
             loginLink.className = "text-medical-blue hover:text-medical-dark font-bold hover:underline transition-all ml-1.5 uppercase tracking-wide";
             loginLink.href = "{% url 'accounts:login_medecin' %}";
             
             inputs.forEach(input => { input.classList.add('focus:ring-medical-blue'); });
             toggleBtns.forEach(btn => { btn.classList.add('hover:text-medical-blue'); });
-            checkbox.classList.add('text-medical-blue', 'focus:ring-medical-blue');
             
             decorShape1.className = "absolute top-10 right-10 w-24 h-24 bg-medical-light/40 rounded-full blur-2xl transition-all duration-500";
             decorShape2.className = "absolute bottom-10 left-10 w-36 h-36 bg-leaf-light/10 rounded-full blur-3xl transition-all duration-500";
@@ -326,13 +632,15 @@
             brandColumn.className = "lg:col-span-5 hidden lg:flex flex-col items-center justify-center bg-gradient-to-br from-orange-50 to-amber-50/50 p-12 border-r border-gray-100 select-none relative transition-all duration-500";
             logoSpinner.className = "absolute inset-0 rounded-full border-4 border-orange-100 border-t-orange-500 animate-spin";
             
-            submitBtn.className = "w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 transform active:scale-[0.98] text-sm text-center tracking-wide uppercase";
+            submitBtn.className = "w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 transform active:scale-[0.98] text-sm text-center tracking-wide uppercase block";
+            nextToStep2Btn.className = "hidden";
+            doctorProgressBar.classList.add('hidden');
+
             loginLink.className = "text-orange-500 hover:text-orange-600 font-bold hover:underline transition-all ml-1.5 uppercase tracking-wide";
             loginLink.href = "{% url 'accounts:login_pharmacie' %}";
             
             inputs.forEach(input => { input.classList.add('focus:ring-orange-500'); });
             toggleBtns.forEach(btn => { btn.classList.add('hover:text-orange-500'); });
-            checkbox.classList.add('text-orange-500', 'focus:ring-orange-500');
             
             decorShape1.className = "absolute top-10 right-10 w-24 h-24 bg-orange-50/30 rounded-full blur-2xl transition-all duration-500";
             decorShape2.className = "absolute bottom-10 left-10 w-36 h-36 bg-medical-light/10 rounded-full blur-3xl transition-all duration-500";
@@ -366,9 +674,79 @@
         });
     });
 
-    // Run defaults on page load
+    // Handle File Upload Previews and Size Validation
+    const fileInputs = document.querySelectorAll('.file-upload-input');
+    const maxSize = 5 * 1024 * 1024; // 5 Mo
+    const validExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
+
+    fileInputs.forEach(input => {
+        input.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            const targetPrefix = input.getAttribute('data-target');
+            const emptyContainer = document.getElementById(`${targetPrefix}-empty`);
+            const previewContainer = document.getElementById(targetPrefix);
+
+            if (!file) {
+                emptyContainer.classList.remove('hidden');
+                previewContainer.classList.add('hidden');
+                return;
+            }
+
+            // Check file size
+            if (file.size > maxSize) {
+                alert(`⚠️ Le fichier '${file.name}' est trop lourd (${(file.size / (1024*1024)).toFixed(1)} Mo). La taille maximale autorisée est de 5 Mo.`);
+                input.value = '';
+                emptyContainer.classList.remove('hidden');
+                previewContainer.classList.add('hidden');
+                return;
+            }
+
+            // Check extension
+            const ext = file.name.split('.').pop().toLowerCase();
+            if (!validExtensions.includes(ext)) {
+                alert(`⚠️ Le format '.${ext}' n'est pas supporté. Veuillez téléverser un fichier PDF, JPG ou PNG.`);
+                input.value = '';
+                emptyContainer.classList.remove('hidden');
+                previewContainer.classList.add('hidden');
+                return;
+            }
+
+            // Update preview card
+            const sizeStr = file.size >= 1024*1024 ? `${(file.size / (1024*1024)).toFixed(1)} Mo` : `${Math.round(file.size / 1024)} Ko`;
+            previewContainer.querySelector('.file-name-text').textContent = file.name;
+            previewContainer.querySelector('.file-size-text').textContent = sizeStr;
+
+            emptyContainer.classList.add('hidden');
+            previewContainer.classList.remove('hidden');
+        });
+    });
+
+    // Run defaults on page load and auto-select step if backend returned form errors
     window.addEventListener('DOMContentLoaded', () => {
-        setRoleTheme('patient');
+        const urlParams = new URLSearchParams(window.location.search);
+        const roleParam = urlParams.get('role') || '{{ form.role.value|default:"patient" }}';
+        
+        setRoleTheme(roleParam);
+
+        // If there are validation errors on Step 2 or 3, open that step automatically
+        {% if form.errors %}
+            if (roleInput.value === 'medecin') {
+                const errors = {{ form.errors.as_json|safe }};
+                const step2Fields = ['speciality', 'license_number', 'hospital_affiliation', 'address', 'city', 'region'];
+                const step3Fields = ['diploma_document', 'professional_card_document', 'identity_document'];
+                
+                const hasStep3Error = step3Fields.some(field => field in errors);
+                const hasStep2Error = step2Fields.some(field => field in errors);
+
+                if (hasStep3Error) {
+                    setStep(3);
+                } else if (hasStep2Error) {
+                    setStep(2);
+                } else {
+                    setStep(1);
+                }
+            }
+        {% endif %}
     });
 </script>
 {% endblock %}

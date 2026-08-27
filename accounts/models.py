@@ -2,6 +2,11 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 class CustomUser(AbstractUser):
+    email = models.EmailField(
+        'adresse email', 
+        unique=True, 
+        error_messages={'unique': "Un utilisateur avec cette adresse email existe déjà."}
+    )
     PATIENT = 'patient'
     MEDECIN = 'medecin'
     PHARMACIE = 'pharmacie'

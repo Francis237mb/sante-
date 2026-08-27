@@ -12,5 +12,7 @@ urlpatterns = [
     path('rdv/<int:pk>/start/', views.StartConsultationView.as_view(), name='start_consultation'),
     path('rdv/<int:pk>/room/', views.ConsultationRoomView.as_view(), name='room'),
     path('rdv/<int:pk>/end/', views.EndConsultationView.as_view(), name='end_consultation'),
+    path('rdv/<int:pk>/accept/', views.AcceptAppointmentView.as_view(), name='accept_appointment'),
+    path('rdv/<int:pk>/reject/', views.RejectAppointmentView.as_view(), name='reject_appointment'),
     path('rdv/direct/', views.CreateDirectConsultationView.as_view(), name='create_direct_consultation'),
 ]

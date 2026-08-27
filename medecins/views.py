@@ -28,7 +28,9 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                         defaults={
                             'speciality': 'Médecin Généraliste',
                             'clinic_address': 'Douala, Cameroun',
-                            'about': 'Médecin praticien certifié inscrit sur la plateforme Fransick Santé.'
+                            'about': 'Médecin praticien certifié inscrit sur la plateforme Fransick Santé.',
+                            'is_verified': True,
+                            'verification_status': 'verified',
                         }
                     )
 

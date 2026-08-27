@@ -1,0 +1,197 @@
+{% extends 'administration/admin_base.html' %}
+
+{% block title %}{{ site_appearance.app_name }} - Tableau de bord{% endblock %}
+{% block header_title %}Vue d'ensemble{% endblock %}
+
+{% block content %}
+<!-- Statistics Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    
+    <!-- Card: Total Patients -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col hover:shadow-md transition-shadow relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+        <div class="flex justify-between items-start mb-4 relative z-10">
+            <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+            </div>
+            <span class="w-2 h-2 rounded-full bg-secondary"></span>
+        </div>
+        <div class="text-3xl font-extrabold text-slate-800 tracking-tight font-heading">{{ total_patients }}</div>
+        <div class="text-xs text-slate-500 font-medium uppercase tracking-wider mt-1">Total Patients</div>
+    </div>
+
+    <!-- Card: Total Médecins -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col hover:shadow-md transition-shadow relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+        <div class="flex justify-between items-start mb-4 relative z-10">
+            <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+            </div>
+            {% if pending_doctors > 0 %}
+                <span class="inline-flex items-center justify-center px-2 py-1 text-[10px] font-bold leading-none text-red-600 bg-red-100 rounded-full">{{ pending_doctors }} en attente</span>
+            {% else %}
+                <span class="w-2 h-2 rounded-full bg-slate-300"></span>
+            {% endif %}
+        </div>
+        <div class="text-3xl font-extrabold text-slate-800 tracking-tight font-heading">{{ total_doctors }}</div>
+        <div class="text-xs text-slate-500 font-medium uppercase tracking-wider mt-1">Médecins Inscrits</div>
+    </div>
+
+    <!-- Card: Total Pharmacies -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col hover:shadow-md transition-shadow relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+        <div class="flex justify-between items-start mb-4 relative z-10">
+            <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+            </div>
+            {% if pending_pharmacies > 0 %}
+                <span class="inline-flex items-center justify-center px-2 py-1 text-[10px] font-bold leading-none text-red-600 bg-red-100 rounded-full">{{ pending_pharmacies }} en attente</span>
+            {% else %}
+                <span class="w-2 h-2 rounded-full bg-slate-300"></span>
+            {% endif %}
+        </div>
+        <div class="text-3xl font-extrabold text-slate-800 tracking-tight font-heading">{{ total_pharmacies }}</div>
+        <div class="text-xs text-slate-500 font-medium uppercase tracking-wider mt-1">Total Pharmacies</div>
+    </div>
+
+    <!-- Card: Consultations -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col hover:shadow-md transition-shadow relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-24 h-24 bg-secondary/10 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+        <div class="flex justify-between items-start mb-4 relative z-10">
+            <div class="w-12 h-12 bg-secondary/20 rounded-xl flex items-center justify-center text-secondary">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            </div>
+            <span class="inline-flex items-center justify-center px-2 py-1 text-[10px] font-bold leading-none text-secondary bg-secondary/10 rounded-full">+{{ recent_consultations }} / 30j</span>
+        </div>
+        <div class="text-3xl font-extrabold text-slate-800 tracking-tight font-heading">{{ total_consultations }}</div>
+        <div class="text-xs text-slate-500 font-medium uppercase tracking-wider mt-1">Consultations réalisées</div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Chart Section -->
+    <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-lg font-bold text-slate-800 font-heading">Activité de la plateforme</h2>
+            <select class="bg-slate-50 border border-slate-200 text-slate-600 text-sm rounded-lg focus:ring-primary focus:border-primary block p-2 outline-none">
+                <option>30 derniers jours</option>
+                <option>Cette année</option>
+            </select>
+        </div>
+        <div class="h-72 w-full">
+            <canvas id="activityChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Recent Users Section -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-0 overflow-hidden flex flex-col">
+        <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-white">
+            <h2 class="text-lg font-bold text-slate-800 font-heading">Inscriptions Récentes</h2>
+            <a href="{% url 'administration:users_list' %}" class="text-xs text-primary font-semibold hover:underline">Voir tout</a>
+        </div>
+        
+        <div class="divide-y divide-slate-100 flex-1 overflow-y-auto max-h-[350px]">
+            {% for u in recent_users %}
+            <div class="px-6 py-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                <div class="flex items-center space-x-3">
+                    {% if u.profile_picture %}
+                        <img src="{{ u.profile_picture.url }}" class="w-10 h-10 rounded-full object-cover shadow-sm border border-slate-200">
+                    {% else %}
+                        <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold text-sm shadow-sm border border-slate-200">
+                            {{ u.username|slice:":2"|upper }}
+                        </div>
+                    {% endif %}
+                    <div>
+                        <div class="font-semibold text-slate-800 text-sm">{{ u.get_full_name|default:u.username }}</div>
+                        <div class="text-xs text-slate-500">{{ u.email }}</div>
+                    </div>
+                </div>
+                <div>
+                    {% if u.role == 'admin' %}
+                        <span class="inline-flex px-2 py-1 rounded-md text-[10px] font-bold bg-slate-800 text-white">Admin</span>
+                    {% elif u.role == 'medecin' %}
+                        <span class="inline-flex px-2 py-1 rounded-md text-[10px] font-bold bg-primary/10 text-primary">Médecin</span>
+                    {% elif u.role == 'pharmacie' %}
+                        <span class="inline-flex px-2 py-1 rounded-md text-[10px] font-bold bg-secondary/10 text-secondary">Pharmacie</span>
+                    {% else %}
+                        <span class="inline-flex px-2 py-1 rounded-md text-[10px] font-bold bg-slate-100 text-slate-600">Patient</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="p-6 text-center text-sm text-slate-400">Aucun utilisateur récent.</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_body %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('activityChart').getContext('2d');
+        
+        // Configuration de base pour le graphique d'exemple
+        // Dans une vraie application, ces données proviendraient de la vue Django via des variables JSON.
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ chart_labels|safe|default:"[]" }},
+                datasets: [{
+                    label: 'Consultations',
+                    data: {{ chart_data|safe|default:"[]" }},
+                    borderColor: '{{ site_appearance.primary_color|default:"#1B5FA8" }}',
+                    backgroundColor: 'rgba(27, 95, 168, 0.1)',
+                    borderWidth: 3,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: '{{ site_appearance.primary_color|default:"#1B5FA8" }}',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: '#1e293b',
+                        padding: 12,
+                        titleFont: { family: 'Inter', size: 13 },
+                        bodyFont: { family: 'Inter', size: 12 },
+                        displayColors: false,
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#f1f5f9',
+                            drawBorder: false,
+                        },
+                        ticks: {
+                            color: '#64748b',
+                            font: { family: 'Inter', size: 11 }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false,
+                            drawBorder: false,
+                        },
+                        ticks: {
+                            color: '#64748b',
+                            font: { family: 'Inter', size: 11 }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

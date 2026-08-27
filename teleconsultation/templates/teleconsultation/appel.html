@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Téléconsultation - {{ rdv.patient.get_full_name }}</title>
+    <!-- Tabler Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Agora Web SDK -->
+    <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: #111827; /* Dark background */
+        font-family: 'Inter', sans-serif;
+        color: white;
+        overflow: hidden;
+    }
+
+    #navbar-container {
+        display: none; /* Hide default navbar for full immersion */
+    }
+
+    .teleconsultation-container {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Top bar info */
+    .top-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+        z-index: 10;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .meeting-info h2 {
+        margin: 0;
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.25rem;
+        font-weight: 600;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+    }
+
+
+    .meeting-info p {
+        margin: 0;
+        font-size: 0.875rem;
+        opacity: 0.8;
+    }
+
+    .network-stats {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        background: rgba(0,0,0,0.4);
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        backdrop-filter: blur(4px);
+    }
+    
+    .network-indicator {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: #6DBE45; /* Vert par défaut */
+    }
+
+    /* Video area */
+    .video-area {
+        flex: 1;
+        position: relative;
+        background-color: #000;
+    }
+
+    #remote-player {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    #local-player {
+        position: absolute;
+        bottom: 100px;
+        right: 20px;
+        width: 120px;
+        height: 160px;
+        background-color: #1f2937;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        z-index: 20;
+        cursor: move;
+    }
+
+    @media (min-width: 768px) {
+        #local-player {
+            width: 240px;
+            height: 180px;
+        }
+    }
+
+    .waiting-screen {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: #111827;
+        z-index: 5;
+    }
+
+    .spinner {
+        border: 4px solid rgba(255,255,255,0.1);
+        border-left-color: #1B5FA8; /* Bleu principal */
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin-bottom: 1rem;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Controls bar */
+    .controls-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        padding: 1.5rem;
+        background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        z-index: 10;
+    }
+
+    .control-btn {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: none;
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+        transition: all 0.2s ease;
+    }
+
+    .control-btn:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+        transform: scale(1.05);
+    }
+
+    .control-btn i {
+        font-size: 1.5rem;
+    }
+
+    .control-btn.muted {
+        background-color: #ef4444; /* Rouge alert */
+    }
+
+    .btn-leave {
+        background-color: #ef4444 !important;
+        width: 60px;
+        height: 60px;
+    }
+    
+    .btn-leave:hover {
+        background-color: #dc2626 !important;
+    }
+
+    .btn-leave i {
+        font-size: 1.75rem;
+    }
+</style>
+</head>
+
+<body>
+<div class="teleconsultation-container">
+    <div class="top-bar">
+        <div class="meeting-info">
+            <h2>Consultation avec {% if is_doctor %}{{ rdv.patient.get_full_name }}{% else %}Dr. {{ rdv.doctor.get_full_name }}{% endif %}</h2>
+            <p id="call-timer">00:00</p>
+        </div>
+        <div class="network-stats">
+            <div id="network-indicator" class="network-indicator"></div>
+            <span id="network-text">Réseau stable</span>
+        </div>
+    </div>
+
+    <div class="video-area">
+        <div id="remote-player"></div>
+        <div id="local-player"></div>
+        
+        <div id="waiting-screen" class="waiting-screen">
+            <div class="spinner"></div>
+            <h3>En attente de l'autre participant...</h3>
+            <p>La vidéo démarrera automatiquement.</p>
+        </div>
+    </div>
+
+    <div class="controls-bar">
+        <button id="btn-mic" class="control-btn" title="Couper/Activer le micro">
+            <i class="ti ti-microphone"></i>
+        </button>
+        <button id="btn-video" class="control-btn" title="Couper/Activer la caméra">
+            <i class="ti ti-video"></i>
+        </button>
+        {% if not is_mobile %}
+        <button id="btn-screen" class="control-btn" title="Partager l'écran">
+            <i class="ti ti-screen-share"></i>
+        </button>
+        {% endif %}
+        <button id="btn-leave" class="control-btn btn-leave" title="Raccrocher">
+            <i class="ti ti-phone-off"></i>
+        </button>
+    </div>
+</div>
+
+<script>
+    // Agora settings
+    const APP_ID = "{{ agora_app_id }}";
+    const TOKEN = "{{ agora_token }}";
+    const CHANNEL = "{{ agora_channel }}";
+    const UID = {{ agora_uid }};
+    const APPEL_ID = {{ appel.id }};
+    
+    let client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+    let localTracks = {
+        videoTrack: null,
+        audioTrack: null
+    };
+    let remoteUsers = {};
+    let isMicMuted = false;
+    let isVideoMuted = false;
+    
+    // Timer
+    let timerInterval;
+    let secondsElapsed = 0;
+    
+    function startTimer() {
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            secondsElapsed++;
+            const m = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
+            const s = (secondsElapsed % 60).toString().padStart(2, '0');
+            document.getElementById('call-timer').innerText = `${m}:${s}`;
+            
+            // Hard limit: 1 hour (3600 seconds)
+            if (secondsElapsed >= 3600) {
+                alert("La durée limite de la consultation (1 heure) a été atteinte.");
+                leaveCall();
+            }
+        }, 1000);
+    }
+    
+    async function initAgora() {
+        try {
+            // Listeners
+            client.on("user-published", handleUserPublished);
+            client.on("user-unpublished", handleUserUnpublished);
+            client.on("user-joined", handleUserJoined);
+            client.on("user-left", handleUserLeft);
+            client.on("network-quality", handleNetworkQuality);
+
+            // Join channel
+            await client.join(APP_ID, CHANNEL, TOKEN, UID);
+            
+            // Create local tracks
+            localTracks.audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+            localTracks.videoTrack = await AgoraRTC.createCameraVideoTrack();
+            
+            // Play local video
+            localTracks.videoTrack.play("local-player");
+            
+            // Publish local tracks
+            await client.publish(Object.values(localTracks));
+            console.log("Publish success");
+            
+        } catch (error) {
+            console.error("Agora Error: ", error);
+            alert("Erreur d'accès à la caméra ou au micro. Veuillez vérifier vos permissions.");
+        }
+    }
+    
+    async function handleUserPublished(user, mediaType) {
+        const id = user.uid;
+        remoteUsers[id] = user;
+        await client.subscribe(user, mediaType);
+        
+        document.getElementById('waiting-screen').style.display = 'none';
+        
+        if (mediaType === "video") {
+            user.videoTrack.play("remote-player");
+        }
+        if (mediaType === "audio") {
+            user.audioTrack.play();
+        }
+        
+        startTimer();
+    }
+    
+    function handleUserUnpublished(user, mediaType) {
+        if (mediaType === "video") {
+            const id = user.uid;
+            delete remoteUsers[id];
+            // Optionally show waiting screen if no one else is in
+            if (Object.keys(remoteUsers).length === 0) {
+                document.getElementById('waiting-screen').style.display = 'flex';
+                clearInterval(timerInterval);
+            }
+        }
+    }
+
+    function handleUserJoined(user) {
+        console.log("User joined:", user.uid);
+    }
+
+    function handleUserLeft(user) {
+        console.log("User left:", user.uid);
+        alert("L'autre participant a quitté la consultation.");
+        leaveCall();
+    }
+    
+    function handleNetworkQuality(stats) {
+        const indicator = document.getElementById('network-indicator');
+        const text = document.getElementById('network-text');
+        
+        // stats.uplinkNetworkQuality & downlinkNetworkQuality: 1 (Excellent) to 6 (Down)
+        const quality = Math.max(stats.uplinkNetworkQuality, stats.downlinkNetworkQuality);
+        
+        if (quality <= 2) {
+            indicator.style.backgroundColor = '#6DBE45'; // Green
+            text.innerText = 'Réseau excellent';
+        } else if (quality <= 4) {
+            indicator.style.backgroundColor = '#f59e0b'; // Yellow/Orange
+            text.innerText = 'Réseau moyen';
+        } else {
+            indicator.style.backgroundColor = '#ef4444'; // Red
+            text.innerText = 'Réseau faible';
+        }
+    }
+
+    // Controls
+    document.getElementById('btn-mic').onclick = async function() {
+        if (!localTracks.audioTrack) return;
+        
+        if (isMicMuted) {
+            await localTracks.audioTrack.setMuted(false);
+            this.classList.remove('muted');
+            this.innerHTML = '<i class="ti ti-microphone"></i>';
+        } else {
+            await localTracks.audioTrack.setMuted(true);
+            this.classList.add('muted');
+            this.innerHTML = '<i class="ti ti-microphone-off"></i>';
+        }
+        isMicMuted = !isMicMuted;
+    };
+    
+    document.getElementById('btn-video').onclick = async function() {
+        if (!localTracks.videoTrack) return;
+        
+        if (isVideoMuted) {
+            await localTracks.videoTrack.setMuted(false);
+            this.classList.remove('muted');
+            this.innerHTML = '<i class="ti ti-video"></i>';
+        } else {
+            await localTracks.videoTrack.setMuted(true);
+            this.classList.add('muted');
+            this.innerHTML = '<i class="ti ti-video-off"></i>';
+        }
+        isVideoMuted = !isVideoMuted;
+    };
+    
+    async function leaveCall() {
+        // Stop local tracks
+        for (trackName in localTracks) {
+            var track = localTracks[trackName];
+            if(track) {
+                track.stop();
+                track.close();
+                localTracks[trackName] = null;
+            }
+        }
+        
+        // Leave channel
+        await client.leave();
+        
+        // Notify backend
+        fetch(`/teleconsultation/terminer/${APPEL_ID}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        }).then(() => {
+            // Redirect depending on user role
+            {% if is_doctor %}
+            window.location.href = "{% url 'ordonnances:create' %}?rdv={{ rdv.id }}";
+            {% else %}
+            window.location.href = "{% url 'consultations:patient_appointments' %}";
+            {% endif %}
+        }).catch(err => {
+            window.location.href = "/";
+        });
+    }
+    
+    document.getElementById('btn-leave').onclick = leaveCall;
+    
+    // Make PIP draggable
+    const pip = document.getElementById('local-player');
+    let isDragging = false;
+    let offset = { x: 0, y: 0 };
+    
+    pip.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        offset.x = pip.offsetLeft - e.clientX;
+        offset.y = pip.offsetTop - e.clientY;
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        pip.style.left = (e.clientX + offset.x) + 'px';
+        pip.style.top = (e.clientY + offset.y) + 'px';
+        pip.style.bottom = 'auto'; // Disable bottom pos once dragged
+        pip.style.right = 'auto'; // Disable right pos once dragged
+    });
+    
+    document.addEventListener('mouseup', () => {
+        isDragging = false;
+    });
+
+    // Mobile drag support
+    pip.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        const touch = e.touches[0];
+        offset.x = pip.offsetLeft - touch.clientX;
+        offset.y = pip.offsetTop - touch.clientY;
+    });
+
+    document.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        pip.style.left = (touch.clientX + offset.x) + 'px';
+        pip.style.top = (touch.clientY + offset.y) + 'px';
+        pip.style.bottom = 'auto';
+        pip.style.right = 'auto';
+    }, { passive: false });
+
+    document.addEventListener('touchend', () => {
+        isDragging = false;
+    });
+
+    // Start
+    initAgora();
+</script>
+</body>
+</html>

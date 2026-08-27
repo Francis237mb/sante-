@@ -61,11 +61,25 @@
             
             <!-- Dashboard Top Header Bar -->
             <header class="h-20 bg-white border-b border-gray-200/80 px-4 md:px-8 flex items-center justify-between flex-shrink-0 z-30 select-none">
-                <div>
-                    <h2 class="text-base md:text-lg font-bold font-poppins text-gray-800 flex items-center">
-                        {% translate "Espace Médical Praticien" %}
-                    </h2>
-                    <p class="text-[10px] md:text-xs text-gray-400 font-semibold" id="current-date-field"></p>
+                <div class="flex items-center space-x-3 sm:space-x-4">
+                    {% if user.profile_picture %}
+                        <img class="h-11 w-11 sm:h-12 sm:w-12 rounded-2xl object-cover ring-2 ring-medical-blue/30 shadow-sm flex-shrink-0" src="{{ user.profile_picture.url }}" alt="{{ user.username }}">
+                    {% else %}
+                        <div class="h-11 w-11 sm:h-12 sm:w-12 rounded-2xl bg-gradient-to-tr from-medical-blue to-cyan-500 text-white flex items-center justify-center font-bold font-poppins text-base sm:text-lg shadow-sm flex-shrink-0">
+                            {{ user.first_name|slice:":1"|default:"Dr" }}{{ user.last_name|slice:":1" }}
+                        </div>
+                    {% endif %}
+                    <div>
+                        <div class="flex flex-wrap items-center gap-1 sm:gap-2">
+                            <h2 class="text-sm sm:text-base md:text-lg font-black font-poppins text-gray-900 leading-tight">
+                                Dr. {% if user.last_name %}{{ user.first_name }} {{ user.last_name }}{% else %}{{ user.username }}{% endif %}
+                            </h2>
+                            <span class="inline-block bg-blue-50 text-medical-blue text-[9px] font-extrabold px-2 py-0.5 rounded-md uppercase tracking-wider border border-blue-100/80">
+                                {% if user.doctor_profile.speciality %}{{ user.doctor_profile.speciality }}{% else %}Praticien{% endif %}
+                            </span>
+                        </div>
+                        <p class="text-[10px] sm:text-xs text-gray-400 font-medium mt-0.5" id="current-date-field"></p>
+                    </div>
                 </div>
 
                 <div class="flex items-center space-x-4 relative">
@@ -128,7 +142,7 @@
             </header>
 
             <!-- Dashboard Content Scroll Area -->
-            <main class="flex-1 overflow-y-auto p-4 md:p-8 pb-24 lg:pb-8 custom-scrollbar">
+            <main class="flex-1 overflow-y-auto p-4 md:p-8 pb-32 lg:pb-8 custom-scrollbar">
                 
                 <!-- Messages de Notification Django -->
                 {% if messages %}
@@ -160,12 +174,12 @@
                             {% endif %}
                         </p>
                     </div>
-                    <div class="z-10 flex-shrink-0 flex flex-col sm:flex-row gap-3">
-                        <button type="button" onclick="openPublishVideoModal()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs uppercase tracking-wider px-5 py-3.5 rounded-2xl shadow-md transition-all flex items-center justify-center space-x-2">
+                    <div class="z-10 flex-shrink-0 w-full sm:w-auto flex flex-col sm:flex-row gap-3">
+                        <button type="button" onclick="openPublishVideoModal()" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs uppercase tracking-wider px-5 py-3.5 rounded-2xl shadow-md transition-all flex items-center justify-center space-x-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
                             <span>Publier Conseil Vidéo</span>
                         </button>
-                        <button type="button" onclick="openWaitingRoomModal()" class="bg-white hover:bg-medical-light text-medical-blue font-bold text-xs uppercase tracking-wider px-5 py-3.5 rounded-2xl shadow-md transition-all flex items-center justify-center space-x-2 relative">
+                        <button type="button" onclick="openWaitingRoomModal()" class="w-full sm:w-auto bg-white hover:bg-medical-light text-medical-blue font-bold text-xs uppercase tracking-wider px-5 py-3.5 rounded-2xl shadow-md transition-all flex items-center justify-center space-x-2 relative">
                             <span id="waiting-room-btn-text">Salle d'attente ({{ waiting_room_count|default:0 }})</span>
                             {% if waiting_room_count > 0 %}
                                 <span id="waiting-room-badge" class="w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center border-2 border-white shadow-xs">{{ waiting_room_count }}</span>
@@ -272,16 +286,47 @@
                                                 <p class="text-xs text-gray-400 font-semibold mt-0.5">{{ rdv.get_consultation_type_display }} • Motif : {{ rdv.reason }}</p>
                                             </div>
                                         </div>
-                                        <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-3">
-                                            <div class="text-right">
-                                                <div class="text-xs font-extrabold text-medical-blue">{{ rdv.date|date:"d/m/Y" }} à {{ rdv.time_slot }}</div>
-                                                <div class="text-[10px] font-bold {% if rdv.in_waiting_room %}text-leaf-green animate-pulse{% else %}text-gray-400{% endif %}">
-                                                    {% if rdv.in_waiting_room %}🟢 En salle d'attente{% else %}Confirmé{% endif %}
+                                        <div class="flex flex-wrap items-center justify-between sm:justify-end w-full sm:w-auto gap-2 sm:gap-3 pt-3 sm:pt-0 border-t sm:border-t-0 border-gray-150">
+                                            <div class="text-left sm:text-right mr-1">
+                                                <div class="text-xs font-extrabold text-gray-900">{{ rdv.date|date:"d/m/Y" }} à <span class="text-medical-blue font-black">{{ rdv.time_slot }}</span></div>
+                                                <div class="mt-1">
+                                                    {% if rdv.in_waiting_room %}
+                                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-green-100 text-green-800 animate-pulse">🟢 En salle d'attente</span>
+                                                    {% elif rdv.status == 'confirmed' %}
+                                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-blue-50 text-medical-blue border border-blue-100">🟢 Confirmé par le praticien</span>
+                                                    {% elif rdv.status == 'cancelled' %}
+                                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-red-50 text-red-600 border border-red-100">🔴 Refusé / Annulé</span>
+                                                    {% else %}
+                                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200/80 animate-pulse">🟡 En attente de validation</span>
+                                                    {% endif %}
                                                 </div>
                                             </div>
-                                            <a href="{% url 'medecins:patients' %}" class="px-4 py-2.5 bg-medical-blue hover:bg-medical-dark text-white text-xs font-bold rounded-xl transition-all shadow-xs uppercase tracking-wide">
-                                                Dossier
-                                            </a>
+                                            
+                                            <div class="flex flex-wrap items-center gap-1.5">
+                                                {% if rdv.status != 'confirmed' %}
+                                                <!-- Bouton Accepter -->
+                                                <form method="POST" action="{% url 'consultations:accept_appointment' rdv.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="px-3.5 py-2 bg-leaf-green hover:bg-leaf-dark text-white text-[11px] font-extrabold rounded-xl transition-all shadow-sm flex items-center space-x-1 uppercase tracking-wide transform active:scale-95" title="Accepter et confirmer ce rendez-vous">
+                                                        <span>✅ Accepter</span>
+                                                    </button>
+                                                </form>
+                                                {% endif %}
+                                                
+                                                {% if rdv.status != 'cancelled' %}
+                                                <!-- Bouton Refuser -->
+                                                <form method="POST" action="{% url 'consultations:reject_appointment' rdv.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 text-[11px] font-extrabold rounded-xl transition-all border border-red-200 flex items-center space-x-1 uppercase tracking-wide transform active:scale-95" title="Refuser ou annuler">
+                                                        <span>❌ Refuser</span>
+                                                    </button>
+                                                </form>
+                                                {% endif %}
+                                                
+                                                <a href="{% url 'medecins:patients' %}" class="px-3.5 py-2 bg-gray-100 hover:bg-medical-blue hover:text-white text-gray-700 text-[11px] font-extrabold rounded-xl transition-all shadow-xs uppercase tracking-wide" title="Accéder au dossier patient">
+                                                    📁 Dossier
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
                                     {% endfor %}
@@ -618,12 +663,9 @@
                                             <p class="text-[10px] text-gray-500 font-medium mt-0.5">Motif : ${pat.reason}</p>
                                         </div>
                                     </div>
-                                    <form action="/consultations/rdv/${pat.id}/start/" method="post">
-                                        {% csrf_token %}
-                                        <button type="submit" class="px-4 py-2.5 bg-leaf-green hover:bg-leaf-dark active:scale-95 text-white text-[10px] font-extrabold tracking-wider uppercase rounded-xl transition-all shadow-xs">
-                                            Admettre & Appeler 🎥
-                                        </button>
-                                    </form>
+                                    <a href="/teleconsultation/rejoindre/${pat.id}/" class="px-4 py-2.5 bg-leaf-green hover:bg-leaf-dark active:scale-95 text-white text-[10px] font-extrabold tracking-wider uppercase rounded-xl transition-all shadow-xs inline-block text-center">
+                                        Admettre & Appeler 🎥
+                                    </a>
                                 `;
                                 listContainer.appendChild(patEl);
                             });

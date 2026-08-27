@@ -1,0 +1,62 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% translate "Conditions Générales d'Utilisation" %} - Fransick{% endblock %}
+
+{% block content %}
+<section class="py-16 bg-white min-h-[80vh]">
+    <div class="container mx-auto px-4 max-w-4xl">
+        <div class="space-y-4 pb-8 border-b border-gray-150">
+            <h1 class="text-3xl md:text-4xl font-extrabold font-poppins text-medical-blue">
+                {% translate "Conditions Générales d'Utilisation (CGU)" %}
+            </h1>
+            <p class="text-sm text-gray-500 font-medium">
+                {% translate "Dernière mise à jour : Août 2026. L'accès et l'utilisation de la plateforme Fransick sont soumis aux présentes Conditions Générales d'Utilisation." %}
+            </p>
+        </div>
+
+        <div class="mt-8 space-y-10 text-gray-700 leading-relaxed text-sm md:text-base font-inter">
+            <section class="space-y-3">
+                <h2 class="text-xl font-bold text-gray-900 font-poppins">1. Objet et champ d'application</h2>
+                <p>
+                    Les présentes Conditions Générales d'Utilisation ont pour objet de définir les conditions dans lesquelles la plateforme <strong>Fransick Santé</strong> met à la disposition des utilisateurs ses services numériques, incluant la téléconsultation médicale, la gestion d'ordonnances électroniques sécurisées, la géolocalisation de pharmacies partenaires et l'assistance clinique virtuelle.
+                </p>
+            </section>
+
+            <section class="space-y-3">
+                <h2 class="text-xl font-bold text-gray-900 font-poppins">2. Inscription et unicité des comptes</h2>
+                <p>
+                    L'utilisation des services interactifs requiert la création d'un compte utilisateur personnel et sécurisé. Lors de l'inscription, l'utilisateur s'engage à fournir des informations de contact exactes. Pour des raisons strictes de sécurité et de confidentialité médicale, <strong>une adresse email est unique et ne peut être associée qu'à un seul compte</strong> sur l'ensemble de la plateforme, qu'il s'agisse d'un compte Patient, Médecin praticien ou Pharmacie.
+                </p>
+            </section>
+
+            <section class="space-y-3">
+                <h2 class="text-xl font-bold text-gray-900 font-poppins">3. Services médicaux et responsabilité clinique</h2>
+                <p>
+                    Fransick intervient en tant qu'intermédiaire technologique facilitant la communication entre les patients et les professionnels de santé dûment certifiés et autorisés à exercer. Les conseils promulgués par l'assistance clinique automatisée ont vocation à éclairer l'utilisateur mais ne substituent en aucun cas un diagnostic ou une prescription formelle émise par un médecin en consultation en direct.
+                </p>
+            </section>
+
+            <section class="space-y-3">
+                <h2 class="text-xl font-bold text-gray-900 font-poppins">4. Protection des données médicales personnelles</h2>
+                <p>
+                    Conformément aux normes en vigueur sur la protection des données de santé, Fransick met en œuvre des protocoles de chiffrement de niveau industriel et des règles strictes de séparation d'accès. Vos données médicales, ordonnances et historiques de consultation ne sont en aucun cas commercialisés ni partagés sans votre accord formel aux professionnels de santé impliqués dans votre parcours de soins.
+                </p>
+            </section>
+
+            <section class="space-y-3">
+                <h2 class="text-xl font-bold text-gray-900 font-poppins">5. Respect des règles de déontologie</h2>
+                <p>
+                    Les professionnels de santé utilisant Fransick s'engagent à respecter le Code de Déontologie de leur profession ainsi que les normes d'exercice de la télémédecine dans leur juridiction.
+                </p>
+            </section>
+
+            <div class="pt-8 border-t border-gray-150">
+                <a href="javascript:history.back()" class="inline-flex items-center space-x-2 bg-leaf-green hover:bg-leaf-dark text-white font-extrabold px-6 py-3 rounded-2xl transition-all shadow-sm text-xs uppercase tracking-wider">
+                    <span>&larr; {% translate "Retour à la page précédente" %}</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -3,9 +3,9 @@ from django.conf import settings
 
 class RendezVous(models.Model):
     CONSULTATION_TYPES = [
-        ('video', 'Téléconsultation Vidéo 🎥'),
-        ('audio', 'Téléconsultation Audio 🎙️'),
-        ('cabinet', 'Consultation en Cabinet 🏥'),
+        ('video', 'Téléconsultation Vidéo'),
+        ('audio', 'Téléconsultation Audio'),
+        ('cabinet', 'Consultation en Cabinet'),
     ]
 
     STATUS_CHOICES = [

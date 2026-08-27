@@ -1,0 +1,129 @@
+{% extends 'administration/admin_base.html' %}
+
+{% block title %}{{ site_appearance.app_name }} - Demandes Pharmacies{% endblock %}
+{% block header_title %}Requêtes d'inscription : Pharmacies{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+    <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-white">
+        <h2 class="text-lg font-bold text-slate-800 font-heading">Pharmacies en attente de validation</h2>
+        <span class="inline-flex items-center justify-center px-3 py-1 text-xs font-bold leading-none text-red-600 bg-red-100 rounded-full">{{ requests.count }} demande(s)</span>
+    </div>
+    
+    <div class="divide-y divide-slate-100">
+        {% for profile in requests %}
+        <div class="p-6 hover:bg-slate-50 transition-colors" x-data="{ rejectModalOpen: false }">
+            <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+                <!-- Info pharmacie -->
+                <div class="flex-1">
+                    <div class="flex items-center space-x-4 mb-4">
+                        {% if profile.user.profile_picture %}
+                            <img src="{{ profile.user.profile_picture.url }}" class="w-12 h-12 rounded-full object-cover shadow-sm border-2 border-slate-200">
+                        {% else %}
+                            <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold text-lg shadow-sm border-2 border-slate-200">
+                                {{ profile.pharmacy_name|slice:":2"|upper }}
+                            </div>
+                        {% endif %}
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-lg font-heading">{{ profile.pharmacy_name }}</h3>
+                            <div class="text-sm text-slate-500">{{ profile.user.email }} • <span class="font-semibold text-primary">Pharmacie</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4 bg-slate-50 p-4 rounded-xl">
+                        <div>
+                            <span class="text-slate-400 block text-xs uppercase tracking-wider font-bold mb-1">Téléphone</span>
+                            <span class="text-slate-700 font-medium">{{ profile.phone|default:"Non renseigné" }}</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block text-xs uppercase tracking-wider font-bold mb-1">Horaires</span>
+                            <span class="text-slate-700 font-medium">{{ profile.opening_hours|default:"Non renseignés" }}</span>
+                        </div>
+                        <div class="md:col-span-2">
+                            <span class="text-slate-400 block text-xs uppercase tracking-wider font-bold mb-1">Adresse complète</span>
+                            <span class="text-slate-700 font-medium">{{ profile.address|default:"Non renseignée" }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Documents & Actions -->
+                <div class="w-full lg:w-72 flex flex-col space-y-4">
+                    <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100/50">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-primary mb-3">Documents justificatifs</h4>
+                        <ul class="space-y-2 text-sm">
+                            {% if profile.registre_commerce %}
+                            <li>
+                                <a href="{{ profile.registre_commerce.url }}" target="_blank" class="flex items-center text-slate-600 hover:text-primary transition-colors">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                                    Registre de commerce
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="text-slate-400 text-xs italic">Aucun registre fourni</li>
+                            {% endif %}
+                            
+                            {% if profile.autorisation_exercice %}
+                            <li>
+                                <a href="{{ profile.autorisation_exercice.url }}" target="_blank" class="flex items-center text-slate-600 hover:text-primary transition-colors">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                                    Autorisation d'exercice
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="text-slate-400 text-xs italic">Aucune autorisation fournie</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <form action="{% url 'administration:pharmacy_approve' profile.pk %}" method="post" class="flex-1">
+                            {% csrf_token %}
+                            <button type="submit" class="w-full py-2.5 bg-secondary hover:bg-green-600 text-white text-sm font-semibold rounded-xl shadow-sm transition-colors flex items-center justify-center space-x-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span>Accepter</span>
+                            </button>
+                        </form>
+                        <button type="button" @click="rejectModalOpen = true" class="flex-1 py-2.5 bg-white border-2 border-red-100 hover:border-red-500 hover:bg-red-50 text-red-600 text-sm font-semibold rounded-xl transition-colors flex items-center justify-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            <span>Refuser</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Refus -->
+            <div x-show="rejectModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-slate-900/50 backdrop-blur-sm p-4">
+                <div @click.away="rejectModalOpen = false" class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 relative">
+                    <button @click="rejectModalOpen = false" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                    
+                    <h3 class="text-xl font-bold text-slate-800 mb-2 font-heading">Refuser l'inscription</h3>
+                    <p class="text-sm text-slate-500 mb-6">Veuillez indiquer le motif du refus pour la pharmacie {{ profile.pharmacy_name }}. Un email lui sera envoyé.</p>
+                    
+                    <form action="{% url 'administration:pharmacy_reject' profile.pk %}" method="post">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Motif du refus <span class="text-red-500">*</span></label>
+                            <textarea name="rejection_reason" required rows="4" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-shadow" placeholder="Ex: Registre de commerce illisible..."></textarea>
+                        </div>
+                        <div class="flex justify-end space-x-3 mt-6">
+                            <button type="button" @click="rejectModalOpen = false" class="px-5 py-2.5 text-sm font-semibold text-slate-600 hover:text-slate-800 transition-colors">Annuler</button>
+                            <button type="submit" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl shadow-sm transition-colors">Confirmer le refus</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="p-12 text-center flex flex-col items-center justify-center">
+            <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 text-slate-300">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+            </div>
+            <h3 class="text-lg font-bold text-slate-700 font-heading">Aucune demande en attente</h3>
+            <p class="text-sm text-slate-500 mt-1">Toutes les inscriptions de pharmacies ont été traitées.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

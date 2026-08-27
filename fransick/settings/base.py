@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'consultations',
     'ordonnances',
     'ia_assistant',
+    'administration',
+    'teleconsultation',
 ]
 
 MIDDLEWARE = [
@@ -72,6 +74,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.i18n',
+                'administration.context_processors.site_appearance',
             ],
         },
     },
@@ -189,3 +192,6 @@ LOGOUT_REDIRECT_URL = 'core:home'
 # OpenAI API Key pour l'Assistant IA Médical Fransick
 OPENAI_API_KEY = env('OPENAI_API_KEY', default=os.getenv('OPENAI_API_KEY', ''))
 
+# Agora Settings
+AGORA_APP_ID = env('AGORA_APP_ID', default=os.getenv('AGORA_APP_ID', ''))
+AGORA_APP_CERTIFICATE = env('AGORA_APP_CERTIFICATE', default=os.getenv('AGORA_APP_CERTIFICATE', ''))

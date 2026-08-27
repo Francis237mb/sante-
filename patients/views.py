@@ -104,9 +104,9 @@ class BookAppointmentView(LoginRequiredMixin, View):
                 time_slot=time_slot,
                 reason=reason,
                 notes=notes,
-                status='confirmed'
+                status='pending'
             )
-            messages.success(request, f"Votre rendez-vous du {date} à {time_slot} avec le Dr. {doctor.username} a été enregistré avec succès !")
+            messages.success(request, f"⏳ Votre demande de rendez-vous du {date} à {time_slot} a été envoyée au Dr. {doctor.username} pour confirmation.")
             return redirect('patients:suivi')
         else:
             messages.error(request, "Veuillez sélectionner une date valide pour votre rendez-vous.")
@@ -236,4 +236,44 @@ class ToggleVideoLikeView(LoginRequiredMixin, View):
             'likes_count': video.likes_count
         })
 
+
+def api_live_medecins(request):
+    """
+    API en temps réel pour récupérer la liste actualisée de tous les médecins inscrits
+    (ex: si un médecin s'est inscrit sur un autre appareil ou téléphone connecté au réseau).
+    """
+    medecins = get_all_registered_medecins()
+    med_list = []
+    for doc in medecins:
+        profile = getattr(doc, 'doctor_profile', None)
+        speciality = profile.speciality if (profile and profile.speciality) else "Spécialité non renseignée"
+        rating = str(profile.rating) if (profile and profile.rating is not None) else "0.0"
+        exp = profile.years_of_experience if (profile and profile.years_of_experience is not None) else 0
+        
+        if doc.first_name or doc.last_name:
+            full_title_name = f"Dr. {doc.first_name} {doc.last_name}".strip()
+            simple_name = f"{doc.first_name} {doc.last_name}".strip()
+        else:
+            full_title_name = f"Dr. {doc.username}"
+            simple_name = doc.username
+            
+        med_list.append({
+            'id': doc.id,
+            'username': doc.username,
+            'full_title_name': full_title_name,
+            'simple_name': simple_name,
+            'speciality': speciality,
+            'speciality_lower': speciality.lower(),
+            'rating': rating,
+            'years_of_experience': exp,
+            'profile_picture_url': doc.profile_picture.url if doc.profile_picture else "",
+            'detail_url': f"/patients/medecin/{doc.id}/",
+            'search_term': f"{doc.username} {simple_name}".lower()
+        })
+    
+    return JsonResponse({
+        'status': 'success',
+        'count': len(med_list),
+        'medecins': med_list
+    })
 

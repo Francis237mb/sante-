@@ -477,6 +477,22 @@
                             <h4 class="text-xs font-extrabold text-gray-400 uppercase tracking-widest">Préférences générales</h4>
                         </div>
                         <div class="divide-y divide-gray-50">
+                            <!-- Mode Sombre (Switch toggle) -->
+                            <div class="px-5 py-4 flex items-center justify-between">
+                                <div class="flex items-center space-x-3.5">
+                                    <div class="w-8 h-8 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4.5 h-4.5">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-semibold text-gray-700">Mode Sombre</span>
+                                </div>
+                                <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                                    <input type="checkbox" name="toggle" id="toggle-dark-mode" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 border-gray-300 appearance-none cursor-pointer focus:outline-none"/>
+                                    <label for="toggle-dark-mode" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-200 cursor-pointer"></label>
+                                </div>
+                            </div>
+
                             <!-- Changer de langue (Switch EN / FR) -->
                             <div class="px-5 py-4 flex items-center justify-between">
                                 <div class="flex items-center space-x-3.5">
@@ -487,18 +503,14 @@
                                     </div>
                                     <span class="text-sm font-semibold text-gray-700">Changer de langue</span>
                                 </div>
-                                <div class="flex items-center space-x-2">
-                                    <!-- Language toggle switch -->
-                                    <form action="/i18n/setlang/" method="POST" id="lang-switch-form" class="flex items-center space-x-1.5 text-xs font-bold text-gray-500">
+                                <div>
+                                    <form action="{% url 'set_language' %}" method="post" class="inline">
                                         {% csrf_token %}
-                                        <input type="hidden" name="next" value="{{ request.path }}">
-                                        <span>EN</span>
-                                        <div class="relative inline-block w-10 mr-1 align-middle select-none transition duration-200 ease-in">
-                                            <input type="checkbox" name="language_toggle" id="toggle-lang" {% if request.LANGUAGE_CODE == 'fr' %}checked{% endif %} class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 border-gray-300 appearance-none cursor-pointer focus:outline-none"/>
-                                            <label for="toggle-lang" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-200 cursor-pointer"></label>
-                                        </div>
-                                        <span>FR</span>
-                                        <input type="hidden" name="language" id="lang-code-input" value="{{ request.LANGUAGE_CODE }}">
+                                        <input name="next" type="hidden" value="{{ request.path }}">
+                                        <select name="language" onchange="this.form.submit()" class="bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-xl px-4 py-2 text-xs font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-medical-blue cursor-pointer transition-all">
+                                            <option value="fr" {% if request.LANGUAGE_CODE == 'fr' %}selected{% endif %}>Français (FR)</option>
+                                            <option value="en" {% if request.LANGUAGE_CODE == 'en' %}selected{% endif %}>English (EN)</option>
+                                        </select>
                                     </form>
                                 </div>
                             </div>
@@ -1226,6 +1238,24 @@
                 }, 3000);
             }
         }
+    </script>
+    <script>
+        const darkModeToggle = document.getElementById('toggle-dark-mode');
+        
+        // Check initial state
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            darkModeToggle.checked = true;
+        }
+
+        darkModeToggle.addEventListener('change', function() {
+            if (this.checked) {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            }
+        });
     </script>
 </body>
 </html>

@@ -7,7 +7,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('django-admin/', admin.site.urls),
     path('i18n/', include('django.conf.urls.i18n')),  # Built-in view to set language
     path('', include('core.urls')),
     path('accounts/', include('accounts.urls')),
@@ -17,6 +17,8 @@ urlpatterns = [
     path('consultations/', include('consultations.urls')),
     path('ordonnances/', include('ordonnances.urls')),
     path('ia_assistant/', include('ia_assistant.urls')),
+    path('administration/', include('administration.urls')),
+    path('teleconsultation/', include('teleconsultation.urls')),
 ]
 
 if settings.DEBUG:

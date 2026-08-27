@@ -1,20 +1,291 @@
-{% extends 'core/base.html' %}
-{% load i18n %}
-{% block title %}{% translate "Téléconsultation Médicale - Fransick" %}{% endblock %}
-{% block content %}
-<section class="py-12 bg-gray-50">
-    <div class="container mx-auto px-4">
-        <h1 class="text-3xl font-bold font-poppins text-medical-blue mb-8">{% translate "Mes Téléconsultations" %}</h1>
-        <div class="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 max-w-2xl text-center space-y-6">
-            <div class="w-20 h-20 bg-medical-light text-medical-blue rounded-full flex items-center justify-center mx-auto text-3xl">🎥</div>
-            <h3 class="text-xl font-bold text-gray-800">{% translate "Aucune consultation en cours ou programmée" %}</h3>
-            <p class="text-gray-500 max-w-md mx-auto text-sm leading-relaxed">
-                {% translate "Prenez rendez-vous avec l'un de nos praticiens pour une consultation en vidéo sécurisée." %}
-            </p>
-            <button onclick="alert('Redirection vers la prise de RDV')" class="bg-medical-blue hover:bg-medical-dark text-white font-semibold px-8 py-3 rounded-full transition-colors shadow">
-                {% translate "Prendre un rendez-vous" %}
-            </button>
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% translate "Mes Consultations & Rendez-vous - Fransick Santé" %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'medical-blue': '#1B5FA8',
+                        'medical-light': '#EBF3FC',
+                        'medical-dark': '#14467d',
+                        'leaf-green': '#6DBE45',
+                        'leaf-light': '#F0F9EB',
+                        'leaf-dark': '#559c30',
+                    },
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif'],
+                        'inter': ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-gray-50/80 font-inter text-gray-800 antialiased overflow-hidden">
+    <div class="flex h-screen overflow-hidden bg-gray-50/50">
+        
+        <!-- ================= DYNAMIC SIDEBAR & BOTTOM NAV (DOCTOR OR PATIENT) ================= -->
+        {% if is_doctor or user.role == 'medecin' %}
+            {% include "medecins/sidebar.html" %}
+            {% include "medecins/bottom_nav.html" %}
+        {% else %}
+            {% include "patients/sidebar.html" %}
+            {% include "patients/bottom_nav.html" %}
+        {% endif %}
+
+        <!-- ================= MAIN CONTENT AREA ================= -->
+        <div class="flex-1 flex flex-col min-h-screen overflow-hidden">
+            
+            <!-- Header Bar -->
+            <header class="h-20 bg-white border-b border-gray-200/80 px-4 md:px-8 flex items-center justify-between flex-shrink-0 z-30 select-none">
+                <div class="flex items-center space-x-3 sm:space-x-4">
+                    {% if user.profile_picture %}
+                        <img class="h-11 w-11 sm:h-12 sm:w-12 rounded-2xl object-cover ring-2 ring-medical-blue/30 shadow-sm flex-shrink-0" src="{{ user.profile_picture.url }}" alt="{{ user.username }}">
+                    {% else %}
+                        <div class="h-11 w-11 sm:h-12 sm:w-12 rounded-2xl bg-gradient-to-tr from-medical-blue to-cyan-500 text-white flex items-center justify-center font-bold font-poppins text-base sm:text-lg shadow-sm flex-shrink-0">
+                            {{ user.first_name|slice:":1"|default:user.username|slice:":1" }}{{ user.last_name|slice:":1" }}
+                        </div>
+                    {% endif %}
+                    <div>
+                        <div class="flex flex-wrap items-center gap-1 sm:gap-2">
+                            <h2 class="text-sm sm:text-base md:text-lg font-black font-poppins text-gray-900 leading-tight">
+                                {% if is_doctor or user.role == 'medecin' %}Dr. {% endif %}{% if user.last_name %}{{ user.first_name }} {{ user.last_name }}{% else %}{{ user.username }}{% endif %}
+                            </h2>
+                            <span class="inline-block bg-blue-50 text-medical-blue text-[9px] font-extrabold px-2 py-0.5 rounded-md uppercase tracking-wider border border-blue-100/80">
+                                {% if is_doctor or user.role == 'medecin' %}{% if user.doctor_profile.speciality %}{{ user.doctor_profile.speciality }}{% else %}Médecin Praticien{% endif %}{% else %}Espace Patient{% endif %}
+                            </span>
+                        </div>
+                        <p class="text-[10px] sm:text-xs text-gray-400 font-medium mt-0.5">Gestion en temps réel de vos consultations & rendez-vous</p>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="hidden sm:flex items-center space-x-3">
+                    {% if not is_doctor and user.role != 'medecin' %}
+                        <a href="{% url 'patients:dashboard' %}" class="bg-medical-blue hover:bg-medical-dark text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition-all flex items-center space-x-1.5">
+                            <span>➕ Nouveau Rendez-vous</span>
+                        </a>
+                    {% endif %}
+                </div>
+            </header>
+
+            <!-- Content Scroll Area -->
+            <main class="flex-1 overflow-y-auto p-4 md:p-8 pb-32 lg:pb-8 custom-scrollbar">
+                
+                <!-- Django Messages Notifications -->
+                {% if messages %}
+                <div class="mb-6 space-y-2 select-none">
+                    {% for message in messages %}
+                    <div class="p-4 rounded-2xl text-xs font-bold shadow-sm flex items-center space-x-2 {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-leaf-light text-leaf-green border border-leaf-green/30{% endif %}">
+                        <span>{% if message.tags == 'error' %}⚠️{% else %}✅{% endif %}</span>
+                        <span>{{ message }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Hero Banner -->
+                <div class="bg-gradient-to-r from-medical-dark via-medical-blue to-indigo-700 text-white rounded-3xl p-6 md:p-8 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 select-none relative overflow-hidden">
+                    <div class="absolute -top-12 -right-12 w-60 h-60 bg-white/10 rounded-full blur-3xl"></div>
+                    <div class="z-10 space-y-2 max-w-xl">
+                        <div class="inline-block bg-white/10 text-white font-black text-[10px] uppercase tracking-wider px-3 py-1 rounded-full border border-white/10 mb-1">
+                            Centre de Consultations
+                        </div>
+                        <h1 class="text-2xl md:text-3xl font-black font-poppins tracking-tight">
+                            {% if is_doctor or user.role == 'medecin' %}
+                                Agenda & Demandes de Patients 🩺
+                            {% else %}
+                                Mes Consultations & Suivi Médical 🏥
+                            {% endif %}
+                        </h1>
+                        <p class="text-blue-100 text-xs sm:text-sm font-medium leading-relaxed">
+                            {% if is_doctor or user.role == 'medecin' %}
+                                Consultez l'ensemble des rendez-vous réservés par vos patients. Vous pouvez accepter et valider les demandes en attente, ou annuler si indisponible.
+                            {% else %}
+                                Retrouvez le statut en direct de vos demandes de rendez-vous ainsi que vos téléconsultations programmées avec vos médecins.
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <div class="z-10 flex flex-wrap gap-2 sm:gap-4 w-full md:w-auto">
+                        <div class="bg-white/10 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/15 flex flex-col items-center justify-center flex-1 sm:flex-initial min-w-[90px]">
+                            <span class="text-2xl font-black font-poppins">{{ all_rdvs|length }}</span>
+                            <span class="text-[10px] text-blue-200 font-extrabold uppercase tracking-wide">Total RDV</span>
+                        </div>
+                        <div class="bg-amber-500/20 backdrop-blur-md px-5 py-3 rounded-2xl border border-amber-400/30 flex flex-col items-center justify-center flex-1 sm:flex-initial min-w-[90px]">
+                            <span class="text-2xl font-black font-poppins text-amber-300">{{ pending_rdvs|length }}</span>
+                            <span class="text-[10px] text-amber-200 font-extrabold uppercase tracking-wide">En Attente</span>
+                        </div>
+                        <div class="bg-green-500/20 backdrop-blur-md px-5 py-3 rounded-2xl border border-green-400/30 flex flex-col items-center justify-center flex-1 sm:flex-initial min-w-[90px]">
+                            <span class="text-2xl font-black font-poppins text-green-300">{{ confirmed_rdvs|length }}</span>
+                            <span class="text-[10px] text-green-200 font-extrabold uppercase tracking-wide">Confirmés</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Appointments List Section -->
+                <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-xs space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 pb-4">
+                        <div>
+                            <h3 class="text-base sm:text-lg font-black font-poppins text-gray-800 flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-medical-blue shadow-xs"></span>
+                                <span>Liste des Rendez-vous Enregistrés</span>
+                            </h3>
+                            <p class="text-xs text-gray-400 font-medium mt-0.5">Mise à jour synchronisée en temps réel depuis la base de données</p>
+                        </div>
+                    </div>
+
+                    <!-- Cards -->
+                    <div class="space-y-4">
+                        {% if all_rdvs %}
+                            {% for rdv in all_rdvs %}
+                            <div class="p-4 sm:p-5 rounded-3xl bg-gray-50/70 border border-gray-150 hover:border-medical-blue/40 hover:bg-white hover:shadow-md transition-all duration-300 flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
+                                <div class="flex items-start sm:items-center space-x-4">
+                                    {% if is_doctor or user.role == 'medecin' %}
+                                        <!-- Affichage du patient pour le médecin -->
+                                        {% if rdv.patient.profile_picture %}
+                                            <img class="w-12 h-12 rounded-2xl object-cover ring-2 ring-blue-500/20 shadow-sm flex-shrink-0" src="{{ rdv.patient.profile_picture.url }}" alt="{{ rdv.patient.username }}">
+                                        {% else %}
+                                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-medical-blue to-blue-700 text-white flex items-center justify-center font-black text-base font-poppins shadow-sm flex-shrink-0">
+                                                {{ rdv.patient.username|slice:":2"|upper }}
+                                            </div>
+                                        {% endif %}
+                                        <div>
+                                            <div class="flex flex-wrap items-center gap-2">
+                                                <h4 class="text-sm sm:text-base font-bold text-gray-900 font-poppins">{{ rdv.patient.username }}</h4>
+                                                <span class="bg-blue-100/70 text-blue-800 font-extrabold text-[10px] px-2.5 py-0.5 rounded-full border border-blue-200/60">{{ rdv.get_consultation_type_display }}</span>
+                                            </div>
+                                            <p class="text-xs text-gray-600 font-medium mt-1">📝 <span class="font-bold">Motif :</span> {{ rdv.reason }}</p>
+                                            {% if rdv.notes %}
+                                                <p class="text-[11px] text-gray-400 italic mt-0.5">"{{ rdv.notes }}"</p>
+                                            {% endif %}
+                                        </div>
+                                    {% else %}
+                                        <!-- Affichage du docteur pour le patient -->
+                                        {% if rdv.doctor.profile_picture %}
+                                            <img class="w-12 h-12 rounded-2xl object-cover ring-2 ring-blue-500/20 shadow-sm flex-shrink-0" src="{{ rdv.doctor.profile_picture.url }}" alt="{{ rdv.doctor.username }}">
+                                        {% else %}
+                                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-medical-dark to-cyan-600 text-white flex items-center justify-center font-black text-base font-poppins shadow-sm flex-shrink-0">
+                                                Dr
+                                            </div>
+                                        {% endif %}
+                                        <div>
+                                            <div class="flex flex-wrap items-center gap-2">
+                                                <h4 class="text-sm sm:text-base font-bold text-gray-900 font-poppins">Dr. {% if rdv.doctor.last_name %}{{ rdv.doctor.first_name }} {{ rdv.doctor.last_name }}{% else %}{{ rdv.doctor.username }}{% endif %}</h4>
+                                                <span class="bg-blue-100/70 text-blue-800 font-extrabold text-[10px] px-2.5 py-0.5 rounded-full">{{ rdv.get_consultation_type_display }}</span>
+                                            </div>
+                                            <p class="text-xs text-gray-600 font-medium mt-1">📝 <span class="font-bold">Motif :</span> {{ rdv.reason }}</p>
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Date & Interactive Actions -->
+                                <div class="flex flex-wrap md:flex-col lg:flex-row items-center justify-between md:justify-end w-full md:w-auto gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-gray-200/60">
+                                    <div class="text-left md:text-right mr-2">
+                                        <div class="text-xs sm:text-sm font-extrabold text-gray-900 font-poppins">📅 {{ rdv.date|date:"d/m/Y" }} à <span class="text-medical-blue font-black">{{ rdv.time_slot }}</span></div>
+                                        <div class="mt-1">
+                                            {% if rdv.in_waiting_room %}
+                                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-extrabold bg-green-100 text-green-800 animate-pulse border border-green-200">🟢 En salle d'attente</span>
+                                            {% elif rdv.status == 'confirmed' %}
+                                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-extrabold bg-blue-50 text-medical-blue border border-blue-200/80">🟢 Confirmé & Valide</span>
+                                            {% elif rdv.status == 'cancelled' %}
+                                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-extrabold bg-red-50 text-red-600 border border-red-200/80">🔴 Refusé / Annulé</span>
+                                            {% else %}
+                                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200 animate-pulse">🟡 En attente de validation</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    {% if is_doctor or user.role == 'medecin' %}
+                                        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+                                            {% if rdv.status != 'confirmed' %}
+                                            <form method="POST" action="{% url 'consultations:accept_appointment' rdv.id %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="px-4 py-2.5 bg-leaf-green hover:bg-leaf-dark text-white text-xs font-extrabold rounded-2xl transition-all shadow-md hover:shadow-lg flex items-center space-x-1.5 uppercase tracking-wide transform active:scale-95">
+                                                    <span>✅ Accepter</span>
+                                                </button>
+                                            </form>
+                                            {% endif %}
+
+                                            {% if rdv.status != 'cancelled' %}
+                                            <form method="POST" action="{% url 'consultations:reject_appointment' rdv.id %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="px-3.5 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-extrabold rounded-2xl transition-all border border-red-200 flex items-center space-x-1 uppercase tracking-wide transform active:scale-95">
+                                                    <span>❌ Refuser</span>
+                                                </button>
+                                            </form>
+                                            {% endif %}
+                                            
+                                            <a href="{% url 'medecins:patients' %}" class="px-4 py-2.5 bg-gray-100 hover:bg-medical-blue hover:text-white text-gray-700 text-xs font-extrabold rounded-2xl transition-all shadow-xs uppercase tracking-wide">
+                                                📁 Dossier
+                                            </a>
+                                        </div>
+                                    {% else %}
+                                        <div class="flex items-center gap-2">
+                                            {% if rdv.status == 'confirmed' %}
+                                                <a href="{% url 'teleconsultation:rejoindre_appel' rdv.id %}" class="px-5 py-2.5 bg-gradient-to-r from-medical-blue to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-black text-xs rounded-2xl shadow-lg shadow-blue-500/20 uppercase tracking-wide transition-all transform active:scale-95">
+                                                    🎥 Rejoindre Visio
+                                                </a>
+                                            {% else %}
+                                                <span class="text-[11px] font-semibold text-gray-400 italic">En attente du médecin...</span>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <!-- Empty State -->
+                            <div class="p-12 text-center bg-gray-50/50 border border-dashed border-gray-200 rounded-3xl space-y-4 max-w-xl mx-auto">
+                                <div class="w-16 h-16 bg-blue-50 text-medical-blue rounded-full flex items-center justify-center mx-auto text-3xl shadow-sm">
+                                    📅
+                                </div>
+                                <h4 class="text-base font-extrabold text-gray-800 font-poppins">Aucune consultation enregistrée</h4>
+                                <p class="text-xs text-gray-500 max-w-sm mx-auto leading-relaxed">
+                                    {% if is_doctor or user.role == 'medecin' %}
+                                        Lorsque vos patients réserveront des créneaux de consultation en ligne ou des téléconsultations, les demandes apparaîtront ici pour validation.
+                                    {% else %}
+                                        Vous n'avez pas encore planifié de rendez-vous. Choisissez l'un de nos praticiens pour programmer une consultation.
+                                    {% endif %}
+                                </p>
+                                {% if not is_doctor and user.role != 'medecin' %}
+                                    <a href="{% url 'patients:dashboard' %}" class="inline-block px-6 py-3 bg-medical-blue hover:bg-medical-dark text-white font-extrabold text-xs rounded-2xl shadow-md uppercase tracking-wider transition-all">
+                                        Prendre un premier rendez-vous
+                                    </a>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </main>
         </div>
     </div>
-</section>
-{% endblock %}
+</body>
+</html>

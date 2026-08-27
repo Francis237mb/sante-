@@ -6,8 +6,23 @@ from django.contrib import messages
 from django.utils.crypto import get_random_string
 from .models import RendezVous
 
-class ConsultationListView(TemplateView):
+class ConsultationListView(LoginRequiredMixin, TemplateView):
     template_name = 'consultations/list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if getattr(self.request.user, 'role', '') == 'medecin':
+            rdvs = RendezVous.objects.filter(doctor=self.request.user).select_related('patient').order_by('-date', '-time_slot')
+            context['is_doctor'] = True
+        else:
+            rdvs = RendezVous.objects.filter(patient=self.request.user).select_related('doctor').order_by('-date', '-time_slot')
+            context['is_doctor'] = False
+        
+        context['all_rdvs'] = rdvs
+        context['pending_rdvs'] = rdvs.filter(status='pending')
+        context['confirmed_rdvs'] = rdvs.filter(status='confirmed')
+        context['cancelled_rdvs'] = rdvs.filter(status='cancelled')
+        return context
 
 class JoinWaitingRoomView(LoginRequiredMixin, View):
     def post(self, request, pk, *args, **kwargs):
@@ -70,7 +85,7 @@ class StartConsultationView(LoginRequiredMixin, View):
         if not rdv.room_name:
             rdv.room_name = f"fransick_teleconsult_{rdv.id}_{get_random_string(8)}"
         rdv.save()
-        return redirect('consultations:room', pk=rdv.id)
+        return redirect('teleconsultation:rejoindre_appel', rdv_id=rdv.id)
 
 class ConsultationRoomView(LoginRequiredMixin, TemplateView):
     template_name = 'consultations/consultation_room.html'
@@ -135,3 +150,36 @@ class CreateDirectConsultationView(LoginRequiredMixin, View):
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
+
+class AcceptAppointmentView(LoginRequiredMixin, View):
+    def post(self, request, pk, *args, **kwargs):
+        rdv = get_object_or_404(RendezVous, pk=pk)
+        # Seul le médecin concerné (ou un admin) peut valider
+        if request.user != rdv.doctor and not request.user.is_superuser:
+            return JsonResponse({'status': 'error', 'message': 'Permission refusée'}, status=403)
+            
+        rdv.status = 'confirmed'
+        rdv.save()
+        
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.content_type == 'application/json':
+            return JsonResponse({'status': 'success', 'new_status': 'confirmed', 'message': f'Rendez-vous de {rdv.patient.username} accepté avec succès !'})
+            
+        messages.success(request, f"✅ Le rendez-vous de {rdv.patient.username} ({rdv.date.strftime('%d/%m/%Y')} à {rdv.time_slot}) a été accepté avec succès !")
+        return redirect('medecins:dashboard')
+
+
+class RejectAppointmentView(LoginRequiredMixin, View):
+    def post(self, request, pk, *args, **kwargs):
+        rdv = get_object_or_404(RendezVous, pk=pk)
+        if request.user != rdv.doctor and not request.user.is_superuser:
+            return JsonResponse({'status': 'error', 'message': 'Permission refusée'}, status=403)
+            
+        rdv.status = 'cancelled'
+        rdv.in_waiting_room = False
+        rdv.save()
+        
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.content_type == 'application/json':
+            return JsonResponse({'status': 'success', 'new_status': 'cancelled', 'message': f'Rendez-vous de {rdv.patient.username} refusé.'})
+            
+        messages.warning(request, f"⚠️ Le rendez-vous de {rdv.patient.username} ({rdv.date.strftime('%d/%m/%Y')} à {rdv.time_slot}) a été refusé / annulé.")
+        return redirect('medecins:dashboard')
