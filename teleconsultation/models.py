@@ -15,11 +15,11 @@ class AppelConsultation(models.Model):
         related_name='appel_video',
         verbose_name="Rendez-vous associé"
     )
-    channel_name = models.CharField(
+    room_code = models.CharField(
         max_length=100, 
         unique=True, 
         default=uuid.uuid4, 
-        verbose_name="Nom du canal Agora"
+        verbose_name="Code de la salle Jitsi"
     )
     status = models.CharField(
         max_length=20, 
@@ -37,4 +37,4 @@ class AppelConsultation(models.Model):
         verbose_name_plural = "Appels Vidéo"
 
     def __str__(self):
-        return f"Appel {self.channel_name} pour RDV {self.rendez_vous.id}"
+        return f"Appel {self.room_code} pour RDV {self.rendez_vous.id}"

@@ -41,7 +41,7 @@ def log_user_registration(sender, instance, created, **kwargs):
 def log_ordonnance_creation(sender, instance, created, **kwargs):
     if created:
         ActivityLog.objects.create(
-            user=instance.doctor.user if instance.doctor else None,
+            user=instance.doctor,
             action=f"Création d'une ordonnance pour {instance.patient.username if instance.patient else 'un patient'}",
             action_type='ordonnance',
             content_object=instance

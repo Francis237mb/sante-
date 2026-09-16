@@ -31,6 +31,11 @@ class DoctorProfile(models.Model):
     clinic_address = models.CharField(max_length=255, blank=True, null=True, verbose_name="Adresse du cabinet")
     clinic_phone = models.CharField(max_length=50, blank=True, null=True, verbose_name="Téléphone du cabinet")
     rating = models.DecimalField(max_digits=3, decimal_places=1, default=0.0, verbose_name="Note moyenne")
+    consultation_fee = models.DecimalField(
+        max_digits=10, decimal_places=0,
+        blank=True, null=True,
+        verbose_name="Tarif de consultation (XAF)"
+    )
 
     # Étape 2 : Informations Professionnelles
     address = models.CharField(max_length=255, blank=True, null=True, verbose_name="Adresse complète")

@@ -23,6 +23,14 @@ class DoctorProfileForm(forms.ModelForm):
     clinic_name = forms.CharField(required=False, label="Nom du Cabinet / Clinique / Centre Hospitalier")
     clinic_address = forms.CharField(required=False, label="Adresse complète du cabinet (Ville, Quartier, Rue)")
     clinic_phone = forms.CharField(required=False, label="Téléphone de secrétariat / cabinet")
+    consultation_fee = forms.DecimalField(
+        required=False,
+        min_value=0,
+        max_digits=10,
+        decimal_places=0,
+        label="Tarif de consultation (en XAF)",
+        help_text="Ex: 5000 pour 5 000 XAF. Les patients paieront 20% d'acompte lors de la prise de RDV."
+    )
 
     class Meta:
         model = CustomUser
@@ -41,6 +49,7 @@ class DoctorProfileForm(forms.ModelForm):
             self.fields['clinic_name'].initial = profile.clinic_name
             self.fields['clinic_address'].initial = profile.clinic_address
             self.fields['clinic_phone'].initial = profile.clinic_phone
+            self.fields['consultation_fee'].initial = profile.consultation_fee
             self.fields['first_name'].initial = self.instance.first_name
             self.fields['last_name'].initial = self.instance.last_name
 
@@ -69,5 +78,6 @@ class DoctorProfileForm(forms.ModelForm):
             profile.clinic_name = self.cleaned_data.get('clinic_name')
             profile.clinic_address = self.cleaned_data.get('clinic_address')
             profile.clinic_phone = self.cleaned_data.get('clinic_phone')
+            profile.consultation_fee = self.cleaned_data.get('consultation_fee')
             profile.save()
         return user

@@ -1,6 +1,6 @@
-{% load i18n %}
+{% load i18n static %}
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="{% if user.is_authenticated and user.dark_mode_enabled %}dark{% endif %}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{% static 'core/js/tailwindcss.js' %}"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -31,6 +31,24 @@
             }
         }
     </script>
+
+    <!-- Surcharges globales Mode Sombre -->
+    <style>
+        html.dark body { background-color: #111827 !important; color: #f9fafb !important; }
+        html.dark .bg-white { background-color: #1f2937 !important; border-color: #374151 !important; }
+        html.dark .text-gray-800, html.dark .text-gray-900, html.dark .text-gray-700, html.dark h1, html.dark h2, html.dark h3, html.dark h4 { color: #f3f4f6 !important; }
+        html.dark .text-gray-500, html.dark .text-gray-400, html.dark .text-gray-600 { color: #9ca3af !important; }
+        html.dark .bg-gray-50, html.dark .bg-gray-100 { background-color: #374151 !important; border-color: #4b5563 !important; }
+        html.dark .bg-gray-200 { background-color: #4b5563 !important; }
+        html.dark .border, html.dark .border-b, html.dark .border-t, html.dark .border-gray-100, html.dark .border-gray-200 { border-color: #374151 !important; }
+        /* Adaptation des couleurs de marque */
+        html.dark .bg-medical-light, html.dark .bg-medical-light\/40 { background-color: rgba(30, 58, 138, 0.4) !important; color: #e8f0fe !important; }
+        html.dark .bg-leaf-light, html.dark .bg-leaf-light\/40 { background-color: rgba(20, 83, 45, 0.4) !important; color: #f1fcf0 !important; }
+        html.dark .hover\:bg-gray-50:hover { background-color: #374151 !important; }
+        html.dark .hover\:bg-medical-light\/40:hover { background-color: rgba(30, 58, 138, 0.6) !important; }
+        /* Navbar et popups */
+        html.dark header.bg-white\/75, html.dark div.bg-white\/95, html.dark nav.bg-white\/95 { background-color: rgba(31, 41, 55, 0.95) !important; border-color: #374151 !important; }
+    </style>
 </head>
 <body class="bg-white sm:bg-gray-100 font-inter text-gray-800 antialiased min-h-screen flex flex-col items-center justify-center p-0 sm:p-8">
 
@@ -101,7 +119,7 @@
                         <label for="prescription_details" class="block text-xs font-extrabold uppercase tracking-wider text-gray-700">Prescription Médicamenteuse & Traitement (Rx)</label>
                         <span class="text-xs text-leaf-green font-extrabold uppercase tracking-wider flex items-center space-x-1">
                             <span>Symbole Rx</span>
-                            <span class="text-base">💊</span>
+                            <span class="text-base"><i class="ti ti-pill"></i></span>
                         </span>
                     </div>
                     <textarea name="prescription_details" id="prescription_details" rows="6" required placeholder="1. Paracétamol 1000mg : 1 comprimé 3 fois par jour au cours des repas pendant 5 jours.&#10;2. Amoxicilline 1g : 1 gélule matin et soir pendant 7 jours.&#10;3. Sirop Antitussif : 1 cuillère à soupe soir au coucher..." class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-mono text-gray-900 focus:bg-white focus:ring-2 focus:ring-leaf-green focus:border-transparent outline-none transition-all leading-relaxed"></textarea>

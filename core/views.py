@@ -34,3 +34,17 @@ class MyReportsView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return Report.objects.filter(author=self.request.user).order_by('-created_at')
+
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+
+@login_required
+@csrf_exempt
+def toggle_dark_mode(request):
+    if request.method == 'POST':
+        user = request.user
+        user.dark_mode_enabled = not user.dark_mode_enabled
+        user.save(update_fields=['dark_mode_enabled'])
+        return JsonResponse({'status': 'success', 'dark_mode_enabled': user.dark_mode_enabled})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)

@@ -1,6 +1,7 @@
-{% load i18n %}
+{% load static %}
+{% load i18n static %}
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="{% if user.is_authenticated and user.dark_mode_enabled %}dark{% endif %}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{% static 'core/js/tailwindcss.js' %}"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -19,9 +20,7 @@
                         'medical-blue': '#1B5FA8',
                         'medical-light': '#EBF3FC',
                         'medical-dark': '#14467d',
-                        'leaf-green': '#6DBE45',
-                        'leaf-light': '#F0F9EB',
-                        'leaf-dark': '#559c30',
+
                     },
                     fontFamily: {
                         'poppins': ['Poppins', 'sans-serif'],
@@ -45,6 +44,24 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
+    </style>
+
+    <!-- Surcharges globales Mode Sombre -->
+    <style>
+        html.dark body { background-color: #111827 !important; color: #f9fafb !important; }
+        html.dark .bg-white { background-color: #1f2937 !important; border-color: #374151 !important; }
+        html.dark .text-gray-800, html.dark .text-gray-900, html.dark .text-gray-700, html.dark h1, html.dark h2, html.dark h3, html.dark h4 { color: #f3f4f6 !important; }
+        html.dark .text-gray-500, html.dark .text-gray-400, html.dark .text-gray-600 { color: #9ca3af !important; }
+        html.dark .bg-gray-50, html.dark .bg-gray-100 { background-color: #374151 !important; border-color: #4b5563 !important; }
+        html.dark .bg-gray-200 { background-color: #4b5563 !important; }
+        html.dark .border, html.dark .border-b, html.dark .border-t, html.dark .border-gray-100, html.dark .border-gray-200 { border-color: #374151 !important; }
+        /* Adaptation des couleurs de marque */
+        html.dark .bg-medical-light, html.dark .bg-medical-light\/40 { background-color: rgba(30, 58, 138, 0.4) !important; color: #e8f0fe !important; }
+        html.dark .bg-leaf-light, html.dark .bg-leaf-light\/40 { background-color: rgba(20, 83, 45, 0.4) !important; color: #f1fcf0 !important; }
+        html.dark .hover\:bg-gray-50:hover { background-color: #374151 !important; }
+        html.dark .hover\:bg-medical-light\/40:hover { background-color: rgba(30, 58, 138, 0.6) !important; }
+        /* Navbar et popups */
+        html.dark header.bg-white\/75, html.dark div.bg-white\/95, html.dark nav.bg-white\/95 { background-color: rgba(31, 41, 55, 0.95) !important; border-color: #374151 !important; }
     </style>
 </head>
 <body class="bg-gray-50/80 font-inter text-gray-800 antialiased overflow-hidden">
@@ -84,8 +101,8 @@
 
                 <div class="flex items-center space-x-4 relative">
                     <!-- Status Indicator Toggle (En Ligne / Consultation) -->
-                    <div class="flex items-center space-x-2 bg-leaf-light border border-leaf-green/30 text-leaf-green font-bold text-xs px-3 py-1.5 rounded-full shadow-xs">
-                        <span class="w-2 h-2 rounded-full bg-leaf-green animate-pulse"></span>
+                    <div class="flex items-center space-x-2 bg-medical-light border border-medical-blue/30 text-medical-blue font-bold text-xs px-3 py-1.5 rounded-full shadow-xs">
+                        <span class="w-2 h-2 rounded-full bg-medical-blue animate-pulse"></span>
                         <span>{% translate "En ligne & disponible" %}</span>
                     </div>
 
@@ -118,7 +135,7 @@
                             {% if my_rdvs %}
                                 {% for rdv in my_rdvs %}
                                 <div class="p-3 rounded-2xl bg-blue-50/40 border border-blue-100 flex items-start space-x-3">
-                                    <div class="w-8 h-8 rounded-xl bg-medical-blue text-white flex items-center justify-center flex-shrink-0 font-bold text-xs shadow-xs">📅</div>
+                                    <div class="w-8 h-8 rounded-xl bg-medical-blue text-white flex items-center justify-center flex-shrink-0 font-bold text-xs shadow-xs"><i class="ti ti-calendar"></i></div>
                                     <div class="flex-1">
                                         <div class="flex items-center justify-between">
                                             <h5 class="text-xs font-bold text-gray-800">Consultation {{ rdv.get_consultation_type_display }}</h5>
@@ -131,7 +148,7 @@
                             {% else %}
                                 <!-- Empty State -->
                                 <div id="doc-notif-empty-state" class="p-8 text-center space-y-2">
-                                    <div class="w-12 h-12 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mx-auto text-xl">🔔</div>
+                                    <div class="w-12 h-12 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mx-auto text-xl"><i class="ti ti-bell"></i></div>
                                     <h5 class="text-xs font-bold text-gray-700">Aucune notification en attente</h5>
                                     <p class="text-[10px] text-gray-400">Toutes les demandes de rendez-vous et questions sont traitées.</p>
                                 </div>
@@ -148,8 +165,8 @@
                 {% if messages %}
                 <div class="mb-6 space-y-2 select-none">
                     {% for message in messages %}
-                    <div class="p-4 rounded-2xl text-xs font-bold shadow-sm flex items-center space-x-2 {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-leaf-light text-leaf-green border border-leaf-green/30{% endif %}">
-                        <span>{% if message.tags == 'error' %}⚠️{% else %}✅{% endif %}</span>
+                    <div class="p-4 rounded-2xl text-xs font-bold shadow-sm flex items-center space-x-2 {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-medical-light text-medical-blue border border-medical-blue/30{% endif %}">
+                        <span>{% if message.tags == 'error' %}<i class="ti ti-alert-triangle"></i>{% else %}<i class="ti ti-check"></i>{% endif %}</span>
                         <span>{{ message }}</span>
                     </div>
                     {% endfor %}
@@ -175,7 +192,7 @@
                         </p>
                     </div>
                     <div class="z-10 flex-shrink-0 w-full sm:w-auto flex flex-col sm:flex-row gap-3">
-                        <button type="button" onclick="openPublishVideoModal()" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs uppercase tracking-wider px-5 py-3.5 rounded-2xl shadow-md transition-all flex items-center justify-center space-x-2">
+                        <button type="button" onclick="openPublishVideoModal()" class="w-full sm:w-auto bg-medical-blue hover:bg-medical-blue text-white font-bold text-xs uppercase tracking-wider px-5 py-3.5 rounded-2xl shadow-md transition-all flex items-center justify-center space-x-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
                             <span>Publier Conseil Vidéo</span>
                         </button>
@@ -193,7 +210,7 @@
                 <!-- KPI Metric Cards Grid (Données réelles de la BD SQLite) -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 select-none">
                     <!-- Consultations & RDV -->
-                    <div class="bg-white border border-gray-100 rounded-3xl p-5 shadow-xs flex items-center space-x-4">
+                    <a href="#consultations-section" class="bg-white border border-gray-100 rounded-3xl p-5 shadow-xs flex items-center space-x-4 hover:shadow-md hover:border-medical-blue/30 transition-all cursor-pointer">
                         <div class="w-12 h-12 rounded-2xl bg-medical-light text-medical-blue flex items-center justify-center flex-shrink-0 font-bold">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
                               <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
@@ -202,15 +219,15 @@
                         <div>
                             <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">Consultations</span>
                             <div class="text-xl font-extrabold text-gray-800 font-poppins mt-0.5">{{ rdvs_count|default:0 }} RDV</div>
-                            <span class="text-[10px] text-leaf-green font-bold flex items-center mt-1">
+                            <span class="text-[10px] text-medical-blue font-bold flex items-center mt-1">
                                 Données en temps réel
                             </span>
                         </div>
-                    </div>
+                    </a>
 
                     <!-- Patients Suivis -->
-                    <div class="bg-white border border-gray-100 rounded-3xl p-5 shadow-xs flex items-center space-x-4">
-                        <div class="w-12 h-12 rounded-2xl bg-leaf-light text-leaf-green flex items-center justify-center flex-shrink-0 font-bold">
+                    <a href="{% url 'medecins:patients' %}" class="bg-white border border-gray-100 rounded-3xl p-5 shadow-xs flex items-center space-x-4 hover:shadow-md hover:border-medical-blue/30 transition-all cursor-pointer">
+                        <div class="w-12 h-12 rounded-2xl bg-medical-light text-medical-blue flex items-center justify-center flex-shrink-0 font-bold">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
                               <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6 0 3.375 3.375 0 0 1 6 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
                             </svg>
@@ -218,14 +235,14 @@
                         <div>
                             <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">Patients Suivis</span>
                             <div class="text-xl font-extrabold text-gray-800 font-poppins mt-0.5">{{ my_patients_count|default:0 }} Actif{{ my_patients_count|pluralize }}</div>
-                            <span class="text-[10px] text-leaf-green font-bold flex items-center mt-1">
+                            <span class="text-[10px] text-medical-blue font-bold flex items-center mt-1">
                                 Dossiers électroniques
                             </span>
                         </div>
-                    </div>
+                    </a>
 
                     <!-- Abonnés Patient -->
-                    <div class="bg-white border border-gray-100 rounded-3xl p-5 shadow-xs flex items-center space-x-4">
+                    <a href="{% url 'medecins:patients' %}" class="bg-white border border-gray-100 rounded-3xl p-5 shadow-xs flex items-center space-x-4 hover:shadow-md hover:border-orange-300 transition-all cursor-pointer">
                         <div class="w-12 h-12 rounded-2xl bg-orange-50 text-orange-500 flex items-center justify-center flex-shrink-0 font-bold">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
                               <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385c.116.488-.42.879-.844.628l-4.69-2.783a.563.563 0 0 0-.58 0l-4.69 2.783c-.424.25-.96-.14-.844-.628l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602c-.38-.325-.178-.948.32-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
@@ -238,11 +255,11 @@
                                 Suivent vos conseils
                             </span>
                         </div>
-                    </div>
+                    </a>
 
                     <!-- Mes Capsules Vidéos -->
-                    <div class="bg-white border border-gray-100 rounded-3xl p-5 shadow-xs flex items-center space-x-4">
-                        <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0 font-bold">
+                    <a href="#videos-section" class="bg-white border border-gray-100 rounded-3xl p-5 shadow-xs flex items-center space-x-4 hover:shadow-md hover:border-medical-blue/30 transition-all cursor-pointer">
+                        <div class="w-12 h-12 rounded-2xl bg-purple-50 text-medical-blue flex items-center justify-center flex-shrink-0 font-bold">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
                               <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
                             </svg>
@@ -250,11 +267,11 @@
                         <div>
                             <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">Mes Vidéos</span>
                             <div class="text-xl font-extrabold text-gray-800 font-poppins mt-0.5">{{ my_videos_count|default:0 }} Capsule{{ my_videos_count|pluralize }}</div>
-                            <span class="text-[10px] text-leaf-green font-bold flex items-center mt-1">
+                            <span class="text-[10px] text-medical-blue font-bold flex items-center mt-1">
                                 Publiées en ligne
                             </span>
                         </div>
-                    </div>
+                    </a>
                 </div>
 
                 <!-- Main Content Grid -->
@@ -264,7 +281,7 @@
                     <div class="lg:col-span-8 space-y-8">
                         
                         <!-- Today's Consultations List (Données réelles de la BD SQLite) -->
-                        <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-xs">
+                        <div id="consultations-section" class="bg-white border border-gray-100 rounded-3xl p-6 shadow-xs scroll-mt-24">
                             <div class="flex items-center justify-between mb-5 border-b border-gray-50 pb-4">
                                 <h3 class="text-md font-bold text-gray-800 font-poppins flex items-center">
                                     <span class="w-2.5 h-2.5 rounded-full bg-medical-blue mr-2 shadow-xs"></span>
@@ -291,13 +308,13 @@
                                                 <div class="text-xs font-extrabold text-gray-900">{{ rdv.date|date:"d/m/Y" }} à <span class="text-medical-blue font-black">{{ rdv.time_slot }}</span></div>
                                                 <div class="mt-1">
                                                     {% if rdv.in_waiting_room %}
-                                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-green-100 text-green-800 animate-pulse">🟢 En salle d'attente</span>
+                                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-green-100 text-green-800 animate-pulse"> En salle d'attente</span>
                                                     {% elif rdv.status == 'confirmed' %}
-                                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-blue-50 text-medical-blue border border-blue-100">🟢 Confirmé par le praticien</span>
+                                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-blue-50 text-medical-blue border border-blue-100"> Confirmé par le praticien</span>
                                                     {% elif rdv.status == 'cancelled' %}
-                                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-red-50 text-red-600 border border-red-100">🔴 Refusé / Annulé</span>
+                                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-red-50 text-red-600 border border-red-100"> Refusé / Annulé</span>
                                                     {% else %}
-                                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200/80 animate-pulse">🟡 En attente de validation</span>
+                                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200/80 animate-pulse"> En attente de validation</span>
                                                     {% endif %}
                                                 </div>
                                             </div>
@@ -307,8 +324,8 @@
                                                 <!-- Bouton Accepter -->
                                                 <form method="POST" action="{% url 'consultations:accept_appointment' rdv.id %}">
                                                     {% csrf_token %}
-                                                    <button type="submit" class="px-3.5 py-2 bg-leaf-green hover:bg-leaf-dark text-white text-[11px] font-extrabold rounded-xl transition-all shadow-sm flex items-center space-x-1 uppercase tracking-wide transform active:scale-95" title="Accepter et confirmer ce rendez-vous">
-                                                        <span>✅ Accepter</span>
+                                                    <button type="submit" class="px-3.5 py-2 bg-medical-blue hover:bg-medical-dark text-white text-[11px] font-extrabold rounded-xl transition-all shadow-sm flex items-center space-x-1 uppercase tracking-wide transform active:scale-95" title="Accepter et confirmer ce rendez-vous">
+                                                        <span><i class="ti ti-check"></i> Accepter</span>
                                                     </button>
                                                 </form>
                                                 {% endif %}
@@ -318,13 +335,13 @@
                                                 <form method="POST" action="{% url 'consultations:reject_appointment' rdv.id %}">
                                                     {% csrf_token %}
                                                     <button type="submit" class="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 text-[11px] font-extrabold rounded-xl transition-all border border-red-200 flex items-center space-x-1 uppercase tracking-wide transform active:scale-95" title="Refuser ou annuler">
-                                                        <span>❌ Refuser</span>
+                                                        <span><i class="ti ti-x"></i> Refuser</span>
                                                     </button>
                                                 </form>
                                                 {% endif %}
                                                 
                                                 <a href="{% url 'medecins:patients' %}" class="px-3.5 py-2 bg-gray-100 hover:bg-medical-blue hover:text-white text-gray-700 text-[11px] font-extrabold rounded-xl transition-all shadow-xs uppercase tracking-wide" title="Accéder au dossier patient">
-                                                    📁 Dossier
+                                                     Dossier
                                                 </a>
                                             </div>
                                         </div>
@@ -332,7 +349,7 @@
                                     {% endfor %}
                                 {% else %}
                                     <div class="p-8 text-center bg-gray-50 border border-gray-100 rounded-2xl space-y-2">
-                                        <span class="text-3xl block">📅</span>
+                                        <span class="text-3xl block"><i class="ti ti-calendar"></i></span>
                                         <h4 class="text-xs font-bold text-gray-700">Aucun rendez-vous planifié</h4>
                                         <p class="text-[10px] text-gray-400 max-w-xs mx-auto">Les consultations et créneaux réservés en temps réel par vos patients s'afficheront directement ici.</p>
                                     </div>
@@ -345,14 +362,14 @@
                             <div class="flex items-center justify-between border-b border-gray-50 pb-4">
                                 <div>
                                     <h3 class="text-md font-bold text-gray-800 font-poppins flex items-center space-x-2">
-                                        <span class="w-2.5 h-2.5 rounded-full bg-leaf-green shadow-xs"></span>
+                                        <span class="w-2.5 h-2.5 rounded-full bg-medical-blue shadow-xs"></span>
                                         <span>{% translate "Dossiers Patients & Derniers Diagnostics" %}</span>
                                     </h3>
                                     <p class="text-xs text-gray-400 font-semibold mt-0.5">Historique des diagnostics et ordonnances électroniques délivrées</p>
                                 </div>
                                 <a href="{% url 'medecins:patients' %}" class="text-xs text-medical-blue hover:underline font-extrabold uppercase tracking-wide flex items-center space-x-1">
                                     <span>Voir tous les dossiers</span>
-                                    <span>➔</span>
+                                    <span><i class="ti ti-arrow-right"></i></span>
                                 </a>
                             </div>
 
@@ -370,7 +387,7 @@
                                                     <p class="text-[10px] text-gray-400 font-semibold">Âge : {{ item.patient_age }} • Consultation : {{ item.last_ordonnance.date|date:"d/m/Y" }}</p>
                                                 </div>
                                             </div>
-                                            <span class="bg-leaf-light text-leaf-green text-[9px] font-extrabold px-2 py-0.5 rounded-full">Dossier Actif</span>
+                                            <span class="bg-medical-light text-medical-blue text-[9px] font-extrabold px-2 py-0.5 rounded-full">Dossier Actif</span>
                                         </div>
 
                                         <!-- Dernier Diagnostic posé par le docteur -->
@@ -381,18 +398,18 @@
                                         </div>
 
                                         <div class="pt-1 flex items-center justify-between gap-2 text-[10px] font-extrabold uppercase tracking-wider">
-                                            <a href="{% url 'ordonnances:detail' pk=item.last_ordonnance.id %}" class="text-leaf-green hover:underline flex items-center space-x-1">
-                                                <span>Fiche Ordonnance 📄</span>
+                                            <a href="{% url 'ordonnances:detail' pk=item.last_ordonnance.id %}" class="text-medical-blue hover:underline flex items-center space-x-1">
+                                                <span>Fiche Ordonnance <i class="ti ti-file-text"></i></span>
                                             </a>
                                             <a href="{% url 'medecins:patients' %}" class="text-medical-blue hover:underline">
-                                                <span>Historique ({{ item.all_ordonnances|length }}) ➔</span>
+                                                <span>Historique ({{ item.all_ordonnances|length }}) <i class="ti ti-arrow-right"></i></span>
                                             </a>
                                         </div>
                                     </div>
                                     {% endfor %}
                                 {% else %}
                                     <div class="col-span-2 p-8 text-center bg-gray-50 border border-gray-100 rounded-2xl space-y-2">
-                                        <span class="text-3xl block">📋</span>
+                                        <span class="text-3xl block"><i class="ti ti-clipboard-list"></i></span>
                                         <h4 class="text-xs font-bold text-gray-700">Aucun dossier patient enregistré</h4>
                                         <p class="text-[10px] text-gray-400 max-w-xs mx-auto">Vos dossiers patients et leurs historiques de diagnostic apparaîtront ici dès la fin de vos consultations et émissions d'ordonnances.</p>
                                     </div>
@@ -401,16 +418,16 @@
                         </div>
 
                         <!-- Doctor Published Videos & Reactions Panel -->
-                        <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-xs select-none space-y-5">
+                        <div id="videos-section" class="bg-white border border-gray-100 rounded-3xl p-6 shadow-xs select-none space-y-5 scroll-mt-24">
                             <div class="flex items-center justify-between border-b border-gray-50 pb-4">
                                 <div>
                                     <h3 class="text-md font-bold text-gray-800 font-poppins flex items-center space-x-2">
-                                        <span class="text-purple-600">📹</span>
+                                        <span class="text-medical-blue"></span>
                                         <span>Mes Capsules Vidéos Publiées & Réactions Patients</span>
                                     </h3>
-                                    <p class="text-xs text-gray-400 font-semibold mt-0.5">Consultez les réactions ❤️ et commentaires 💬 reçus sous vos conseils de santé</p>
+                                    <p class="text-xs text-gray-400 font-semibold mt-0.5">Consultez les réactions <i class="ti ti-heart text-red-500"></i> et commentaires <i class="ti ti-message"></i> reçus sous vos conseils de santé</p>
                                 </div>
-                                <button type="button" onclick="openPublishVideoModal()" class="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl shadow-xs uppercase tracking-wider">
+                                <button type="button" onclick="openPublishVideoModal()" class="px-3.5 py-2 bg-medical-blue hover:bg-medical-blue text-white text-xs font-bold rounded-xl shadow-xs uppercase tracking-wider">
                                     + Publier Vidéo
                                 </button>
                             </div>
@@ -420,8 +437,8 @@
                                     {% for video in my_videos %}
                                     <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                         <div class="flex items-center space-x-3">
-                                            <div class="w-10 h-10 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-base shadow-xs shrink-0">
-                                                🎥
+                                            <div class="w-10 h-10 rounded-2xl bg-purple-100 text-medical-blue flex items-center justify-center font-bold text-base shadow-xs shrink-0">
+                                                
                                             </div>
                                             <div class="min-w-0 overflow-hidden">
                                                 <h4 class="text-sm font-bold text-gray-800 font-poppins truncate">{{ video.title }}</h4>
@@ -430,11 +447,11 @@
                                         </div>
                                         <div class="flex items-center space-x-4 text-xs font-bold shrink-0">
                                             <span class="text-red-500 flex items-center space-x-1" title="J'aime">
-                                                <span>❤️</span>
+                                                <span><i class="ti ti-heart text-red-500"></i></span>
                                                 <span>{{ video.likes_count|default:0 }}</span>
                                             </span>
                                             <span class="text-medical-blue flex items-center space-x-1" title="Commentaires">
-                                                <span>💬</span>
+                                                <span><i class="ti ti-message"></i></span>
                                                 <span>{{ video.comments.count }}</span>
                                             </span>
                                         </div>
@@ -442,7 +459,7 @@
                                     {% endfor %}
                                 {% else %}
                                     <div class="p-8 text-center bg-gray-50 border border-gray-100 rounded-2xl space-y-2">
-                                        <span class="text-3xl block">📹</span>
+                                        <span class="text-3xl block"></span>
                                         <h4 class="text-xs font-bold text-gray-700">Aucune capsule vidéo publiée</h4>
                                         <p class="text-[10px] text-gray-400 max-w-xs mx-auto">Publiez de courtes vidéos de prévention pour éduquer votre patientèle et interagir avec les patients.</p>
                                     </div>
@@ -461,17 +478,17 @@
                                 {% translate "Actions Médicales Rapides" %}
                             </h3>
                             <div class="grid grid-cols-1 gap-3">
-                                <button type="button" onclick="alert('Générateur d\'ordonnance électronique sécurisée...')" class="w-full flex items-center space-x-3 p-3.5 rounded-2xl bg-gray-50 border border-gray-100/50 hover:border-medical-blue hover:bg-medical-light/40 transition-all font-semibold text-xs text-gray-700 text-left">
+                                <a href="{% url 'ordonnances:create' %}" class="w-full flex items-center space-x-3 p-3.5 rounded-2xl bg-gray-50 border border-gray-100/50 hover:border-medical-blue hover:bg-medical-light/40 transition-all font-semibold text-xs text-gray-700 text-left cursor-pointer">
                                     <div class="w-8 h-8 rounded-xl bg-medical-blue/10 text-medical-blue flex items-center justify-center flex-shrink-0">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
                                           <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.83 20.013a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                                         </svg>
                                     </div>
                                     <span>Rédiger une Ordonnance</span>
-                                </button>
+                                </a>
 
-                                <button type="button" onclick="alert('Ajout de créneau dans l\'agenda...')" class="w-full flex items-center space-x-3 p-3.5 rounded-2xl bg-gray-50 border border-gray-100/50 hover:border-leaf-green hover:bg-leaf-light/40 transition-all font-semibold text-xs text-gray-700 text-left">
-                                    <div class="w-8 h-8 rounded-xl bg-leaf-green/10 text-leaf-green flex items-center justify-center flex-shrink-0">
+                                <button type="button" onclick="alert('La fonctionnalité Agenda et Créneaux est en cours de déploiement !')" class="w-full flex items-center space-x-3 p-3.5 rounded-2xl bg-gray-50 border border-gray-100/50 hover:border-medical-blue hover:bg-medical-light/40 transition-all font-semibold text-xs text-gray-700 text-left cursor-pointer">
+                                    <div class="w-8 h-8 rounded-xl bg-medical-blue/10 text-medical-blue flex items-center justify-center flex-shrink-0">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
                                           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                                         </svg>
@@ -479,19 +496,19 @@
                                     <span>Ajouter un Créneau Horaire</span>
                                 </button>
 
-                                <button type="button" onclick="alert('Lien d\'invitation généré pour le patient...')" class="w-full flex items-center space-x-3 p-3.5 rounded-2xl bg-gray-50 border border-gray-100/50 hover:border-purple-400 hover:bg-purple-50/20 transition-all font-semibold text-xs text-gray-700 text-left">
-                                    <div class="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0">
+                                <a href="{% url 'medecins:patients' %}" class="w-full flex items-center space-x-3 p-3.5 rounded-2xl bg-gray-50 border border-gray-100/50 hover:border-purple-400 hover:bg-purple-50/20 transition-all font-semibold text-xs text-gray-700 text-left cursor-pointer">
+                                    <div class="w-8 h-8 rounded-xl bg-purple-50 text-medical-blue flex items-center justify-center flex-shrink-0">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
                                           <path stroke-linecap="round" stroke-linejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.765Z" />
                                         </svg>
                                     </div>
                                     <span>Inviter un Nouveau Patient</span>
-                                </button>
+                                </a>
                             </div>
                         </div>
 
                         <!-- Medical AI Diagnostic Assistant Card -->
-                        <div class="bg-gradient-to-br from-medical-blue to-leaf-dark text-white rounded-3xl p-6 shadow-sm relative overflow-hidden select-none">
+                        <div class="bg-gradient-to-br from-medical-blue to-medical-dark text-white rounded-3xl p-6 shadow-sm relative overflow-hidden select-none">
                             <div class="absolute -top-12 -left-12 w-40 h-40 bg-white/10 rounded-full blur-xl"></div>
                             <div class="space-y-4 z-10 relative">
                                 <span class="bg-white/15 text-white font-bold text-[9px] uppercase tracking-widest px-2.5 py-1 rounded-full inline-block border border-white/20">Support Médical IA</span>
@@ -521,7 +538,7 @@
                 {% csrf_token %}
                 <div class="flex items-center justify-between border-b border-gray-100 pb-3">
                     <h4 class="text-md font-bold text-gray-900 font-poppins flex items-center space-x-2">
-                        <span class="text-purple-600">📹</span>
+                        <span class="text-medical-blue"></span>
                         <span>Publier un Conseil Vidéo Santé</span>
                     </h4>
                     <button type="button" onclick="closePublishVideoModal()" class="text-gray-400 hover:text-gray-600"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
@@ -541,8 +558,8 @@
                     </div>
                 </div>
                 <div class="pt-3 border-t border-gray-100">
-                    <button type="submit" class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs shadow-md uppercase tracking-wider">
-                        Publier sur le Feed Vidéos Santé 🚀
+                    <button type="submit" class="w-full py-3 bg-medical-blue hover:bg-medical-blue text-white font-bold rounded-xl text-xs shadow-md uppercase tracking-wider">
+                        Publier sur le Feed Vidéos Santé <i class="ti ti-rocket"></i>
                     </button>
                 </div>
             </form>
@@ -571,7 +588,7 @@
         }
 
         function submitVideoCapsule() {
-            alert('🎉 Votre capsule vidéo de conseil médical a été publiée avec succès sur le feed des patients !');
+            alert(' Votre capsule vidéo de conseil médical a été publiée avec succès sur le feed des patients !');
             closePublishVideoModal();
         }
 
@@ -648,11 +665,11 @@
                             emptyState.classList.add('hidden');
                             patients.forEach(pat => {
                                 const patEl = document.createElement('div');
-                                patEl.className = "p-4 rounded-2xl bg-gray-50 border border-gray-150 hover:border-leaf-green transition-all flex items-center justify-between gap-4";
+                                patEl.className = "p-4 rounded-2xl bg-gray-50 border border-gray-150 hover:border-medical-blue transition-all flex items-center justify-between gap-4";
                                 
                                 const avatarHTML = pat.patient_avatar 
                                     ? `<img class="w-11 h-11 rounded-xl object-cover" src="${pat.patient_avatar}">`
-                                    : `<div class="w-11 h-11 rounded-xl bg-leaf-green/10 text-leaf-green flex items-center justify-center font-extrabold text-sm shadow-xs">${pat.patient_initials}</div>`;
+                                    : `<div class="w-11 h-11 rounded-xl bg-medical-blue/10 text-medical-blue flex items-center justify-center font-extrabold text-sm shadow-xs">${pat.patient_initials}</div>`;
 
                                 patEl.innerHTML = `
                                     <div class="flex items-center space-x-3.5">
@@ -663,8 +680,8 @@
                                             <p class="text-[10px] text-gray-500 font-medium mt-0.5">Motif : ${pat.reason}</p>
                                         </div>
                                     </div>
-                                    <a href="/teleconsultation/rejoindre/${pat.id}/" class="px-4 py-2.5 bg-leaf-green hover:bg-leaf-dark active:scale-95 text-white text-[10px] font-extrabold tracking-wider uppercase rounded-xl transition-all shadow-xs inline-block text-center">
-                                        Admettre & Appeler 🎥
+                                    <a href="/teleconsultation/rejoindre/${pat.id}/" class="px-4 py-2.5 bg-medical-blue hover:bg-medical-dark active:scale-95 text-white text-[10px] font-extrabold tracking-wider uppercase rounded-xl transition-all shadow-xs inline-block text-center">
+                                        Admettre & Appeler 
                                     </a>
                                 `;
                                 listContainer.appendChild(patEl);
@@ -693,7 +710,7 @@
                 <!-- Header -->
                 <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-gray-50/50">
                     <div class="flex items-center space-x-2">
-                        <span class="w-3 h-3 rounded-full bg-leaf-green animate-pulse"></span>
+                        <span class="w-3 h-3 rounded-full bg-medical-blue animate-pulse"></span>
                         <h3 class="text-md font-bold font-poppins text-gray-800">Salle d'attente active</h3>
                     </div>
                     <button type="button" onclick="closeWaitingRoomModal()" class="text-gray-400 hover:text-gray-600 transition-colors focus:outline-none">
@@ -711,7 +728,7 @@
 
                     <!-- Empty State -->
                     <div id="waiting-patients-empty" class="text-center py-10 space-y-3">
-                        <div class="text-4xl">📭</div>
+                        <div class="text-4xl"></div>
                         <h4 class="text-sm font-bold text-gray-700">Aucun patient en attente</h4>
                         <p class="text-xs text-gray-400 max-w-xs mx-auto">Les patients prenant place dans votre salle d'attente virtuelle apparaîtront instantanément ici.</p>
                     </div>

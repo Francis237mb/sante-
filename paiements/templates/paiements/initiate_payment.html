@@ -1,0 +1,384 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Paiement — {{ label }}{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --pay-primary: #4f46e5;
+    --pay-primary-dark: #3730a3;
+    --pay-success: #059669;
+    --pay-warning: #d97706;
+    --pay-bg: #0f172a;
+    --pay-card: #1e293b;
+    --pay-border: #334155;
+    --pay-text: #f1f5f9;
+    --pay-muted: #94a3b8;
+  }
+
+  body { background: var(--pay-bg); }
+
+  .payment-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+  }
+
+  .payment-card {
+    background: var(--pay-card);
+    border: 1px solid var(--pay-border);
+    border-radius: 20px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 520px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+    animation: slideUp 0.4s ease;
+  }
+
+  @keyframes slideUp {
+    from { opacity:0; transform:translateY(30px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+
+  .payment-brand {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  .payment-brand .logo-icon {
+    width: 56px; height: 56px;
+    background: linear-gradient(135deg, var(--pay-primary), #7c3aed);
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    margin-bottom: 0.6rem;
+    box-shadow: 0 8px 24px rgba(79,70,229,0.4);
+  }
+  .payment-brand h1 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--pay-text);
+    margin: 0;
+  }
+  .payment-brand p {
+    font-size: 0.8rem;
+    color: var(--pay-muted);
+    margin: 0;
+  }
+
+  .doctor-summary {
+    background: rgba(79,70,229,0.1);
+    border: 1px solid rgba(79,70,229,0.3);
+    border-radius: 12px;
+    padding: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .doctor-avatar {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--pay-primary);
+    flex-shrink: 0;
+  }
+  .doctor-avatar-initials {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--pay-primary), #7c3aed);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; font-weight: 700; color: white;
+    flex-shrink: 0;
+  }
+  .doctor-info h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--pay-text);
+    margin: 0 0 0.2rem;
+  }
+  .doctor-info p {
+    font-size: 0.8rem;
+    color: var(--pay-muted);
+    margin: 0;
+  }
+
+  .amount-box {
+    background: linear-gradient(135deg, rgba(5,150,105,0.15), rgba(16,185,129,0.05));
+    border: 1px solid rgba(5,150,105,0.4);
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  .amount-label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--pay-muted);
+    margin-bottom: 0.4rem;
+  }
+  .amount-value {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: #10b981;
+    line-height: 1;
+    margin-bottom: 0.4rem;
+  }
+  .amount-unit { font-size: 1.2rem; color: #6ee7b7; }
+  .amount-info {
+    font-size: 0.78rem;
+    color: var(--pay-muted);
+    margin-top: 0.5rem;
+  }
+  .amount-info span {
+    background: rgba(79,70,229,0.2);
+    color: #818cf8;
+    padding: 0.2rem 0.6rem;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    margin-left: 0.3rem;
+  }
+
+  .form-group { margin-bottom: 1.2rem; }
+  .form-label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--pay-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+  }
+  .form-input {
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--pay-border);
+    border-radius: 10px;
+    color: var(--pay-text);
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+  }
+  .form-input:focus {
+    outline: none;
+    border-color: var(--pay-primary);
+    box-shadow: 0 0 0 3px rgba(79,70,229,0.2);
+  }
+  .form-hint {
+    font-size: 0.75rem;
+    color: var(--pay-muted);
+    margin-top: 0.4rem;
+  }
+
+  .operators-badge {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.2rem;
+  }
+  .operator-badge {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--pay-border);
+    border-radius: 8px;
+    padding: 0.35rem 0.8rem;
+    font-size: 0.78rem;
+    color: var(--pay-text);
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+  .operator-badge .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot-mtn { background: #fbbf24; }
+  .dot-orange { background: #f97316; }
+
+  .security-note {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.78rem;
+    color: var(--pay-muted);
+  }
+  .security-note svg { flex-shrink: 0; color: #10b981; }
+
+  .pay-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--pay-primary), #7c3aed);
+    color: white;
+    font-size: 1.05rem;
+    font-weight: 700;
+    padding: 0.9rem;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 8px 24px rgba(79,70,229,0.4);
+    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  }
+  .pay-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(79,70,229,0.5);
+  }
+  .pay-btn:active { transform: translateY(0); }
+
+  .back-link {
+    display: block;
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.82rem;
+    color: var(--pay-muted);
+    text-decoration: none;
+  }
+  .back-link:hover { color: var(--pay-text); }
+
+  .consultation-type-select {
+    display: none;
+  }
+  {% if payment_type == 'direct' %}
+  .consultation-type-select { display: block; }
+  {% endif %}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="payment-wrapper">
+  <div class="payment-card">
+    <!-- Brand -->
+    <div class="payment-brand">
+      <div class="logo-icon">💳</div>
+      <h1>Fransick Santé</h1>
+      <p>Paiement Sécurisé via Mobile Money</p>
+    </div>
+
+    <!-- Médecin -->
+    <div class="doctor-summary">
+      {% if doctor.profile_picture %}
+        <img src="{{ doctor.profile_picture.url }}" alt="{{ doctor.username }}" class="doctor-avatar">
+      {% else %}
+        <div class="doctor-avatar-initials">
+          {{ doctor.username|slice:":2"|upper }}
+        </div>
+      {% endif %}
+      <div class="doctor-info">
+        <h3>Dr. {{ doctor.get_full_name|default:doctor.username }}</h3>
+        <p>{{ doctor_profile.speciality|default:"Médecin Généraliste" }} — {{ doctor_profile.clinic_name|default:"" }}</p>
+      </div>
+    </div>
+
+    <!-- Montant -->
+    <div class="amount-box">
+      <div class="amount-label">
+        {% if payment_type == 'rdv' %}Acompte à payer{% else %}Montant total à payer{% endif %}
+      </div>
+      <div class="amount-value">
+        {{ amount|floatformat:0 }} <span class="amount-unit">XAF</span>
+      </div>
+      {% if payment_type == 'rdv' %}
+      <div class="amount-info">
+        Tarif consultation : {{ fee|floatformat:0 }} XAF
+        <span>Acompte {{ deposit_percent }}%</span>
+      </div>
+      {% else %}
+      <div class="amount-info">
+        Paiement intégral de la consultation directe
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Opérateurs -->
+    <div class="operators-badge">
+      <div class="operator-badge">
+        <div class="dot dot-mtn"></div> MTN Mobile Money
+      </div>
+      <div class="operator-badge">
+        <div class="dot dot-orange"></div> Orange Money
+      </div>
+    </div>
+
+    <!-- Formulaire -->
+    <form method="post" id="payment-form">
+      {% csrf_token %}
+      <input type="hidden" name="consultation_type" value="{{ rdv_consultation_type|default:'video' }}">
+      {% if payment_type == 'rdv' %}
+        <input type="hidden" name="date" value="{{ rdv_date }}">
+        <input type="hidden" name="time_slot" value="{{ rdv_time|default:'10:00' }}">
+        <input type="hidden" name="reason" value="{{ rdv_reason|default:'Consultation médicale' }}">
+        <input type="hidden" name="notes" value="">
+      {% endif %}
+
+      <!-- Type de consultation (consultation directe seulement) -->
+      <div class="form-group consultation-type-select">
+        <label class="form-label" for="id_consultation_type">Type de Consultation</label>
+        <select name="consultation_type" id="id_consultation_type" class="form-input">
+          <option value="video">📹 Vidéo</option>
+          <option value="audio">📞 Audio</option>
+        </select>
+      </div>
+
+      <!-- Numéro de téléphone -->
+      <div class="form-group">
+        <label class="form-label" for="id_phone">Numéro Mobile Money</label>
+        <input
+          type="tel"
+          name="phone_number"
+          id="id_phone"
+          class="form-input"
+          placeholder="ex: 677 000 000 ou 237677000000"
+          value="{{ phone_prefill }}"
+          required
+          autocomplete="tel"
+        >
+        <p class="form-hint">
+          📱 Entrez votre numéro MTN ou Orange (avec ou sans indicatif 237).
+          Un code USSD sera envoyé sur ce numéro pour confirmer le paiement.
+        </p>
+      </div>
+
+      <!-- Sécurité -->
+      <div class="security-note">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        <span>Paiement sécurisé via CamPay. Aucune donnée bancaire n'est stockée sur nos serveurs.</span>
+      </div>
+
+      <button type="submit" class="pay-btn" id="pay-submit-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+          <line x1="1" y1="10" x2="23" y2="10"/>
+        </svg>
+        Payer {{ amount|floatformat:0 }} XAF maintenant
+      </button>
+    </form>
+
+    <a href="javascript:history.back()" class="back-link">← Annuler et retourner en arrière</a>
+  </div>
+</div>
+
+<script>
+document.getElementById('payment-form').addEventListener('submit', function() {
+  const btn = document.getElementById('pay-submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = `
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      style="animation:spin 1s linear infinite">
+      <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+    </svg>
+    Initiation en cours...
+  `;
+  // Ajout animation spin
+  const style = document.createElement('style');
+  style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+  document.head.appendChild(style);
+});
+</script>
+{% endblock %}

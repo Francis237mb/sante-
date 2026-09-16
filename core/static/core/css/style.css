@@ -18,42 +18,55 @@ h1, h2, h3, h4, h5, h6 {
 body {
     font-family: 'Inter', sans-serif;
     scroll-behavior: smooth;
+    color: #374151; /* gray-700 */
 }
 
-/* Glassmorphism Styles (inspired by mockup) */
+/* Professional Card Styles (Replacing heavy glassmorphism) */
 .glass-card {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 8px 32px 0 rgba(27, 95, 168, 0.08);
+    background: #ffffff;
+    border: 1px solid #e5e7eb; /* gray-200 */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    border-radius: 0.75rem;
 }
 
 .glass-card-dark {
-    background: rgba(27, 95, 168, 0.85);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+    background: #1e3a8a; /* medical-blue dark */
+    border: 1px solid #1e40af;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    color: #ffffff;
+    border-radius: 0.75rem;
 }
 
 /* Custom premium hover enhancements */
 .hover-card {
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.2s ease-in-out;
 }
 
 .hover-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 20px 40px -15px rgba(27, 95, 168, 0.15);
-    border-color: rgba(27, 95, 168, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(27, 95, 168, 0.08), 0 4px 6px -2px rgba(27, 95, 168, 0.04);
+    border-color: rgba(27, 95, 168, 0.15);
 }
 
 .hover-card-green {
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.2s ease-in-out;
 }
 
 .hover-card-green:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 20px 40px -15px rgba(109, 190, 69, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(109, 190, 69, 0.08), 0 4px 6px -2px rgba(109, 190, 69, 0.04);
     border-color: rgba(109, 190, 69, 0.2);
+}
+
+/* Base button standards */
+.btn-primary {
+    background-color: #1B5FA8;
+    color: white;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+.btn-primary:hover {
+    background-color: #14467d;
 }

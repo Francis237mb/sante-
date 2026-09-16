@@ -1,488 +1,459 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="{% if user.is_authenticated and user.dark_mode_enabled %}dark{% endif %}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Téléconsultation - {{ rdv.patient.get_full_name }}</title>
+    <title>Téléconsultation - {{ user_name }}</title>
     <!-- Tabler Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
     <!-- Google Fonts -->
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- Agora Web SDK -->
-    <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+    <!-- Jitsi Meet External API -->
+    <script src="https://meet.guifi.net/external_api.js"></script>
 
-<style>
-    body {
-        margin: 0;
-        padding: 0;
-        background-color: #111827; /* Dark background */
-        font-family: 'Inter', sans-serif;
-        color: white;
-        overflow: hidden;
-    }
-
-    #navbar-container {
-        display: none; /* Hide default navbar for full immersion */
-    }
-
-    .teleconsultation-container {
-        position: relative;
-        width: 100vw;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-    }
-
-    /* Top bar info */
-    .top-bar {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        padding: 1rem;
-        background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
-        z-index: 10;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .meeting-info h2 {
-        margin: 0;
-        font-family: 'Poppins', sans-serif;
-        font-size: 1.25rem;
-        font-weight: 600;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
-    }
-
-
-    .meeting-info p {
-        margin: 0;
-        font-size: 0.875rem;
-        opacity: 0.8;
-    }
-
-    .network-stats {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.875rem;
-        background: rgba(0,0,0,0.4);
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        backdrop-filter: blur(4px);
-    }
-    
-    .network-indicator {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background-color: #6DBE45; /* Vert par défaut */
-    }
-
-    /* Video area */
-    .video-area {
-        flex: 1;
-        position: relative;
-        background-color: #000;
-    }
-
-    #remote-player {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    #local-player {
-        position: absolute;
-        bottom: 100px;
-        right: 20px;
-        width: 120px;
-        height: 160px;
-        background-color: #1f2937;
-        border-radius: 12px;
-        overflow: hidden;
-        border: 2px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-        z-index: 20;
-        cursor: move;
-    }
-
-    @media (min-width: 768px) {
-        #local-player {
-            width: 240px;
-            height: 180px;
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0f172a; /* Slate 900 */
+            font-family: 'Inter', sans-serif;
+            color: white;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
         }
-    }
 
-    .waiting-screen {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        background-color: #111827;
-        z-index: 5;
-    }
+        /* Top Bar */
+        .top-bar {
+            height: 70px;
+            background-color: #1e293b; /* Slate 800 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 1.5rem;
+            border-bottom: 1px solid #334155;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            z-index: 50;
+        }
+        .meeting-info h2 { margin: 0; font-family: 'Poppins', sans-serif; font-size: 1.1rem; font-weight: 600; color: #f8fafc; }
+        .meeting-info p { margin: 0; font-size: 0.8rem; color: #94a3b8; font-weight: 500; }
+        .timer-container { display: flex; align-items: center; gap: 0.5rem; background: rgba(0,0,0,0.2); padding: 0.4rem 1rem; border-radius: 9999px; font-variant-numeric: tabular-nums; font-weight: 600; }
+        .timer-container .dot { width: 8px; height: 8px; border-radius: 50%; background-color: #ef4444; animation: pulse 2s infinite; }
 
-    .spinner {
-        border: 4px solid rgba(255,255,255,0.1);
-        border-left-color: #1B5FA8; /* Bleu principal */
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
-        animation: spin 1s linear infinite;
-        margin-bottom: 1rem;
-    }
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
 
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
+        /* Loading Screen */
+        .loading-screen {
+            position: absolute;
+            top: 70px; left: 0; right: 0; bottom: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #0f172a;
+            z-index: 40;
+            transition: opacity 0.5s;
+        }
+        .spinner {
+            width: 50px; height: 50px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-left-color: #3b82f6; /* Blue 500 */
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1.5rem;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .loading-screen h3 { font-family: 'Poppins', sans-serif; font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; text-align: center; }
+        .loading-screen p { color: #94a3b8; font-size: 0.9rem; text-align: center; }
 
-    /* Controls bar */
-    .controls-bar {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        padding: 1.5rem;
-        background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 1rem;
-        z-index: 10;
-    }
+        /* Error UI in Loading Screen */
+        .error-actions {
+            display: none;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .btn-retry, .btn-back {
+            padding: 0.5rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-retry { background-color: #3b82f6; color: white; }
+        .btn-retry:hover { background-color: #2563eb; }
+        .btn-back { background-color: #475569; color: white; text-decoration: none; }
+        .btn-back:hover { background-color: #334155; }
 
-    .control-btn {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        border: none;
-        background-color: rgba(255, 255, 255, 0.1);
-        color: white;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        backdrop-filter: blur(8px);
-        transition: all 0.2s ease;
-    }
+        /* Jitsi Container */
+        .jitsi-container {
+            flex: 1;
+            padding: 1rem;
+            position: relative;
+            background-color: #0f172a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #jitsi-iframe {
+            width: 100%;
+            height: 100%;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            background-color: #000;
+        }
+        
+        /* Mobile fixes */
+        @media (max-width: 768px) {
+            .jitsi-container { padding: 0.5rem; }
+            #jitsi-iframe { border-radius: 1rem; }
+            .top-bar { padding: 0 1rem; }
+        }
 
-    .control-btn:hover {
-        background-color: rgba(255, 255, 255, 0.2);
-        transform: scale(1.05);
-    }
+        /* Toast Notification */
+        .toast-notification {
+            position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%);
+            background: #1e293b; color: white; padding: 12px 24px; border-radius: 9999px;
+            font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); z-index: 100;
+            transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .toast-notification.show { bottom: 30px; }
+        .toast-icon { display: flex; align-items: center; justify-content: center; background: #22c55e; width: 24px; height: 24px; border-radius: 50%; }
+        .toast-icon.error { background: #ef4444; }
 
-    .control-btn i {
-        font-size: 1.5rem;
-    }
+        /* Custom Ordonnance Modal */
+        .custom-modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000; opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .custom-modal-overlay.active {
+            opacity: 1; pointer-events: auto;
+        }
+        .custom-modal-box {
+            background: white; border-radius: 24px; padding: 2.5rem 2rem;
+            max-width: 420px; width: 90%; text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-family: 'Inter', sans-serif;
+        }
+        .custom-modal-overlay.active .custom-modal-box {
+            transform: scale(1);
+        }
+        .modal-icon-wrapper {
+            width: 70px; height: 70px; border-radius: 50%;
+            background: #e0f2fe; color: #0ea5e9;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1.5rem; font-size: 32px;
+            box-shadow: inset 0 0 0 6px white, 0 0 0 6px #f0f9ff;
+        }
+        .custom-modal-box h3 {
+            margin: 0 0 0.5rem; color: #0f172a; font-family: 'Poppins', sans-serif; font-size: 1.35rem; font-weight: 700;
+        }
+        .custom-modal-box p {
+            margin: 0 0 2rem; color: #64748b; font-size: 0.95rem; line-height: 1.5; font-weight: 500;
+        }
+        .modal-actions {
+            display: flex; flex-direction: column; gap: 0.85rem;
+        }
+        .btn-modal-primary {
+            background: #0ea5e9; color: white; border: none; border-radius: 14px;
+            padding: 1rem; font-size: 1.05rem; font-weight: 600; cursor: pointer;
+            transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.4);
+        }
+        .btn-modal-primary:hover { background: #0284c7; transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.4); }
+        .btn-modal-primary:active { transform: translateY(0); box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.4); }
+        
+        .btn-modal-secondary {
+            background: #f8fafc; color: #64748b; border: 2px solid #e2e8f0; border-radius: 14px;
+            padding: 1rem; font-size: 1rem; font-weight: 600; cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-modal-secondary:hover { background: #f1f5f9; color: #475569; border-color: #cbd5e1; }
+    </style>
 
-    .control-btn.muted {
-        background-color: #ef4444; /* Rouge alert */
-    }
-
-    .btn-leave {
-        background-color: #ef4444 !important;
-        width: 60px;
-        height: 60px;
-    }
-    
-    .btn-leave:hover {
-        background-color: #dc2626 !important;
-    }
-
-    .btn-leave i {
-        font-size: 1.75rem;
-    }
-</style>
+    <!-- Surcharges globales Mode Sombre -->
+    <style>
+        html.dark body { background-color: #111827 !important; color: #f9fafb !important; }
+        html.dark .bg-white { background-color: #1f2937 !important; border-color: #374151 !important; }
+        html.dark .text-gray-800, html.dark .text-gray-900, html.dark .text-gray-700, html.dark h1, html.dark h2, html.dark h3, html.dark h4 { color: #f3f4f6 !important; }
+        html.dark .text-gray-500, html.dark .text-gray-400, html.dark .text-gray-600 { color: #9ca3af !important; }
+        html.dark .bg-gray-50, html.dark .bg-gray-100 { background-color: #374151 !important; border-color: #4b5563 !important; }
+        html.dark .bg-gray-200 { background-color: #4b5563 !important; }
+        html.dark .border, html.dark .border-b, html.dark .border-t, html.dark .border-gray-100, html.dark .border-gray-200 { border-color: #374151 !important; }
+        /* Adaptation des couleurs de marque */
+        html.dark .bg-medical-light, html.dark .bg-medical-light\/40 { background-color: rgba(30, 58, 138, 0.4) !important; color: #e8f0fe !important; }
+        html.dark .bg-leaf-light, html.dark .bg-leaf-light\/40 { background-color: rgba(20, 83, 45, 0.4) !important; color: #f1fcf0 !important; }
+        html.dark .hover\:bg-gray-50:hover { background-color: #374151 !important; }
+        html.dark .hover\:bg-medical-light\/40:hover { background-color: rgba(30, 58, 138, 0.6) !important; }
+        /* Navbar et popups */
+        html.dark header.bg-white\/75, html.dark div.bg-white\/95, html.dark nav.bg-white\/95 { background-color: rgba(31, 41, 55, 0.95) !important; border-color: #374151 !important; }
+    </style>
 </head>
-
 <body>
-<div class="teleconsultation-container">
     <div class="top-bar">
         <div class="meeting-info">
-            <h2>Consultation avec {% if is_doctor %}{{ rdv.patient.get_full_name }}{% else %}Dr. {{ rdv.doctor.get_full_name }}{% endif %}</h2>
-            <p id="call-timer">00:00</p>
+            <h2>Consultation Fransick</h2>
+            <p>avec {% if is_doctor %}{{ rdv.patient.get_full_name|default:rdv.patient.username }}{% else %}Dr. {{ rdv.doctor.get_full_name|default:rdv.doctor.username }}{% endif %}</p>
         </div>
-        <div class="network-stats">
-            <div id="network-indicator" class="network-indicator"></div>
-            <span id="network-text">Réseau stable</span>
-        </div>
-    </div>
-
-    <div class="video-area">
-        <div id="remote-player"></div>
-        <div id="local-player"></div>
-        
-        <div id="waiting-screen" class="waiting-screen">
-            <div class="spinner"></div>
-            <h3>En attente de l'autre participant...</h3>
-            <p>La vidéo démarrera automatiquement.</p>
+        <div class="timer-container" id="timer-container" style="display: none;">
+            <div class="dot"></div>
+            <span id="timer">00:00</span>
         </div>
     </div>
 
-    <div class="controls-bar">
-        <button id="btn-mic" class="control-btn" title="Couper/Activer le micro">
-            <i class="ti ti-microphone"></i>
-        </button>
-        <button id="btn-video" class="control-btn" title="Couper/Activer la caméra">
-            <i class="ti ti-video"></i>
-        </button>
-        {% if not is_mobile %}
-        <button id="btn-screen" class="control-btn" title="Partager l'écran">
-            <i class="ti ti-screen-share"></i>
-        </button>
-        {% endif %}
-        <button id="btn-leave" class="control-btn btn-leave" title="Raccrocher">
-            <i class="ti ti-phone-off"></i>
-        </button>
+    <div class="loading-screen" id="loading-screen">
+        <div class="spinner" id="loading-spinner"></div>
+        <h3 id="loading-title">Préparation de votre consultation...</h3>
+        <p id="loading-message">Connexion au serveur...</p>
+        
+        <div class="error-actions" id="error-actions">
+            <button class="btn-retry" onclick="window.location.reload();">
+                <i class="ti ti-refresh"></i> Réessayer
+            </button>
+            <a href="{% if is_doctor %}{% url 'medecins:dashboard' %}{% else %}{% url 'consultations:patient_appointments' %}{% endif %}" class="btn-back">
+                <i class="ti ti-arrow-left"></i> Retour
+            </a>
+        </div>
     </div>
-</div>
 
-<script>
-    // Agora settings
-    const APP_ID = "{{ agora_app_id }}";
-    const TOKEN = "{{ agora_token }}";
-    const CHANNEL = "{{ agora_channel }}";
-    const UID = {{ agora_uid }};
-    const APPEL_ID = {{ appel.id }};
-    
-    let client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
-    let localTracks = {
-        videoTrack: null,
-        audioTrack: null
-    };
-    let remoteUsers = {};
-    let isMicMuted = false;
-    let isVideoMuted = false;
-    
-    // Timer
-    let timerInterval;
-    let secondsElapsed = 0;
-    
-    function startTimer() {
-        if (timerInterval) clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-            secondsElapsed++;
-            const m = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
-            const s = (secondsElapsed % 60).toString().padStart(2, '0');
-            document.getElementById('call-timer').innerText = `${m}:${s}`;
+    <div class="jitsi-container">
+        <div id="jitsi-iframe"></div>
+    </div>
+
+    <div id="toast" class="toast-notification">
+        <div class="toast-icon" id="toast-icon"><i class="ti ti-check"></i></div>
+        <span id="toast-message">Notification</span>
+    </div>
+
+    <!-- Beautiful Ordonnance Modal -->
+    <div id="ordonnance-modal" class="custom-modal-overlay">
+        <div class="custom-modal-box">
+            <div class="modal-icon-wrapper">
+                <i class="ti ti-file-description"></i>
+            </div>
+            <h3>Consultation Terminée</h3>
+            <p>Voulez-vous rédiger une ordonnance pour ce patient suite à cette téléconsultation ?</p>
+            <div class="modal-actions">
+                <button id="btn-ord-yes" class="btn-modal-primary">
+                    <i class="ti ti-check"></i> Oui, rédiger l'ordonnance
+                </button>
+                <button id="btn-ord-no" class="btn-modal-secondary">
+                    Non, terminer et revenir au tableau de bord
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Constants from backend
+        const ROOM_CODE = "{{ room_code }}";
+        const USER_NAME = "{{ user_name }}";
+        const APPEL_ID = {{ appel.id }};
+        
+        let api = null;
+        let timerInterval;
+        let secondsElapsed = 0;
+        let loadingTimeout;
+        
+        // Toast Management
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toast-icon');
+            document.getElementById('toast-message').innerText = message;
             
-            // Hard limit: 1 hour (3600 seconds)
-            if (secondsElapsed >= 3600) {
-                alert("La durée limite de la consultation (1 heure) a été atteinte.");
-                leaveCall();
+            if (isError) {
+                toastIcon.classList.add('error');
+                toastIcon.innerHTML = '<i class="ti ti-alert-circle"></i>';
+            } else {
+                toastIcon.classList.remove('error');
+                toastIcon.innerHTML = '<i class="ti ti-info-circle"></i>';
             }
-        }, 1000);
-    }
-    
-    async function initAgora() {
-        try {
-            // Listeners
-            client.on("user-published", handleUserPublished);
-            client.on("user-unpublished", handleUserUnpublished);
-            client.on("user-joined", handleUserJoined);
-            client.on("user-left", handleUserLeft);
-            client.on("network-quality", handleNetworkQuality);
+            
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 4000);
+        }
 
-            // Join channel
-            await client.join(APP_ID, CHANNEL, TOKEN, UID);
-            
-            // Create local tracks
-            localTracks.audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-            localTracks.videoTrack = await AgoraRTC.createCameraVideoTrack();
-            
-            // Play local video
-            localTracks.videoTrack.play("local-player");
-            
-            // Publish local tracks
-            await client.publish(Object.values(localTracks));
-            console.log("Publish success");
-            
-        } catch (error) {
-            console.error("Agora Error: ", error);
-            alert("Erreur d'accès à la caméra ou au micro. Veuillez vérifier vos permissions.");
+        // Error Handling during load
+        function handleLoadError(title, message) {
+            console.error("Loading Error:", title, message);
+            clearTimeout(loadingTimeout);
+            document.getElementById('loading-spinner').style.display = 'none';
+            document.getElementById('loading-title').innerText = title;
+            document.getElementById('loading-title').style.color = '#ef4444';
+            document.getElementById('loading-message').innerText = message;
+            document.getElementById('error-actions').style.display = 'flex';
         }
-    }
-    
-    async function handleUserPublished(user, mediaType) {
-        const id = user.uid;
-        remoteUsers[id] = user;
-        await client.subscribe(user, mediaType);
-        
-        document.getElementById('waiting-screen').style.display = 'none';
-        
-        if (mediaType === "video") {
-            user.videoTrack.play("remote-player");
+
+        // Timer Management
+        function startTimer() {
+            document.getElementById('timer-container').style.display = 'flex';
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const m = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
+                const s = (secondsElapsed % 60).toString().padStart(2, '0');
+                document.getElementById('timer').innerText = `${m}:${s}`;
+                
+                // Expiration logic if needed (e.g. max 1 hour)
+                if (secondsElapsed >= 3600) {
+                    showToast("La durée limite (1 heure) a été atteinte.", true);
+                    endCall();
+                }
+            }, 1000);
         }
-        if (mediaType === "audio") {
-            user.audioTrack.play();
+
+        // Backend Sync
+        function notifyBackendAndRedirect() {
+            fetch(`/teleconsultation/terminer/${APPEL_ID}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            }).then(() => {
+                // Redirect depending on user role
+                {% if is_doctor %}
+                const modal = document.getElementById('ordonnance-modal');
+                modal.classList.add('active');
+                
+                document.getElementById('btn-ord-yes').onclick = () => {
+                    window.location.href = "{% url 'ordonnances:create_for_rdv' rdv.id %}";
+                };
+                document.getElementById('btn-ord-no').onclick = () => {
+                    window.location.href = "{% url 'medecins:dashboard' %}";
+                };
+                {% else %}
+                window.location.href = "{% url 'consultations:patient_appointments' %}";
+                {% endif %}
+            }).catch(err => {
+                window.location.href = "/";
+            });
         }
-        
-        startTimer();
-    }
-    
-    function handleUserUnpublished(user, mediaType) {
-        if (mediaType === "video") {
-            const id = user.uid;
-            delete remoteUsers[id];
-            // Optionally show waiting screen if no one else is in
-            if (Object.keys(remoteUsers).length === 0) {
-                document.getElementById('waiting-screen').style.display = 'flex';
-                clearInterval(timerInterval);
+
+        function endCall() {
+            if (api) {
+                api.dispose();
             }
+            notifyBackendAndRedirect();
         }
-    }
 
-    function handleUserJoined(user) {
-        console.log("User joined:", user.uid);
-    }
+        // Fake progress for UX
+        function updateLoadingProgress() {
+            const msgEl = document.getElementById('loading-message');
+            setTimeout(() => { if(msgEl.innerText === 'Connexion au serveur...') msgEl.innerText = "Initialisation de l'interface vidéo..."; }, 3000);
+            setTimeout(() => { if(msgEl.innerText === "Initialisation de l'interface vidéo...") msgEl.innerText = "Préparation de la salle sécurisée..."; }, 6000);
+        }
 
-    function handleUserLeft(user) {
-        console.log("User left:", user.uid);
-        alert("L'autre participant a quitté la consultation.");
-        leaveCall();
-    }
-    
-    function handleNetworkQuality(stats) {
-        const indicator = document.getElementById('network-indicator');
-        const text = document.getElementById('network-text');
-        
-        // stats.uplinkNetworkQuality & downlinkNetworkQuality: 1 (Excellent) to 6 (Down)
-        const quality = Math.max(stats.uplinkNetworkQuality, stats.downlinkNetworkQuality);
-        
-        if (quality <= 2) {
-            indicator.style.backgroundColor = '#6DBE45'; // Green
-            text.innerText = 'Réseau excellent';
-        } else if (quality <= 4) {
-            indicator.style.backgroundColor = '#f59e0b'; // Yellow/Orange
-            text.innerText = 'Réseau moyen';
-        } else {
-            indicator.style.backgroundColor = '#ef4444'; // Red
-            text.innerText = 'Réseau faible';
-        }
-    }
+        // Jitsi Initialization
+        window.onload = () => {
+            console.log("Starting Jitsi initialization...");
+            updateLoadingProgress();
+            
+            // Watchdog Timeout: Fallback in case API fails to instantiate
+            loadingTimeout = setTimeout(() => {
+                handleLoadError("Erreur d'initialisation", "L'interface vidéo n'a pas pu se charger. Vérifiez votre connexion.");
+            }, 10000);
 
-    // Controls
-    document.getElementById('btn-mic').onclick = async function() {
-        if (!localTracks.audioTrack) return;
-        
-        if (isMicMuted) {
-            await localTracks.audioTrack.setMuted(false);
-            this.classList.remove('muted');
-            this.innerHTML = '<i class="ti ti-microphone"></i>';
-        } else {
-            await localTracks.audioTrack.setMuted(true);
-            this.classList.add('muted');
-            this.innerHTML = '<i class="ti ti-microphone-off"></i>';
-        }
-        isMicMuted = !isMicMuted;
-    };
-    
-    document.getElementById('btn-video').onclick = async function() {
-        if (!localTracks.videoTrack) return;
-        
-        if (isVideoMuted) {
-            await localTracks.videoTrack.setMuted(false);
-            this.classList.remove('muted');
-            this.innerHTML = '<i class="ti ti-video"></i>';
-        } else {
-            await localTracks.videoTrack.setMuted(true);
-            this.classList.add('muted');
-            this.innerHTML = '<i class="ti ti-video-off"></i>';
-        }
-        isVideoMuted = !isVideoMuted;
-    };
-    
-    async function leaveCall() {
-        // Stop local tracks
-        for (trackName in localTracks) {
-            var track = localTracks[trackName];
-            if(track) {
-                track.stop();
-                track.close();
-                localTracks[trackName] = null;
+            const domain = 'meet.guifi.net';
+            const options = {
+                roomName: ROOM_CODE,
+                width: '100%',
+                height: '100%',
+                parentNode: document.getElementById('jitsi-iframe'),
+                userInfo: {
+                    displayName: USER_NAME
+                },
+                configOverwrite: {
+                    prejoinPageEnabled: false,          // Disable lobby page
+                    startWithAudioMuted: false,         // Audio on by default
+                    startWithVideoMuted: false,         // Video on by default
+                    disableDeepLinking: true,           // Disable app prompt
+                    requireDisplayName: false           // Already provided
+                },
+                interfaceConfigOverwrite: {
+                    TOOLBAR_BUTTONS: [
+                        'microphone', 'camera', 'desktop', 'chat',
+                        'fullscreen', 'hangup', 'tileview'
+                    ],
+                    HIDE_INVITE_MORE_HEADER: true,
+                    DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
+                    SHOW_JITSI_WATERMARK: false,
+                    SHOW_WATERMARK_FOR_GUESTS: false,
+                    SHOW_PROMOTIONAL_CLOSE_PAGE: false,
+                    MOBILE_APP_PROMO: false
+                }
+            };
+            
+            try {
+                api = new JitsiMeetExternalAPI(domain, options);
+                console.log("Jitsi API instance created.");
+                
+                // Cacher immédiatement l'écran de chargement pour que l'utilisateur puisse voir l'interface Jitsi (Ex: bouton "Je suis l'hôte")
+                clearTimeout(loadingTimeout);
+                document.getElementById('loading-screen').style.opacity = '0';
+                setTimeout(() => { document.getElementById('loading-screen').style.display = 'none'; }, 500);
+                
+                // Event Listeners
+                api.addListener('videoConferenceJoined', () => {
+                    startTimer();
+                });
+                
+                api.addListener('videoConferenceLeft', () => {
+                    endCall();
+                });
+
+                api.addListener('participantJoined', (participant) => {
+                    console.log("Participant joined:", participant);
+                    showToast(participant.displayName + " a rejoint la consultation.");
+                });
+
+                api.addListener('participantLeft', (participant) => {
+                    console.log("Participant left:", participant);
+                    showToast(participant.displayName + " a quitté la consultation.");
+                });
+
+                api.addListener('cameraError', (error) => {
+                    console.error("Camera Error:", error);
+                    showToast("Erreur d'accès à la caméra. Vérifiez vos permissions.", true);
+                });
+
+                api.addListener('micError', (error) => {
+                    console.error("Mic Error:", error);
+                    showToast("Erreur d'accès au microphone. Vérifiez vos permissions.", true);
+                });
+
+                api.addListener('videoConferenceLeft', (e) => {
+                    console.log("videoConferenceLeft triggered:", e);
+                    endCall();
+                });
+
+                // Network error catch if possible
+                api.addListener('suspendDetected', () => {
+                     showToast("Connexion suspendue, tentative de reconnexion...", true);
+                });
+
+            } catch (e) {
+                console.error("Jitsi Init Exception:", e);
+                handleLoadError("Erreur d'initialisation", "L'interface vidéo n'a pas pu se charger. Veuillez réessayer.");
             }
-        }
-        
-        // Leave channel
-        await client.leave();
-        
-        // Notify backend
-        fetch(`/teleconsultation/terminer/${APPEL_ID}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-                'Content-Type': 'application/json'
-            }
-        }).then(() => {
-            // Redirect depending on user role
-            {% if is_doctor %}
-            window.location.href = "{% url 'ordonnances:create' %}?rdv={{ rdv.id }}";
-            {% else %}
-            window.location.href = "{% url 'consultations:patient_appointments' %}";
-            {% endif %}
-        }).catch(err => {
-            window.location.href = "/";
-        });
-    }
-    
-    document.getElementById('btn-leave').onclick = leaveCall;
-    
-    // Make PIP draggable
-    const pip = document.getElementById('local-player');
-    let isDragging = false;
-    let offset = { x: 0, y: 0 };
-    
-    pip.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        offset.x = pip.offsetLeft - e.clientX;
-        offset.y = pip.offsetTop - e.clientY;
-    });
-    
-    document.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        e.preventDefault();
-        pip.style.left = (e.clientX + offset.x) + 'px';
-        pip.style.top = (e.clientY + offset.y) + 'px';
-        pip.style.bottom = 'auto'; // Disable bottom pos once dragged
-        pip.style.right = 'auto'; // Disable right pos once dragged
-    });
-    
-    document.addEventListener('mouseup', () => {
-        isDragging = false;
-    });
-
-    // Mobile drag support
-    pip.addEventListener('touchstart', (e) => {
-        isDragging = true;
-        const touch = e.touches[0];
-        offset.x = pip.offsetLeft - touch.clientX;
-        offset.y = pip.offsetTop - touch.clientY;
-    });
-
-    document.addEventListener('touchmove', (e) => {
-        if (!isDragging) return;
-        e.preventDefault();
-        const touch = e.touches[0];
-        pip.style.left = (touch.clientX + offset.x) + 'px';
-        pip.style.top = (touch.clientY + offset.y) + 'px';
-        pip.style.bottom = 'auto';
-        pip.style.right = 'auto';
-    }, { passive: false });
-
-    document.addEventListener('touchend', () => {
-        isDragging = false;
-    });
-
-    // Start
-    initAgora();
-</script>
+        };
+    </script>
 </body>
 </html>

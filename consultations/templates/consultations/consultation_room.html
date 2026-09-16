@@ -1,6 +1,7 @@
+{% load static %}
 {% load i18n static %}
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="{% if user.is_authenticated and user.dark_mode_enabled %}dark{% endif %}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -10,9 +11,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Jitsi Meet Open Server WebRTC External API -->
-    <script src="https://meet.ffmuc.net/external_api.js"></script>
+    <script src="{% static 'core/js/tailwindcss.js' %}"></script>
+    <!-- Jitsi Meet WebRTC External API -->
+    <script src="https://meet.guifi.net/external_api.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -22,7 +23,7 @@
                         'wa-card': '#111b21',
                         'wa-green': '#25D366',
                         'wa-red': '#EA4335',
-                        'leaf-green': '#15803d',
+                        'medical-blue': '#1B5FA8',
                     },
                     fontFamily: {
                         'poppins': ['Poppins', 'sans-serif'],
@@ -64,6 +65,24 @@
             z-index: 1;
             display: none;
         }
+    </style>
+
+    <!-- Surcharges globales Mode Sombre -->
+    <style>
+        html.dark body { background-color: #111827 !important; color: #f9fafb !important; }
+        html.dark .bg-white { background-color: #1f2937 !important; border-color: #374151 !important; }
+        html.dark .text-gray-800, html.dark .text-gray-900, html.dark .text-gray-700, html.dark h1, html.dark h2, html.dark h3, html.dark h4 { color: #f3f4f6 !important; }
+        html.dark .text-gray-500, html.dark .text-gray-400, html.dark .text-gray-600 { color: #9ca3af !important; }
+        html.dark .bg-gray-50, html.dark .bg-gray-100 { background-color: #374151 !important; border-color: #4b5563 !important; }
+        html.dark .bg-gray-200 { background-color: #4b5563 !important; }
+        html.dark .border, html.dark .border-b, html.dark .border-t, html.dark .border-gray-100, html.dark .border-gray-200 { border-color: #374151 !important; }
+        /* Adaptation des couleurs de marque */
+        html.dark .bg-medical-light, html.dark .bg-medical-light\/40 { background-color: rgba(30, 58, 138, 0.4) !important; color: #e8f0fe !important; }
+        html.dark .bg-leaf-light, html.dark .bg-leaf-light\/40 { background-color: rgba(20, 83, 45, 0.4) !important; color: #f1fcf0 !important; }
+        html.dark .hover\:bg-gray-50:hover { background-color: #374151 !important; }
+        html.dark .hover\:bg-medical-light\/40:hover { background-color: rgba(30, 58, 138, 0.6) !important; }
+        /* Navbar et popups */
+        html.dark header.bg-white\/75, html.dark div.bg-white\/95, html.dark nav.bg-white\/95 { background-color: rgba(31, 41, 55, 0.95) !important; border-color: #374151 !important; }
     </style>
 </head>
 <body class="bg-wa-dark text-white font-inter antialiased relative overflow-hidden select-none">
@@ -154,6 +173,28 @@
         </div>
     </div>
 
+    <!-- Beautiful Ordonnance Modal -->
+    <div id="ordonnance-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/85 backdrop-blur-md hidden transition-opacity duration-300 opacity-0 pointer-events-none">
+        <div id="ordonnance-modal-box" class="bg-white rounded-3xl p-8 max-w-sm w-11/12 text-center shadow-2xl transform scale-95 transition-transform duration-300 pointer-events-auto">
+            <div class="w-[70px] h-[70px] rounded-full bg-sky-100 text-sky-500 flex items-center justify-center mx-auto mb-6 text-3xl shadow-[inset_0_0_0_6px_white,0_0_0_6px_#f0f9ff]">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+            </div>
+            <h3 class="text-xl text-slate-900 font-poppins font-bold mb-2">Consultation Terminée</h3>
+            <p class="text-[0.95rem] text-slate-500 mb-8 font-medium leading-relaxed">Voulez-vous rédiger une ordonnance pour ce patient suite à cette téléconsultation ?</p>
+            <div class="flex flex-col gap-3">
+                <button id="btn-ord-yes" class="bg-sky-500 hover:bg-sky-600 text-white border-none rounded-2xl py-3.5 font-semibold text-[1.05rem] transition-all duration-200 shadow-[0_4px_6px_-1px_rgba(14,165,233,0.4)] hover:-translate-y-0.5 hover:shadow-[0_10px_15px_-3px_rgba(14,165,233,0.4)] flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                    Oui, rédiger l'ordonnance
+                </button>
+                <button id="btn-ord-no" class="bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-600 border-2 border-slate-200 rounded-2xl py-3.5 font-semibold text-base transition-colors duration-200">
+                    Non, terminer et revenir
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- JAVASCRIPT WEBRTC ENGINE -->
     <script>
         const rdvId = "{{ rdv.id }}";
@@ -180,10 +221,9 @@
             }, 1000);
         }
 
-        // 2. Initialisation Visio WebRTC sans modérateur (Serveur Open Source meet.ffmuc.net)
+        // 2. Initialisation Visio WebRTC (Serveur Jitsi Officiel)
         function initJitsiWebRTC() {
-            // Utiliser le serveur open source Freifunk München (aucun mot de passe / modérateur requis)
-            const domain = "meet.ffmuc.net";
+            const domain = "meet.guifi.net";
             const roomName = `Fransick_Medical_Room_${rdvId}`;
 
             const options = {
@@ -292,7 +332,7 @@
         }
 
         function toggleSpeaker() {
-            alert("🔊 Haut-parleur actif");
+            alert(" Haut-parleur actif");
         }
 
         // 4. Action de raccrochage AJAX instantané
@@ -318,7 +358,20 @@
             .then(res => res.json())
             .then(data => {
                 if (isDoctor) {
-                    window.location.href = "{% url 'ordonnances:create_for_rdv' rdv_id=rdv.id %}";
+                    const modal = document.getElementById('ordonnance-modal');
+                    modal.classList.remove('hidden');
+                    setTimeout(() => {
+                        modal.classList.remove('opacity-0');
+                        document.getElementById('ordonnance-modal-box').classList.remove('scale-95');
+                        document.getElementById('ordonnance-modal-box').classList.add('scale-100');
+                    }, 10);
+                    
+                    document.getElementById('btn-ord-yes').onclick = () => {
+                        window.location.href = "{% url 'ordonnances:create_for_rdv' rdv_id=rdv.id %}";
+                    };
+                    document.getElementById('btn-ord-no').onclick = () => {
+                        window.location.href = "{% url 'medecins:dashboard' %}";
+                    };
                 } else {
                     window.location.href = "{% url 'patients:dashboard' %}";
                 }
@@ -326,7 +379,20 @@
             .catch(err => {
                 console.error("Erreur clôture AJAX :", err);
                 if (isDoctor) {
-                    window.location.href = "{% url 'ordonnances:create_for_rdv' rdv_id=rdv.id %}";
+                    const modal = document.getElementById('ordonnance-modal');
+                    modal.classList.remove('hidden');
+                    setTimeout(() => {
+                        modal.classList.remove('opacity-0');
+                        document.getElementById('ordonnance-modal-box').classList.remove('scale-95');
+                        document.getElementById('ordonnance-modal-box').classList.add('scale-100');
+                    }, 10);
+                    
+                    document.getElementById('btn-ord-yes').onclick = () => {
+                        window.location.href = "{% url 'ordonnances:create_for_rdv' rdv_id=rdv.id %}";
+                    };
+                    document.getElementById('btn-ord-no').onclick = () => {
+                        window.location.href = "{% url 'medecins:dashboard' %}";
+                    };
                 } else {
                     window.location.href = "{% url 'patients:dashboard' %}";
                 }
@@ -349,7 +415,20 @@
                             try { localStream.getTracks().forEach(t => t.stop()); } catch(e) {}
                         }
                         if (isDoctor) {
-                            window.location.href = "{% url 'ordonnances:create_for_rdv' rdv_id=rdv.id %}";
+                            const modal = document.getElementById('ordonnance-modal');
+                            modal.classList.remove('hidden');
+                            setTimeout(() => {
+                                modal.classList.remove('opacity-0');
+                                document.getElementById('ordonnance-modal-box').classList.remove('scale-95');
+                                document.getElementById('ordonnance-modal-box').classList.add('scale-100');
+                            }, 10);
+                            
+                            document.getElementById('btn-ord-yes').onclick = () => {
+                                window.location.href = "{% url 'ordonnances:create_for_rdv' rdv_id=rdv.id %}";
+                            };
+                            document.getElementById('btn-ord-no').onclick = () => {
+                                window.location.href = "{% url 'medecins:dashboard' %}";
+                            };
                         } else {
                             window.location.href = "{% url 'patients:dashboard' %}";
                         }

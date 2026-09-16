@@ -1,6 +1,7 @@
+{% load static %}
 {% load i18n static %}
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="{% if user.is_authenticated and user.dark_mode_enabled %}dark{% endif %}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{% static 'core/js/tailwindcss.js' %}"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -19,9 +20,7 @@
                         'medical-blue': '#1B5FA8',
                         'medical-light': '#EBF3FC',
                         'medical-dark': '#14467d',
-                        'leaf-green': '#6DBE45',
-                        'leaf-light': '#F0F9EB',
-                        'leaf-dark': '#559c30',
+
                     },
                     fontFamily: {
                         'poppins': ['Poppins', 'sans-serif'],
@@ -45,6 +44,24 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
+    </style>
+
+    <!-- Surcharges globales Mode Sombre -->
+    <style>
+        html.dark body { background-color: #111827 !important; color: #f9fafb !important; }
+        html.dark .bg-white { background-color: #1f2937 !important; border-color: #374151 !important; }
+        html.dark .text-gray-800, html.dark .text-gray-900, html.dark .text-gray-700, html.dark h1, html.dark h2, html.dark h3, html.dark h4 { color: #f3f4f6 !important; }
+        html.dark .text-gray-500, html.dark .text-gray-400, html.dark .text-gray-600 { color: #9ca3af !important; }
+        html.dark .bg-gray-50, html.dark .bg-gray-100 { background-color: #374151 !important; border-color: #4b5563 !important; }
+        html.dark .bg-gray-200 { background-color: #4b5563 !important; }
+        html.dark .border, html.dark .border-b, html.dark .border-t, html.dark .border-gray-100, html.dark .border-gray-200 { border-color: #374151 !important; }
+        /* Adaptation des couleurs de marque */
+        html.dark .bg-medical-light, html.dark .bg-medical-light\/40 { background-color: rgba(30, 58, 138, 0.4) !important; color: #e8f0fe !important; }
+        html.dark .bg-leaf-light, html.dark .bg-leaf-light\/40 { background-color: rgba(20, 83, 45, 0.4) !important; color: #f1fcf0 !important; }
+        html.dark .hover\:bg-gray-50:hover { background-color: #374151 !important; }
+        html.dark .hover\:bg-medical-light\/40:hover { background-color: rgba(30, 58, 138, 0.6) !important; }
+        /* Navbar et popups */
+        html.dark header.bg-white\/75, html.dark div.bg-white\/95, html.dark nav.bg-white\/95 { background-color: rgba(31, 41, 55, 0.95) !important; border-color: #374151 !important; }
     </style>
 </head>
 <body class="bg-gray-50/80 font-inter text-gray-800 antialiased overflow-hidden">
@@ -89,7 +106,7 @@
                 <div class="hidden sm:flex items-center space-x-3">
                     {% if not is_doctor and user.role != 'medecin' %}
                         <a href="{% url 'patients:dashboard' %}" class="bg-medical-blue hover:bg-medical-dark text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition-all flex items-center space-x-1.5">
-                            <span>➕ Nouveau Rendez-vous</span>
+                            <span><i class="ti ti-plus"></i> Nouveau Rendez-vous</span>
                         </a>
                     {% endif %}
                 </div>
@@ -102,8 +119,8 @@
                 {% if messages %}
                 <div class="mb-6 space-y-2 select-none">
                     {% for message in messages %}
-                    <div class="p-4 rounded-2xl text-xs font-bold shadow-sm flex items-center space-x-2 {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-leaf-light text-leaf-green border border-leaf-green/30{% endif %}">
-                        <span>{% if message.tags == 'error' %}⚠️{% else %}✅{% endif %}</span>
+                    <div class="p-4 rounded-2xl text-xs font-bold shadow-sm flex items-center space-x-2 {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-medical-light text-medical-blue border border-medical-blue/30{% endif %}">
+                        <span>{% if message.tags == 'error' %}<i class="ti ti-alert-triangle"></i>{% else %}<i class="ti ti-check"></i>{% endif %}</span>
                         <span>{{ message }}</span>
                     </div>
                     {% endfor %}
@@ -119,9 +136,9 @@
                         </div>
                         <h1 class="text-2xl md:text-3xl font-black font-poppins tracking-tight">
                             {% if is_doctor or user.role == 'medecin' %}
-                                Agenda & Demandes de Patients 🩺
+                                Agenda & Demandes de Patients <i class="ti ti-stethoscope"></i>
                             {% else %}
-                                Mes Consultations & Suivi Médical 🏥
+                                Mes Consultations & Suivi Médical <i class="ti ti-building-hospital"></i>
                             {% endif %}
                         </h1>
                         <p class="text-blue-100 text-xs sm:text-sm font-medium leading-relaxed">
@@ -181,7 +198,7 @@
                                                 <h4 class="text-sm sm:text-base font-bold text-gray-900 font-poppins">{{ rdv.patient.username }}</h4>
                                                 <span class="bg-blue-100/70 text-blue-800 font-extrabold text-[10px] px-2.5 py-0.5 rounded-full border border-blue-200/60">{{ rdv.get_consultation_type_display }}</span>
                                             </div>
-                                            <p class="text-xs text-gray-600 font-medium mt-1">📝 <span class="font-bold">Motif :</span> {{ rdv.reason }}</p>
+                                            <p class="text-xs text-gray-600 font-medium mt-1"><i class="ti ti-file-text"></i> <span class="font-bold">Motif :</span> {{ rdv.reason }}</p>
                                             {% if rdv.notes %}
                                                 <p class="text-[11px] text-gray-400 italic mt-0.5">"{{ rdv.notes }}"</p>
                                             {% endif %}
@@ -200,7 +217,7 @@
                                                 <h4 class="text-sm sm:text-base font-bold text-gray-900 font-poppins">Dr. {% if rdv.doctor.last_name %}{{ rdv.doctor.first_name }} {{ rdv.doctor.last_name }}{% else %}{{ rdv.doctor.username }}{% endif %}</h4>
                                                 <span class="bg-blue-100/70 text-blue-800 font-extrabold text-[10px] px-2.5 py-0.5 rounded-full">{{ rdv.get_consultation_type_display }}</span>
                                             </div>
-                                            <p class="text-xs text-gray-600 font-medium mt-1">📝 <span class="font-bold">Motif :</span> {{ rdv.reason }}</p>
+                                            <p class="text-xs text-gray-600 font-medium mt-1"><i class="ti ti-file-text"></i> <span class="font-bold">Motif :</span> {{ rdv.reason }}</p>
                                         </div>
                                     {% endif %}
                                 </div>
@@ -208,16 +225,16 @@
                                 <!-- Date & Interactive Actions -->
                                 <div class="flex flex-wrap md:flex-col lg:flex-row items-center justify-between md:justify-end w-full md:w-auto gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-gray-200/60">
                                     <div class="text-left md:text-right mr-2">
-                                        <div class="text-xs sm:text-sm font-extrabold text-gray-900 font-poppins">📅 {{ rdv.date|date:"d/m/Y" }} à <span class="text-medical-blue font-black">{{ rdv.time_slot }}</span></div>
+                                        <div class="text-xs sm:text-sm font-extrabold text-gray-900 font-poppins"><i class="ti ti-calendar"></i> {{ rdv.date|date:"d/m/Y" }} à <span class="text-medical-blue font-black">{{ rdv.time_slot }}</span></div>
                                         <div class="mt-1">
                                             {% if rdv.in_waiting_room %}
-                                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-extrabold bg-green-100 text-green-800 animate-pulse border border-green-200">🟢 En salle d'attente</span>
+                                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-extrabold bg-green-100 text-green-800 animate-pulse border border-green-200"> En salle d'attente</span>
                                             {% elif rdv.status == 'confirmed' %}
-                                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-extrabold bg-blue-50 text-medical-blue border border-blue-200/80">🟢 Confirmé & Valide</span>
+                                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-extrabold bg-blue-50 text-medical-blue border border-blue-200/80"> Confirmé & Valide</span>
                                             {% elif rdv.status == 'cancelled' %}
-                                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-extrabold bg-red-50 text-red-600 border border-red-200/80">🔴 Refusé / Annulé</span>
+                                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-extrabold bg-red-50 text-red-600 border border-red-200/80"> Refusé / Annulé</span>
                                             {% else %}
-                                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200 animate-pulse">🟡 En attente de validation</span>
+                                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200 animate-pulse"> En attente de validation</span>
                                             {% endif %}
                                         </div>
                                     </div>
@@ -227,8 +244,8 @@
                                             {% if rdv.status != 'confirmed' %}
                                             <form method="POST" action="{% url 'consultations:accept_appointment' rdv.id %}">
                                                 {% csrf_token %}
-                                                <button type="submit" class="px-4 py-2.5 bg-leaf-green hover:bg-leaf-dark text-white text-xs font-extrabold rounded-2xl transition-all shadow-md hover:shadow-lg flex items-center space-x-1.5 uppercase tracking-wide transform active:scale-95">
-                                                    <span>✅ Accepter</span>
+                                                <button type="submit" class="px-4 py-2.5 bg-medical-blue hover:bg-medical-dark text-white text-xs font-extrabold rounded-2xl transition-all shadow-md hover:shadow-lg flex items-center space-x-1.5 uppercase tracking-wide transform active:scale-95">
+                                                    <span><i class="ti ti-check"></i> Accepter</span>
                                                 </button>
                                             </form>
                                             {% endif %}
@@ -237,20 +254,20 @@
                                             <form method="POST" action="{% url 'consultations:reject_appointment' rdv.id %}">
                                                 {% csrf_token %}
                                                 <button type="submit" class="px-3.5 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-extrabold rounded-2xl transition-all border border-red-200 flex items-center space-x-1 uppercase tracking-wide transform active:scale-95">
-                                                    <span>❌ Refuser</span>
+                                                    <span><i class="ti ti-x"></i> Refuser</span>
                                                 </button>
                                             </form>
                                             {% endif %}
                                             
                                             <a href="{% url 'medecins:patients' %}" class="px-4 py-2.5 bg-gray-100 hover:bg-medical-blue hover:text-white text-gray-700 text-xs font-extrabold rounded-2xl transition-all shadow-xs uppercase tracking-wide">
-                                                📁 Dossier
+                                                 Dossier
                                             </a>
                                         </div>
                                     {% else %}
                                         <div class="flex items-center gap-2">
                                             {% if rdv.status == 'confirmed' %}
                                                 <a href="{% url 'teleconsultation:rejoindre_appel' rdv.id %}" class="px-5 py-2.5 bg-gradient-to-r from-medical-blue to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-black text-xs rounded-2xl shadow-lg shadow-blue-500/20 uppercase tracking-wide transition-all transform active:scale-95">
-                                                    🎥 Rejoindre Visio
+                                                     Rejoindre Visio
                                                 </a>
                                             {% else %}
                                                 <span class="text-[11px] font-semibold text-gray-400 italic">En attente du médecin...</span>
@@ -264,7 +281,7 @@
                             <!-- Empty State -->
                             <div class="p-12 text-center bg-gray-50/50 border border-dashed border-gray-200 rounded-3xl space-y-4 max-w-xl mx-auto">
                                 <div class="w-16 h-16 bg-blue-50 text-medical-blue rounded-full flex items-center justify-center mx-auto text-3xl shadow-sm">
-                                    📅
+                                    <i class="ti ti-calendar"></i>
                                 </div>
                                 <h4 class="text-base font-extrabold text-gray-800 font-poppins">Aucune consultation enregistrée</h4>
                                 <p class="text-xs text-gray-500 max-w-sm mx-auto leading-relaxed">

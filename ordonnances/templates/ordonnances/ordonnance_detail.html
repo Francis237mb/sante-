@@ -1,6 +1,6 @@
-{% load i18n %}
+{% load i18n static %}
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="{% if user.is_authenticated and user.dark_mode_enabled %}dark{% endif %}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{% static 'core/js/tailwindcss.js' %}"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -38,6 +38,24 @@
             .print-card { border: none !important; box-shadow: none !important; width: 100% !important; margin: 0 !important; }
         }
     </style>
+
+    <!-- Surcharges globales Mode Sombre -->
+    <style>
+        html.dark body { background-color: #111827 !important; color: #f9fafb !important; }
+        html.dark .bg-white { background-color: #1f2937 !important; border-color: #374151 !important; }
+        html.dark .text-gray-800, html.dark .text-gray-900, html.dark .text-gray-700, html.dark h1, html.dark h2, html.dark h3, html.dark h4 { color: #f3f4f6 !important; }
+        html.dark .text-gray-500, html.dark .text-gray-400, html.dark .text-gray-600 { color: #9ca3af !important; }
+        html.dark .bg-gray-50, html.dark .bg-gray-100 { background-color: #374151 !important; border-color: #4b5563 !important; }
+        html.dark .bg-gray-200 { background-color: #4b5563 !important; }
+        html.dark .border, html.dark .border-b, html.dark .border-t, html.dark .border-gray-100, html.dark .border-gray-200 { border-color: #374151 !important; }
+        /* Adaptation des couleurs de marque */
+        html.dark .bg-medical-light, html.dark .bg-medical-light\/40 { background-color: rgba(30, 58, 138, 0.4) !important; color: #e8f0fe !important; }
+        html.dark .bg-leaf-light, html.dark .bg-leaf-light\/40 { background-color: rgba(20, 83, 45, 0.4) !important; color: #f1fcf0 !important; }
+        html.dark .hover\:bg-gray-50:hover { background-color: #374151 !important; }
+        html.dark .hover\:bg-medical-light\/40:hover { background-color: rgba(30, 58, 138, 0.6) !important; }
+        /* Navbar et popups */
+        html.dark header.bg-white\/75, html.dark div.bg-white\/95, html.dark nav.bg-white\/95 { background-color: rgba(31, 41, 55, 0.95) !important; border-color: #374151 !important; }
+    </style>
 </head>
 <body class="bg-gray-100 font-inter text-gray-800 antialiased min-h-screen p-3 sm:p-8 flex flex-col items-center justify-center">
 
@@ -64,11 +82,11 @@
             <!-- Option 1: Envoyer au patient -->
             <form action="{% url 'ordonnances:send_to_patient' pk=ordonnance.id %}" method="post" class="inline">
                 {% csrf_token %}
-                <button type="submit" class="w-full sm:w-auto px-3.5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-[11px] rounded-xl shadow-xs uppercase tracking-wider transition-all flex items-center justify-center space-x-1.5 cursor-pointer">
+                <button type="submit" class="w-full sm:w-auto px-3.5 py-2.5 bg-medical-blue hover:bg-medical-blue text-white font-extrabold text-[11px] rounded-xl shadow-xs uppercase tracking-wider transition-all flex items-center justify-center space-x-1.5 cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
                     </svg>
-                    <span>Envoyer au patient 📩</span>
+                    <span>Envoyer au patient </span>
                 </button>
             </form>
 
@@ -77,12 +95,12 @@
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5" />
                 </svg>
-                <span>Programmer Suivi 📅</span>
+                <span>Programmer Suivi <i class="ti ti-calendar"></i></span>
             </a>
 
             <!-- Option 3: Transmettre Pharmacie -->
             <a href="{% url 'patients:pharmacies' %}" class="flex-1 sm:flex-initial px-3.5 py-2.5 bg-leaf-green hover:bg-leaf-dark text-white font-extrabold text-[11px] rounded-xl shadow-xs uppercase tracking-wider transition-all flex items-center justify-center space-x-1.5">
-                <span>Pharmacie 💊</span>
+                <span>Pharmacie <i class="ti ti-pill"></i></span>
             </a>
 
             <!-- Option 4: Imprimer / PDF -->
@@ -98,7 +116,7 @@
     <!-- Toast Notification Container -->
     <div id="toast-notify" class="fixed top-5 right-5 z-50 transform -translate-y-20 opacity-0 pointer-events-none transition-all duration-300">
         <div class="bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center space-x-3 text-xs font-bold">
-            <span class="text-lg">✅</span>
+            <span class="text-lg"><i class="ti ti-check"></i></span>
             <span id="toast-text">Ordonnance transmise avec succès !</span>
         </div>
     </div>
@@ -227,7 +245,7 @@
             const toast = document.getElementById('toast-notify');
             const toastText = document.getElementById('toast-text');
             if (toast && toastText) {
-                toastText.innerText = "📩 Ordonnance transmise avec succès dans le dossier du patient {{ ordonnance.patient.username }} !";
+                toastText.innerText = " Ordonnance transmise avec succès dans le dossier du patient {{ ordonnance.patient.username }} !";
                 toast.classList.remove('-translate-y-20', 'opacity-0', 'pointer-events-none');
                 toast.classList.add('translate-y-0', 'opacity-100');
                 

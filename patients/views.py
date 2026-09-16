@@ -2,6 +2,7 @@ from django.views.generic import TemplateView, DetailView, View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
+import json
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash, get_user_model
 from django.contrib.auth.forms import PasswordChangeForm
@@ -40,6 +41,19 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         # Pharmacies et Médicaments pour la recherche globale
         context['pharmacies_list'] = User.objects.filter(role='pharmacie')
         context['medicaments_list'] = Medicament.objects.all()
+        
+        # Rendez-vous du patient pour le calendrier dynamique (côté client)
+        user_rdvs = RendezVous.objects.filter(patient=self.request.user).select_related('doctor')
+        rdv_list = []
+        for rdv in user_rdvs:
+            rdv_list.append({
+                'date': rdv.date.strftime('%Y-%m-%d') if rdv.date else '',
+                'time_slot': rdv.time_slot,
+                'doctor_name': f"Dr. {rdv.doctor.last_name or rdv.doctor.username}" if rdv.doctor else 'Inconnu',
+                'reason': rdv.reason,
+                'status': rdv.status
+            })
+        context['user_rdv_json'] = json.dumps(rdv_list)
         return context
 
 class PatientSuiviView(LoginRequiredMixin, TemplateView):
@@ -95,22 +109,37 @@ class BookAppointmentView(LoginRequiredMixin, View):
         reason = request.POST.get('reason', 'Consultation médicale')
         notes = request.POST.get('notes', '')
 
-        if date:
-            rdv = RendezVous.objects.create(
-                patient=request.user,
-                doctor=doctor,
-                consultation_type=consultation_type,
-                date=date,
-                time_slot=time_slot,
-                reason=reason,
-                notes=notes,
-                status='pending'
-            )
-            messages.success(request, f"⏳ Votre demande de rendez-vous du {date} à {time_slot} a été envoyée au Dr. {doctor.username} pour confirmation.")
-            return redirect('patients:suivi')
-        else:
+        if not date:
             messages.error(request, "Veuillez sélectionner une date valide pour votre rendez-vous.")
             return redirect('patients:doctor_detail', pk=doctor.pk)
+
+        # Vérifier si le médecin a un tarif configuré → passer par le paiement
+        profile = getattr(doctor, 'doctor_profile', None)
+        if profile and profile.consultation_fee and profile.consultation_fee > 0:
+            # Stocker les données RDV en session, puis rediriger vers paiement
+            request.session['rdv_pending_date'] = date
+            request.session['rdv_pending_time'] = time_slot
+            request.session['rdv_pending_reason'] = reason
+            request.session['rdv_pending_notes'] = notes
+            request.session['rdv_pending_type'] = consultation_type
+            # Rediriger vers le paiement (acompte 20%)
+            payment_url = f'/paiements/payer/{doctor.pk}/rdv/?date={date}&time_slot={time_slot}&reason={reason}&consultation_type={consultation_type}'
+            return redirect(payment_url)
+
+        # Pas de tarif défini : créer le RDV directement (comportement original)
+        rdv = RendezVous.objects.create(
+            patient=request.user,
+            doctor=doctor,
+            consultation_type=consultation_type,
+            date=date,
+            time_slot=time_slot,
+            reason=reason,
+            notes=notes,
+            status='pending'
+        )
+        messages.success(request, f"⏳ Votre demande de rendez-vous du {date} à {time_slot} a été envoyée au Dr. {doctor.username} pour confirmation.")
+        return redirect('patients:suivi')
+
 
 class DoctorSubscribeToggleView(LoginRequiredMixin, View):
     def post(self, request, pk, *args, **kwargs):

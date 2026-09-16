@@ -1,6 +1,7 @@
+{% load static %}
 {% load i18n static %}
 <!DOCTYPE html>
-<html lang="fr" class="h-full bg-[#f8fafc]">
+<html lang="fr" class="{% if user.is_authenticated and user.dark_mode_enabled %}dark{% endif %} h-full bg-[#f8fafc]">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -10,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{% static 'core/js/tailwindcss.js' %}"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -32,6 +33,17 @@
         }
     </script>
     <style>
+        html, body {
+            height: 100%;
+            height: 100dvh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+        }
         .custom-scrollbar::-webkit-scrollbar {
             width: 5px;
         }
@@ -150,19 +162,37 @@
             z-index: -1;
         }
     </style>
+
+    <!-- Surcharges globales Mode Sombre -->
+    <style>
+        html.dark body { background-color: #111827 !important; color: #f9fafb !important; }
+        html.dark .bg-white { background-color: #1f2937 !important; border-color: #374151 !important; }
+        html.dark .text-gray-800, html.dark .text-gray-900, html.dark .text-gray-700, html.dark h1, html.dark h2, html.dark h3, html.dark h4 { color: #f3f4f6 !important; }
+        html.dark .text-gray-500, html.dark .text-gray-400, html.dark .text-gray-600 { color: #9ca3af !important; }
+        html.dark .bg-gray-50, html.dark .bg-gray-100 { background-color: #374151 !important; border-color: #4b5563 !important; }
+        html.dark .bg-gray-200 { background-color: #4b5563 !important; }
+        html.dark .border, html.dark .border-b, html.dark .border-t, html.dark .border-gray-100, html.dark .border-gray-200 { border-color: #374151 !important; }
+        /* Adaptation des couleurs de marque */
+        html.dark .bg-medical-light, html.dark .bg-medical-light\/40 { background-color: rgba(30, 58, 138, 0.4) !important; color: #e8f0fe !important; }
+        html.dark .bg-leaf-light, html.dark .bg-leaf-light\/40 { background-color: rgba(20, 83, 45, 0.4) !important; color: #f1fcf0 !important; }
+        html.dark .hover\:bg-gray-50:hover { background-color: #374151 !important; }
+        html.dark .hover\:bg-medical-light\/40:hover { background-color: rgba(30, 58, 138, 0.6) !important; }
+        /* Navbar et popups */
+        html.dark header.bg-white\/75, html.dark div.bg-white\/95, html.dark nav.bg-white\/95 { background-color: rgba(31, 41, 55, 0.95) !important; border-color: #374151 !important; }
+    </style>
 </head>
 <body class="bg-[#f8fafc] font-inter text-gray-800 antialiased overflow-hidden h-full">
 
     <!-- Toast Notification Popup -->
     <div id="toast-notification" class="fixed top-6 right-6 z-50 transform -translate-y-16 opacity-0 pointer-events-none transition-all duration-300">
         <div class="bg-gray-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center space-x-3 border border-gray-800">
-            <span class="text-lg">ℹ️</span>
+            <span class="text-lg"><i class="ti ti-info-circle"></i></span>
             <span id="toast-message" class="text-xs font-bold font-poppins">Message</span>
         </div>
     </div>
 
     <!-- App Shell Layout (Sidebar + Main Content Area) -->
-    <div class="flex h-screen overflow-hidden bg-gray-50/50">
+    <div class="flex h-full w-full overflow-hidden bg-gray-50/50">
         
         <!-- ================= SILICON VALLEY MODULAR DESKTOP SIDEBAR ================= -->
         {% include "patients/sidebar.html" %}
@@ -180,7 +210,7 @@
                     </a>
                     <div>
                         <h2 class="text-sm md:text-base font-extrabold text-gray-900 font-poppins flex items-center space-x-2">
-                            <span>📹</span>
+                            <span></span>
                             <span>Capsules Vidéos Santé</span>
                         </h2>
                         <p class="text-[10px] text-gray-400 font-semibold">Conseils préventifs publiés par les médecins Fransick</p>
@@ -214,6 +244,8 @@
                             id="video-player-{{ video.id }}"
                             class="w-full h-full object-cover cursor-pointer"
                             loop 
+                            muted
+                            autoplay
                             playsinline 
                             preload="metadata"
                             onclick="togglePlayPause({{ video.id }})"
@@ -236,7 +268,7 @@
                         </div>
 
                         <!-- Bottom Gradient Overlay -->
-                        <div class="absolute inset-x-0 bottom-0 tiktok-bottom-gradient pt-24 pb-20 px-4 flex justify-between items-end pointer-events-none z-20">
+                        <div class="absolute inset-x-0 bottom-0 tiktok-bottom-gradient pt-24 pb-28 px-4 flex justify-between items-end pointer-events-none z-20">
                             
                             <!-- Left Overlay Info (Vrai Nom du Docteur & Vraies Infos) -->
                             <div class="space-y-2 max-w-[78%] pointer-events-auto">
@@ -372,7 +404,7 @@
                     </section>
                     {% empty %}
                     <div class="h-full flex flex-col items-center justify-center text-center p-6 space-y-4 bg-slate-950">
-                        <div class="w-16 h-16 rounded-full bg-slate-900 flex items-center justify-center text-2xl">📹</div>
+                        <div class="w-16 h-16 rounded-full bg-slate-900 flex items-center justify-center text-2xl"></div>
                         <h2 class="text-base font-bold text-white">Aucune capsule vidéo disponible</h2>
                         <p class="text-xs text-gray-400 max-w-sm">Revenez bientôt ! Les médecins partenaires Fransick publieront prochainement des conseils vidéo.</p>
                         <a href="{% url 'patients:dashboard' %}" class="px-5 py-2.5 bg-medical-blue hover:bg-blue-600 text-white text-xs font-bold rounded-full transition-all">Retour au Tableau de bord</a>
@@ -395,7 +427,7 @@
             <!-- Header Drawer -->
             <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                 <h4 class="text-sm font-extrabold text-white font-poppins flex items-center space-x-2">
-                    <span>💬</span>
+                    <span><i class="ti ti-message"></i></span>
                     <span id="comments-drawer-title">Commentaires</span>
                 </h4>
                 <button type="button" onclick="closeVideoCommentsDrawer()" class="w-8 h-8 rounded-full bg-slate-800 text-gray-400 hover:text-white font-bold flex items-center justify-center">✕</button>
@@ -493,12 +525,12 @@
                 if (iconOff) iconOff.classList.remove('hidden');
                 if (iconOn) iconOn.classList.add('hidden');
                 if (statusText) statusText.innerText = "Son Désactivé";
-                showToast("🔇 Son désactivé");
+                showToast(" Son désactivé");
             } else {
                 if (iconOff) iconOff.classList.add('hidden');
                 if (iconOn) iconOn.classList.remove('hidden');
                 if (statusText) statusText.innerText = "Son Activé";
-                showToast("🔊 Son activé pour les capsules vidéo !");
+                showToast(" Son activé pour les capsules vidéo !");
             }
 
             const videos = document.querySelectorAll('video');
@@ -526,7 +558,7 @@
                     if (data.liked) {
                         heartIcon.classList.add('heart-liked');
                         heartIcon.setAttribute('fill', '#fe2c55');
-                        showToast("❤️ Vous aimez cette capsule vidéo !");
+                        showToast("<i class="ti ti-heart text-red-500"></i> Vous aimez cette capsule vidéo !");
                     } else {
                         heartIcon.classList.remove('heart-liked');
                         heartIcon.setAttribute('fill', 'none');
@@ -550,7 +582,7 @@
                 if (data.is_subscribed) {
                     btn.className = btn.className.replace('bg-tiktok-red animate-pulse', 'bg-leaf-green');
                     if (iconSpan) iconSpan.innerText = '✓';
-                    showToast("🎉 Vous êtes désormais abonné(e) aux conseils de ce médecin !");
+                    showToast(" Vous êtes désormais abonné(e) aux conseils de ce médecin !");
                 } else {
                     btn.className = btn.className.replace('bg-leaf-green', 'bg-tiktok-red animate-pulse');
                     if (iconSpan) iconSpan.innerText = '+';
@@ -623,7 +655,7 @@
             .then(data => {
                 if (data.status === 'success') {
                     document.getElementById('comment-input-text').value = '';
-                    showToast("💬 Commentaire publié avec succès !");
+                    showToast("<i class="ti ti-message"></i> Commentaire publié avec succès !");
 
                     const countEl = document.getElementById(`comments-count-${videoId}`);
                     if (countEl) countEl.innerText = data.total_comments;
@@ -660,7 +692,7 @@
                 }).catch(() => {});
             } else {
                 navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
-                showToast("🔗 Lien de la vidéo copié ! Vous pouvez le partager.");
+                showToast(" Lien de la vidéo copié ! Vous pouvez le partager.");
             }
         }
 

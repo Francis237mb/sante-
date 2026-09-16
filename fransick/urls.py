@@ -19,6 +19,7 @@ urlpatterns = [
     path('ia_assistant/', include('ia_assistant.urls')),
     path('administration/', include('administration.urls')),
     path('teleconsultation/', include('teleconsultation.urls')),
+    path('paiements/', include('paiements.urls')),
 ]
 
 if settings.DEBUG:

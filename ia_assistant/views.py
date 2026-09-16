@@ -11,6 +11,8 @@ from django.utils.decorators import method_decorator
 import urllib.request
 import urllib.parse
 import urllib.error
+from django.http import StreamingHttpResponse
+from groq import Groq
 from .models import ChatMessage, Conversation
 from .medical_engine import analyze_and_generate_response
 
@@ -55,49 +57,34 @@ def get_ai_api_config():
 
     return {'key': api_key, 'provider': provider}
 
+import httpx
+from groq import Groq
+
 def call_ai_llm_service(api_config, messages_payload):
     """
-    Appelle l'API Groq ou OpenAI en HTTP direct avec gestion automatique et rotation des modèles de pointe.
+    Appelle l'API Groq en utilisant le SDK officiel groq. Retourne le flux en temps réel (stream).
+    Contourne les problèmes de timeout SSL sous Windows avec http2=False.
     """
     api_key = api_config.get('key')
-    provider = api_config.get('provider')
-
+    
     if not api_key:
-        raise ValueError("Aucune clé API (Groq/OpenAI) trouvée.")
-
-    if provider == 'groq':
-        url = "https://api.groq.com/openai/v1/chat/completions"
-        # Liste de repli automatique sur les modèles officiels performants de Groq
-        models = ["llama-3.3-70b-versatile", "mixtral-8x7b-32768", "llama3-70b-8192", "llama-3.1-8b-instant", "gemma2-9b-it", "llama3-8b-8192"]
-    else:
-        url = "https://api.openai.com/v1/chat/completions"
-        models = ["gpt-4o-mini", "gpt-4o", "gpt-3.5-turbo"]
-
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-    }
-
-    for model in models:
-        try:
-            payload = {
-                "model": model,
-                "messages": messages_payload,
-                "temperature": 0.7,
-                "max_tokens": 1500
-            }
-            req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'), headers=headers)
-            with urllib.request.urlopen(req, timeout=20) as resp:
-                resp_data = json.loads(resp.read().decode('utf-8'))
-                reply = resp_data['choices'][0]['message']['content'].strip()
-                if reply:
-                    return reply
-        except Exception as e:
-            print(f"Tentative modèle {model} ({provider}) en échec : {e}")
-            continue
-
-    raise RuntimeError(f"Échec de communication avec tous les modèles pour {provider}.")
+        raise ValueError("Aucune clé API (Groq) trouvée.")
+        
+    client = Groq(
+        api_key=api_key,
+        http_client=httpx.Client(http2=False)
+    )
+    
+    # Mode streaming via le SDK officiel
+    stream = client.chat.completions.create(
+        model="qwen/qwen3.8-27b",
+        messages=messages_payload,
+        temperature=0.7,
+        max_completion_tokens=1500,
+        stream=True,
+    )
+    
+    return stream
 
 def generate_medical_fallback_response(query):
     """
@@ -140,8 +127,9 @@ class ChatView(LoginRequiredMixin, TemplateView):
         else:
             context['chat_history'] = []
 
-        # Identifier si l'utilisateur est un médecin pour adapter l'UI et la barre de navigation
-        context['is_doctor'] = (user.role == 'medecin' or getattr(user, 'doctor_profile', None) is not None)
+        # Identifier le rôle pour adapter l'UI
+        context['is_doctor'] = (user.role == 'medecin')
+        context['is_pharmacy'] = (user.role == 'pharmacie')
         return context
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -186,8 +174,8 @@ class AIChatApiView(LoginRequiredMixin, View):
         past_messages = conversation.messages.order_by('-timestamp')[:14]
         past_messages_sorted = reversed(list(past_messages))
 
-        # 4. Prompt système sur-mesure (Médecin vs Patient)
-        if user.role == 'medecin' or getattr(user, 'doctor_profile', None) is not None:
+        # 4. Prompt système sur-mesure (Médecin vs Pharmacie vs Patient)
+        if user.role == 'medecin':
             system_prompt = (
                 "Vous êtes le Dr. Fransick IA Pro, l'assistant d'élite en diagnostic clinique, pharmacologie et aide à la décision médicale de la plateforme Fransick Santé. "
                 f"Vous échangez avec le Dr. {user.last_name or user.username}, un médecin praticien certifié. "
@@ -195,6 +183,15 @@ class AIChatApiView(LoginRequiredMixin, View):
                 "de vérifier les posologies et interactions médicamenteuses, et de répondre à TOUTES les sollicitations du médecin, qu'elles soient médicales, scientifiques, techniques ou générales. "
                 "Adoptez en permanence un ton confraternel, expert, structuré, professionnel et irréprochable en français. "
                 "RÈGLE STRICTE : Conformément à la charte visuelle haut de gamme Fransick Santé, N'UTILISEZ AUCUN ÉMOJI dans vos réponses. Utilisez exclusivement du Markdown propre (titres, listes à puces, gras) sans icônes ni émojis."
+            )
+        elif user.role == 'pharmacie':
+            system_prompt = (
+                "Vous êtes Fransick Pharma IA, l'assistant d'élite spécialisé en pharmacologie, interactions médicamenteuses et gestion d'officine de la plateforme Fransick Santé. "
+                f"Vous échangez avec le pharmacien {user.last_name or user.username}. "
+                "Votre rôle est de vérifier les posologies, d'analyser les ordonnances complexes, d'identifier les contre-indications et interactions médicamenteuses, "
+                "et de fournir des conseils scientifiques pointus sur les traitements. "
+                "Adoptez en permanence un ton expert, structuré, professionnel et confraternel en français. "
+                "RÈGLE STRICTE : N'UTILISEZ AUCUN ÉMOJI dans vos réponses. Utilisez exclusivement du Markdown propre."
             )
         else:
             system_prompt = (
@@ -213,26 +210,45 @@ class AIChatApiView(LoginRequiredMixin, View):
             role = "user" if msg.sender == "user" else "assistant"
             messages_payload.append({"role": role, "content": msg.content})
 
-        try:
-            ai_reply = call_ai_llm_service(api_config, messages_payload)
-            ChatMessage.objects.create(user=user, conversation=conversation, sender='assistant', content=ai_reply)
+        def event_stream():
+            try:
+                # 1. Yield initial metadata event (so client knows the conversation ID)
+                meta = {
+                    "conversation_id": conversation.id,
+                    "conversation_title": conversation.title
+                }
+                yield f"event: metadata\ndata: {json.dumps(meta)}\n\n"
 
-            return JsonResponse({
-                'status': 'success',
-                'reply': ai_reply,
-                'conversation_id': conversation.id,
-                'conversation_title': conversation.title
-            })
-        except Exception as e:
-            print("Notice API IA Groq/OpenAI (Mode Secours Médical Actif) :", str(e))
-            ai_reply = generate_medical_fallback_response(user_message)
-            ChatMessage.objects.create(user=user, conversation=conversation, sender='assistant', content=ai_reply)
-            return JsonResponse({
-                'status': 'success',
-                'reply': ai_reply,
-                'conversation_id': conversation.id,
-                'conversation_title': conversation.title
-            })
+                # 2. Call SDK with streaming
+                stream = call_ai_llm_service(api_config, messages_payload)
+                
+                full_reply = ""
+                for chunk in stream:
+                    if chunk.choices[0].delta.content is not None:
+                        token = chunk.choices[0].delta.content
+                        full_reply += token
+                        # Yield each token using SSE format
+                        # We dump to json to safely encode newlines and special characters
+                        yield f"data: {json.dumps({'token': token})}\n\n"
+                        
+                # 3. Save the final message to the database once the stream is complete
+                if full_reply:
+                    ChatMessage.objects.create(user=user, conversation=conversation, sender='assistant', content=full_reply)
+                    
+                # 4. Yield done event
+                yield f"event: done\ndata: [DONE]\n\n"
+                
+            except Exception as e:
+                print("Erreur IA Streaming Groq :", str(e))
+                # Fallback to local medical engine
+                ai_reply = generate_medical_fallback_response(user_message)
+                ChatMessage.objects.create(user=user, conversation=conversation, sender='assistant', content=ai_reply)
+                
+                # Send the fallback message as a single chunk
+                yield f"data: {json.dumps({'token': ai_reply})}\n\n"
+                yield f"event: done\ndata: [DONE]\n\n"
+
+        return StreamingHttpResponse(event_stream(), content_type='text/event-stream')
 
 @method_decorator(csrf_exempt, name='dispatch')
 class NewConversationApiView(LoginRequiredMixin, View):

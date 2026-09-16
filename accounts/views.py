@@ -113,14 +113,18 @@ class RegisterView(CreateView):
             )
             return redirect('accounts:login_medecin')
         elif user.role == 'pharmacie':
+            # Auto-login for pharmacie as well, unless they need verification
+            auth_login(self.request, user)
             messages.success(
                 self.request,
-                "Votre compte a été créé avec succès. Veuillez vous identifier pour accéder à votre espace personnel."
+                "Votre compte a été créé avec succès. Bienvenue dans votre espace Pharmacie."
             )
-            return redirect('accounts:login_pharmacie')
+            return redirect(get_dashboard_url_for_user(user))
         
+        # Auto-login for patients
+        auth_login(self.request, user)
         messages.success(
             self.request, 
-            "Votre compte a été créé avec succès. Veuillez vous identifier pour accéder à votre espace personnel."
+            "Votre compte a été créé avec succès. Bienvenue !"
         )
-        return redirect('accounts:login_patient')
+        return redirect(get_dashboard_url_for_user(user))

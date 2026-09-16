@@ -1,6 +1,7 @@
+{% load static %}
 {% load i18n static %}
 <!DOCTYPE html>
-<html lang="{{ LANGUAGE_CODE }}" class="scroll-smooth">
+<html lang="{{ LANGUAGE_CODE }}" class="scroll-smooth {% if user.is_authenticated and user.dark_mode_enabled %}dark{% endif %}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,16 +11,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <script>
-        // Verifier le theme
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-          document.documentElement.classList.add('dark')
-        } else {
-          document.documentElement.classList.remove('dark')
-        }
-    </script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
     <!-- Tailwind CSS Play CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{% static 'core/js/tailwindcss.js' %}"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -61,6 +56,24 @@
     <!-- Custom style sheet for animations and glassmorphism -->
     <link rel="stylesheet" href="{% static 'core/css/style.css' %}">
     {% block extra_css %}{% endblock %}
+
+    <!-- Surcharges globales Mode Sombre -->
+    <style>
+        html.dark body { background-color: #111827 !important; color: #f9fafb !important; }
+        html.dark .bg-white { background-color: #1f2937 !important; border-color: #374151 !important; }
+        html.dark .text-gray-800, html.dark .text-gray-900, html.dark .text-gray-700, html.dark h1, html.dark h2, html.dark h3, html.dark h4 { color: #f3f4f6 !important; }
+        html.dark .text-gray-500, html.dark .text-gray-400, html.dark .text-gray-600 { color: #9ca3af !important; }
+        html.dark .bg-gray-50, html.dark .bg-gray-100 { background-color: #374151 !important; border-color: #4b5563 !important; }
+        html.dark .bg-gray-200 { background-color: #4b5563 !important; }
+        html.dark .border, html.dark .border-b, html.dark .border-t, html.dark .border-gray-100, html.dark .border-gray-200 { border-color: #374151 !important; }
+        /* Adaptation des couleurs de marque */
+        html.dark .bg-medical-light, html.dark .bg-medical-light\/40 { background-color: rgba(30, 58, 138, 0.4) !important; color: #e8f0fe !important; }
+        html.dark .bg-leaf-light, html.dark .bg-leaf-light\/40 { background-color: rgba(20, 83, 45, 0.4) !important; color: #f1fcf0 !important; }
+        html.dark .hover\:bg-gray-50:hover { background-color: #374151 !important; }
+        html.dark .hover\:bg-medical-light\/40:hover { background-color: rgba(30, 58, 138, 0.6) !important; }
+        /* Navbar et popups */
+        html.dark header.bg-white\/75, html.dark div.bg-white\/95, html.dark nav.bg-white\/95 { background-color: rgba(31, 41, 55, 0.95) !important; border-color: #374151 !important; }
+    </style>
 </head>
 <body class="bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100 font-sans antialiased flex flex-col min-h-screen transition-colors duration-300 pt-28">
 
@@ -104,7 +117,7 @@
     </div>
 
     <!-- Centered Glass floating Navbar -->
-    <div class="fixed top-0 left-0 right-0 z-40 px-4 sm:px-6 lg:px-8 pt-4 flex justify-center pointer-events-none">
+    <div class="fixed top-0 left-0 right-0 z-40 px-4 sm:px-6 lg:px-8 pt-4 flex flex-col items-center pointer-events-none">
         <header class="w-full max-w-7xl bg-white/75 backdrop-blur-md border border-white/30 shadow-lg rounded-full px-6 py-2.5 pointer-events-auto transition-all duration-300">
             <nav class="flex items-center justify-between">
                 <!-- Brand / Logo -->
@@ -157,7 +170,7 @@
                                 <div class="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-xl shadow-lg ring-1 ring-black/5 hidden" id="user-menu" role="menu">
                                     <div class="py-1" role="none">
                                         {% if user.role == 'admin' or user.is_superuser or user.is_staff %}
-                                            <a href="{% url 'administration:dashboard' %}" class="block px-4 py-2.5 text-sm font-semibold text-purple-700 hover:bg-purple-50 transition-colors" role="menuitem">👨‍💻 Dashboard Admin</a>
+                                            <a href="{% url 'administration:dashboard' %}" class="block px-4 py-2.5 text-sm font-semibold text-medical-blue hover:bg-purple-50 transition-colors" role="menuitem">‍<i class="ti ti-device-laptop"></i> Dashboard Admin</a>
                                         {% elif user.role == 'patient' %}
                                             <a href="{% url 'patients:dashboard' %}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors" role="menuitem">Tableau de bord Patient</a>
                                         {% elif user.role == 'medecin' %}
@@ -214,7 +227,7 @@
 
                         <!-- À propos -->
                         <a href="{% url 'core:home' %}#about" class="mobile-link flex items-center space-x-2.5 p-3 rounded-2xl bg-gray-50/80 hover:bg-medical-light/40 hover:text-medical-blue text-xs font-bold text-gray-800 transition-all border border-gray-100">
-                            <span class="w-2.5 h-2.5 rounded-full bg-purple-600"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-medical-blue"></span>
                             <span>{% translate "À propos" %}</span>
                         </a>
 
@@ -230,7 +243,7 @@
                 <div>
                     <div class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-2.5 px-1 font-poppins">{% translate "Espaces & Connexion" %}</div>
                     {% if user.is_authenticated %}
-                        <div class="bg-gradient-to-br from-gray-50 to-emerald-50/30 border border-gray-150 rounded-2xl p-4 flex flex-col space-y-3">
+                        <div class="bg-medical-light/10 border-medical-light/50 border border-gray-150 rounded-2xl p-4 flex flex-col space-y-3">
                             <div class="flex items-center space-x-3">
                                 {% if user.profile_picture %}
                                     <img class="h-10 w-10 rounded-full object-cover ring-2 ring-medical-blue/20" src="{{ user.profile_picture.url }}" alt="{{ user.username }}">
@@ -244,11 +257,11 @@
                             </div>
                             <div class="grid grid-cols-1 gap-2 pt-1">
                                 {% if user.role == 'admin' or user.is_superuser or user.is_staff %}
-                                    <a href="{% url 'administration:dashboard' %}" class="mobile-link w-full text-center py-3 px-4 rounded-xl bg-purple-600 text-white text-xs font-extrabold shadow-sm transition-all hover:bg-purple-700">👨‍💻 Dashboard Admin →</a>
+                                    <a href="{% url 'administration:dashboard' %}" class="mobile-link w-full text-center py-3 px-4 rounded-xl bg-medical-blue text-white text-xs font-extrabold shadow-sm transition-all hover:bg-medical-blue">‍<i class="ti ti-device-laptop"></i> Dashboard Admin →</a>
                                 {% elif user.role == 'patient' %}
-                                    <a href="{% url 'patients:dashboard' %}" class="mobile-link w-full text-center py-3 px-4 rounded-xl bg-leaf-green text-white text-xs font-extrabold shadow-sm transition-all hover:bg-leaf-dark">{% translate "Mon Espace Patient" %} ➔</a>
+                                    <a href="{% url 'patients:dashboard' %}" class="mobile-link w-full text-center py-3 px-4 rounded-xl bg-leaf-green text-white text-xs font-extrabold shadow-sm transition-all hover:bg-leaf-dark">{% translate "Mon Espace Patient" %} <i class="ti ti-arrow-right"></i></a>
                                 {% elif user.role == 'medecin' %}
-                                    <a href="{% url 'medecins:dashboard' %}" class="mobile-link w-full text-center py-3 px-4 rounded-xl bg-medical-blue text-white text-xs font-extrabold shadow-sm transition-all hover:bg-medical-dark">{% translate "Mon Espace Médecin" %} ➔</a>
+                                    <a href="{% url 'medecins:dashboard' %}" class="mobile-link w-full text-center py-3 px-4 rounded-xl bg-medical-blue text-white text-xs font-extrabold shadow-sm transition-all hover:bg-medical-dark">{% translate "Mon Espace Médecin" %} <i class="ti ti-arrow-right"></i></a>
                                 {% endif %}
                                 <form action="{% url 'accounts:logout' %}" method="post" class="block w-full">
                                     {% csrf_token %}
@@ -268,7 +281,7 @@
                                         <div class="text-[10px] text-gray-500 font-medium">Accéder à mon espace</div>
                                     </div>
                                 </div>
-                                <span class="text-gray-400 font-extrabold text-xs group-hover:translate-x-1 transition-transform">➔</span>
+                                <span class="text-gray-400 font-extrabold text-xs group-hover:translate-x-1 transition-transform"><i class="ti ti-arrow-right"></i></span>
                             </a>
 
                             <!-- Inscription -->
@@ -280,7 +293,7 @@
                                         <div class="text-[10px] text-white/80 font-medium">Créer mon compte</div>
                                     </div>
                                 </div>
-                                <span class="text-white/80 font-extrabold text-xs group-hover:translate-x-1 transition-transform">➔</span>
+                                <span class="text-white/80 font-extrabold text-xs group-hover:translate-x-1 transition-transform"><i class="ti ti-arrow-right"></i></span>
                             </a>
                         </div>
                     {% endif %}

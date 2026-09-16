@@ -9,17 +9,35 @@ from .models import AppelConsultation
 from agora_token_builder import RtcTokenBuilder
 import time
 
+from datetime import datetime, timedelta
+from django.contrib import messages
+
 @login_required
 def rejoindre_appel(request, rdv_id):
     rdv = get_object_or_404(RendezVous, id=rdv_id)
     
     # Vérifier que l'utilisateur est bien le patient ou le médecin du RDV
     if request.user != rdv.patient and request.user != rdv.doctor:
-        return redirect('core:home') # ou une page d'erreur
+        return redirect('core:home')
         
-    # S'assurer que le type de RDV est vidéo ou audio (bien que le modèle permette les 3)
+    # S'assurer que le type de RDV est vidéo ou audio
     if rdv.consultation_type not in ['video', 'audio']:
         return redirect('core:home')
+
+    # Vérification d'expiration de la salle (2 heures après le début prévu)
+    try:
+        hour, minute = map(int, rdv.time_slot.split(':'))
+        rdv_datetime = datetime.combine(rdv.date, datetime.min.time()).replace(hour=hour, minute=minute)
+        rdv_datetime = timezone.make_aware(rdv_datetime)
+        
+        if timezone.now() > rdv_datetime + timedelta(hours=2):
+            messages.error(request, "Cette salle de consultation a expiré.")
+            if request.user == rdv.patient:
+                return redirect('consultations:patient_appointments')
+            else:
+                return redirect('medecins:dashboard')
+    except Exception as e:
+        pass
 
     appel, created = AppelConsultation.objects.get_or_create(
         rendez_vous=rdv,
@@ -36,29 +54,16 @@ def rejoindre_appel(request, rdv_id):
         rdv.status = 'in_progress'
         rdv.save()
 
-    # Génération du token Agora
-    app_id = settings.AGORA_APP_ID
-    app_certificate = settings.AGORA_APP_CERTIFICATE
-    channel_name = str(appel.channel_name)
-    uid = request.user.id
-    expiration_time_in_seconds = 3600 # 1 heure
-    current_timestamp = int(time.time())
-    privilege_expired_ts = current_timestamp + expiration_time_in_seconds
-    role = 1 # Role_Publisher
-
-    token = RtcTokenBuilder.buildTokenWithUid(
-        app_id, app_certificate, channel_name, uid, role, privilege_expired_ts
-    )
-
     is_doctor = (request.user == rdv.doctor)
+    user_name = "Dr. " + request.user.get_full_name() if is_doctor else request.user.get_full_name()
+    if not user_name.strip() or user_name.strip() == "Dr.":
+        user_name = request.user.username
 
     context = {
         'appel': appel,
         'rdv': rdv,
-        'agora_app_id': app_id,
-        'agora_token': token,
-        'agora_channel': channel_name,
-        'agora_uid': uid,
+        'room_code': str(appel.room_code),
+        'user_name': user_name,
         'is_doctor': is_doctor
     }
     

@@ -1,0 +1,263 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Historique des Paiements — Fransick Santé{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --bg: #0f172a; --card: #1e293b; --border: #334155;
+    --text: #f1f5f9; --muted: #94a3b8; --primary: #4f46e5;
+    --success: #059669; --warning: #d97706; --danger: #dc2626;
+  }
+  body { background: var(--bg); }
+  .history-wrapper { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+  h1 { font-size: 1.5rem; font-weight: 800; color: var(--text); margin-bottom: 0.3rem; }
+  .subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 2rem; }
+
+  /* Stats */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.3rem;
+    text-align: center;
+  }
+  .stat-icon { font-size: 1.6rem; margin-bottom: 0.4rem; }
+  .stat-value { font-size: 1.8rem; font-weight: 800; color: var(--text); line-height: 1; }
+  .stat-label { font-size: 0.78rem; color: var(--muted); margin-top: 0.3rem; }
+  .stat-success .stat-value { color: #10b981; }
+  .stat-warning .stat-value { color: #fbbf24; }
+  .stat-danger .stat-value { color: #f87171; }
+  .stat-primary .stat-value { color: #818cf8; }
+
+  /* Filtre badges */
+  .filter-tabs {
+    display: flex; gap: 0.5rem; flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+  .filter-tab {
+    padding: 0.4rem 1rem;
+    border-radius: 99px;
+    font-size: 0.82rem; font-weight: 600;
+    cursor: pointer; border: 1px solid var(--border);
+    background: transparent; color: var(--muted);
+    transition: all 0.2s;
+  }
+  .filter-tab.active, .filter-tab:hover {
+    background: var(--primary); border-color: var(--primary); color: white;
+  }
+
+  /* Table */
+  .table-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .table-responsive { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr {
+    background: rgba(255,255,255,0.04);
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    padding: 1rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+  td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.88rem; color: var(--text); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.7rem;
+    border-radius: 99px;
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+  .badge-success { background: rgba(5,150,105,0.15); color: #10b981; border: 1px solid rgba(5,150,105,0.3); }
+  .badge-pending { background: rgba(217,119,6,0.15); color: #fbbf24; border: 1px solid rgba(217,119,6,0.3); }
+  .badge-failed { background: rgba(220,38,38,0.15); color: #f87171; border: 1px solid rgba(220,38,38,0.3); }
+  .badge-acompte { background: rgba(79,70,229,0.15); color: #818cf8; border: 1px solid rgba(79,70,229,0.3); }
+  .badge-total { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+
+  .amount-cell { font-weight: 700; color: #10b981; }
+  .ref-cell { font-family: monospace; font-size: 0.78rem; color: var(--muted); }
+
+  .action-link {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    font-size: 0.78rem;
+    color: var(--primary);
+    text-decoration: none;
+    padding: 0.3rem 0.7rem;
+    border-radius: 6px;
+    border: 1px solid rgba(79,70,229,0.3);
+    transition: all 0.2s;
+  }
+  .action-link:hover {
+    background: rgba(79,70,229,0.15);
+    color: #818cf8;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--muted);
+  }
+  .empty-state .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+  .empty-state p { font-size: 0.9rem; }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .history-wrapper { padding: 1rem; }
+    td, th { padding: 0.7rem 0.6rem; font-size: 0.8rem; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="history-wrapper">
+  <h1>💳 Historique des Paiements</h1>
+  <p class="subtitle">
+    {% if is_admin %}Tous les paiements de la plateforme{% else %}Vos transactions CamPay{% endif %}
+  </p>
+
+  <!-- Statistiques -->
+  <div class="stats-grid">
+    <div class="stat-card stat-primary">
+      <div class="stat-icon">📊</div>
+      <div class="stat-value">{{ total_count }}</div>
+      <div class="stat-label">Total transactions</div>
+    </div>
+    <div class="stat-card stat-success">
+      <div class="stat-icon">✅</div>
+      <div class="stat-value">{{ success_count }}</div>
+      <div class="stat-label">Confirmés</div>
+    </div>
+    <div class="stat-card stat-warning">
+      <div class="stat-icon">⏳</div>
+      <div class="stat-value">{{ pending_count }}</div>
+      <div class="stat-label">En attente</div>
+    </div>
+    <div class="stat-card stat-danger">
+      <div class="stat-icon">❌</div>
+      <div class="stat-value">{{ failed_count }}</div>
+      <div class="stat-label">Échoués</div>
+    </div>
+    <div class="stat-card stat-success">
+      <div class="stat-icon">💰</div>
+      <div class="stat-value">{{ total_montant|floatformat:0 }}</div>
+      <div class="stat-label">XAF confirmés</div>
+    </div>
+  </div>
+
+  <!-- Filtres -->
+  <div class="filter-tabs">
+    <button class="filter-tab active" onclick="filterTable('all', this)">Tous</button>
+    <button class="filter-tab" onclick="filterTable('successful', this)">✅ Confirmés</button>
+    <button class="filter-tab" onclick="filterTable('pending', this)">⏳ En attente</button>
+    <button class="filter-tab" onclick="filterTable('failed', this)">❌ Échoués</button>
+  </div>
+
+  <!-- Tableau -->
+  <div class="table-card">
+    {% if paiements %}
+    <div class="table-responsive">
+      <table id="payments-table">
+        <thead>
+          <tr>
+            <th>Référence</th>
+            {% if is_admin %}<th>Patient</th>{% endif %}
+            <th>Médecin</th>
+            <th>Type</th>
+            <th>Montant</th>
+            <th>Statut</th>
+            <th>Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in paiements %}
+          <tr data-status="{{ p.status }}">
+            <td class="ref-cell">{{ p.reference|stringformat:"s"|slice:":12"|upper }}…</td>
+            {% if is_admin %}
+            <td>
+              <div style="font-weight: 600;">{{ p.patient.get_full_name|default:p.patient.username }}</div>
+              <div style="font-size:0.75rem; color: var(--muted);">{{ p.phone_number }}</div>
+            </td>
+            {% endif %}
+            <td>Dr. {{ p.medecin.get_full_name|default:p.medecin.username }}</td>
+            <td>
+              {% if p.payment_type == 'acompte' %}
+                <span class="badge badge-acompte">Acompte 20%</span>
+              {% else %}
+                <span class="badge badge-total">Paiement Total</span>
+              {% endif %}
+            </td>
+            <td class="amount-cell">{{ p.montant_paye|floatformat:0 }} XAF</td>
+            <td>
+              {% if p.status == 'successful' %}
+                <span class="badge badge-success">✅ Confirmé</span>
+              {% elif p.status == 'pending' %}
+                <span class="badge badge-pending">⏳ En attente</span>
+              {% else %}
+                <span class="badge badge-failed">❌ {{ p.get_status_display }}</span>
+              {% endif %}
+            </td>
+            <td style="color: var(--muted); font-size: 0.82rem;">{{ p.created_at|date:"d/m/Y H:i" }}</td>
+            <td>
+              {% if p.status == 'successful' %}
+                <a href="{% url 'paiements:receipt' p.reference %}" class="action-link">
+                  📄 Reçu
+                </a>
+              {% elif p.status == 'pending' %}
+                <a href="{% url 'paiements:status' p.reference %}" class="action-link">
+                  🔄 Vérifier
+                </a>
+              {% else %}
+                <span style="color: var(--muted); font-size: 0.78rem;">—</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">💳</div>
+      <p>Aucun paiement enregistré pour le moment.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+function filterTable(status, btn) {
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+
+  document.querySelectorAll('#payments-table tbody tr').forEach(row => {
+    if (status === 'all') {
+      row.style.display = '';
+    } else {
+      row.style.display = row.dataset.status === status ? '' : 'none';
+    }
+  });
+}
+</script>
+{% endblock %}

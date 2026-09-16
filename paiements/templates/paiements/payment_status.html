@@ -1,0 +1,316 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Paiement en cours — Fransick Santé{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --pay-primary: #4f46e5;
+    --pay-success: #059669;
+    --pay-fail: #dc2626;
+    --pay-warning: #d97706;
+    --pay-bg: #0f172a;
+    --pay-card: #1e293b;
+    --pay-border: #334155;
+    --pay-text: #f1f5f9;
+    --pay-muted: #94a3b8;
+  }
+
+  body { background: var(--pay-bg); }
+
+  .status-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+  }
+
+  .status-card {
+    background: var(--pay-card);
+    border: 1px solid var(--pay-border);
+    border-radius: 20px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 480px;
+    text-align: center;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+  }
+
+  /* Icône animée */
+  .status-icon {
+    width: 90px; height: 90px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2.4rem;
+    position: relative;
+  }
+  .icon-pending {
+    background: rgba(217,119,6,0.15);
+    border: 2px solid rgba(217,119,6,0.4);
+    animation: pulse-ring 2s ease-out infinite;
+  }
+  .icon-success {
+    background: rgba(5,150,105,0.15);
+    border: 2px solid rgba(5,150,105,0.5);
+  }
+  .icon-failed {
+    background: rgba(220,38,38,0.15);
+    border: 2px solid rgba(220,38,38,0.4);
+  }
+
+  @keyframes pulse-ring {
+    0% { box-shadow: 0 0 0 0 rgba(217,119,6,0.4); }
+    70% { box-shadow: 0 0 0 20px rgba(217,119,6,0); }
+    100% { box-shadow: 0 0 0 0 rgba(217,119,6,0); }
+  }
+
+  .status-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--pay-text);
+    margin-bottom: 0.5rem;
+  }
+  .status-subtitle {
+    font-size: 0.9rem;
+    color: var(--pay-muted);
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+  }
+
+  /* USSD card */
+  .ussd-instruction {
+    background: rgba(79,70,229,0.1);
+    border: 1px solid rgba(79,70,229,0.3);
+    border-radius: 12px;
+    padding: 1.2rem;
+    margin-bottom: 1.5rem;
+  }
+  .ussd-instruction h4 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #818cf8;
+    margin: 0 0 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .ussd-steps {
+    list-style: none;
+    padding: 0; margin: 0;
+    text-align: left;
+  }
+  .ussd-steps li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    margin-bottom: 0.6rem;
+    font-size: 0.85rem;
+    color: var(--pay-text);
+  }
+  .ussd-steps .step-num {
+    background: var(--pay-primary);
+    color: white;
+    width: 22px; height: 22px; min-width: 22px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+
+  /* Progress bar */
+  .progress-bar-wrap {
+    background: rgba(255,255,255,0.06);
+    border-radius: 99px;
+    height: 6px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--pay-primary), #7c3aed);
+    border-radius: 99px;
+    animation: progress-anim 30s linear infinite;
+    width: 0%;
+  }
+  @keyframes progress-anim {
+    0% { width: 5%; }
+    90% { width: 90%; }
+    100% { width: 90%; }
+  }
+
+  .timer-display {
+    font-size: 0.8rem;
+    color: var(--pay-muted);
+    margin-bottom: 1.5rem;
+  }
+  .timer-display span { color: #fbbf24; font-weight: 600; }
+
+  .amount-badge {
+    display: inline-block;
+    background: rgba(5,150,105,0.15);
+    border: 1px solid rgba(5,150,105,0.4);
+    color: #10b981;
+    font-size: 1.6rem;
+    font-weight: 800;
+    padding: 0.6rem 1.5rem;
+    border-radius: 99px;
+    margin-bottom: 1.5rem;
+  }
+
+  .action-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--pay-primary), #7c3aed);
+    color: white; font-weight: 700; font-size: 0.95rem;
+    border: none; border-radius: 10px; padding: 0.8rem;
+    cursor: pointer; text-decoration: none; display: block;
+    transition: all 0.2s;
+    box-shadow: 0 6px 20px rgba(79,70,229,0.4);
+  }
+  .btn-primary:hover { transform: translateY(-2px); }
+  .btn-outline {
+    background: transparent;
+    color: var(--pay-muted); font-size: 0.85rem;
+    border: 1px solid var(--pay-border); border-radius: 10px; padding: 0.7rem;
+    cursor: pointer; text-decoration: none; display: block;
+    transition: all 0.2s;
+  }
+  .btn-outline:hover { color: var(--pay-text); border-color: var(--pay-muted); }
+
+  /* États cachés/visibles */
+  #state-pending { display: block; }
+  #state-success { display: none; }
+  #state-failed { display: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="status-wrapper">
+  <div class="status-card">
+
+    <!-- ====== STATE: PENDING ====== -->
+    <div id="state-pending">
+      <div class="status-icon icon-pending">⏳</div>
+      <h2 class="status-title">En attente de confirmation</h2>
+      <p class="status-subtitle">
+        Un code USSD a été envoyé sur <strong style="color: #fbbf24;">{{ paiement.phone_number }}</strong>.<br>
+        Vérifiez votre téléphone et suivez les instructions.
+      </p>
+
+      <div class="amount-badge">{{ paiement.montant_paye|floatformat:0 }} XAF</div>
+
+      <div class="ussd-instruction">
+        <h4>📱 Comment confirmer votre paiement ?</h4>
+        <ul class="ussd-steps">
+          <li><span class="step-num">1</span> <span>Vérifiez votre téléphone — un pop-up USSD devrait apparaître</span></li>
+          <li><span class="step-num">2</span> <span>Si aucun pop-up : composez <strong>*126#</strong> (MTN) ou <strong>#150#</strong> (Orange)</span></li>
+          <li><span class="step-num">3</span> <span>Sélectionnez "Payer" → Entrez votre code PIN Mobile Money</span></li>
+          <li><span class="step-num">4</span> <span>Cette page se mettra à jour automatiquement après confirmation</span></li>
+        </ul>
+      </div>
+
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill"></div>
+      </div>
+      <p class="timer-display">Vérification automatique dans <span id="timer-countdown">5</span>s</p>
+    </div>
+
+    <!-- ====== STATE: SUCCESS ====== -->
+    <div id="state-success">
+      <div class="status-icon icon-success">✅</div>
+      <h2 class="status-title" style="color: #10b981;">Paiement Confirmé !</h2>
+      <p class="status-subtitle">
+        Votre paiement de <strong style="color:#10b981;">{{ paiement.montant_paye|floatformat:0 }} XAF</strong> a été reçu avec succès.
+        {% if paiement.payment_type == 'acompte' %}
+          Votre rendez-vous a été créé.
+        {% else %}
+          La téléconsultation directe est prête.
+        {% endif %}
+      </p>
+      <div class="action-btns">
+        <a href="#" class="btn-primary" id="receipt-link">
+          {% if paiement.payment_type == 'acompte' %}📄 Voir mon reçu{% else %}📹 Rejoindre la consultation{% endif %}
+        </a>
+        <a href="{% url 'patients:suivi' %}" class="btn-outline">Retour à mon espace</a>
+      </div>
+    </div>
+
+    <!-- ====== STATE: FAILED ====== -->
+    <div id="state-failed">
+      <div class="status-icon icon-failed">❌</div>
+      <h2 class="status-title" style="color: #f87171;">Paiement Échoué</h2>
+      <p class="status-subtitle">
+        Le paiement n'a pas pu être traité. Vérifiez votre solde Mobile Money ou essayez à nouveau.
+      </p>
+      <div class="action-btns">
+        <a href="javascript:history.back()" class="btn-primary">🔄 Réessayer</a>
+        <a href="/patients/dashboard/" class="btn-outline">Retour à l'accueil</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const PAIEMENT_REF = "{{ paiement.reference }}";
+const CHECK_URL = `/paiements/api/statut/${PAIEMENT_REF}/`;
+let checkInterval;
+let countdown = 5;
+const timerEl = document.getElementById('timer-countdown');
+
+function showState(state) {
+  document.getElementById('state-pending').style.display = state === 'pending' ? 'block' : 'none';
+  document.getElementById('state-success').style.display = state === 'success' ? 'block' : 'none';
+  document.getElementById('state-failed').style.display = state === 'failed' ? 'block' : 'none';
+}
+
+function startCountdown() {
+  countdown = 5;
+  const interval = setInterval(() => {
+    countdown--;
+    if (timerEl) timerEl.textContent = countdown;
+    if (countdown <= 0) clearInterval(interval);
+  }, 1000);
+}
+
+async function checkStatus() {
+  try {
+    const resp = await fetch(CHECK_URL, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+    const data = await resp.json();
+    if (data.status === 'successful') {
+      clearInterval(checkInterval);
+      if (data.redirect_url) {
+        document.getElementById('receipt-link').href = data.redirect_url;
+        // Redirection automatique après 3 secondes
+        setTimeout(() => {
+          window.location.href = data.redirect_url;
+        }, 3000);
+      }
+      showState('success');
+    } else if (data.status === 'failed' || data.status === 'expired') {
+      clearInterval(checkInterval);
+      showState('failed');
+    } else {
+      startCountdown();
+    }
+  } catch (e) {
+    console.error('Erreur vérification statut:', e);
+  }
+}
+
+// Démarrer le polling après 5s, puis toutes les 5s
+setTimeout(() => {
+  checkStatus();
+  checkInterval = setInterval(checkStatus, 5000);
+  startCountdown();
+}, 5000);
+
+startCountdown();
+</script>
+{% endblock %}

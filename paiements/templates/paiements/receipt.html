@@ -1,0 +1,394 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Reçu de Paiement — Fransick Santé{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --border: #334155;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --primary: #4f46e5;
+    --success: #059669;
+    --light: #f8fafc;
+  }
+
+  body { background: var(--bg); }
+
+  .receipt-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2rem 1rem;
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+  }
+
+  .receipt-container { width: 100%; max-width: 640px; }
+
+  /* Actions en haut */
+  .receipt-actions {
+    display: flex;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .btn-action {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: none; cursor: pointer;
+  }
+  .btn-download {
+    background: linear-gradient(135deg, var(--primary), #7c3aed);
+    color: white;
+    box-shadow: 0 4px 12px rgba(79,70,229,0.4);
+  }
+  .btn-download:hover { transform: translateY(-1px); }
+  .btn-back {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .btn-back:hover { color: var(--text); }
+  .btn-print {
+    background: rgba(5,150,105,0.15);
+    border: 1px solid rgba(5,150,105,0.4);
+    color: #10b981;
+  }
+  .btn-print:hover { background: rgba(5,150,105,0.25); }
+
+  /* Carte Reçu */
+  .receipt-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+    animation: slideUp 0.4s ease;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Header */
+  .receipt-header {
+    background: linear-gradient(135deg, var(--primary), #7c3aed);
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .receipt-header::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%);
+  }
+  .receipt-header-content { position: relative; z-index: 1; }
+  .receipt-logo {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+  .receipt-header h1 {
+    font-size: 1.4rem; font-weight: 800;
+    color: white; margin: 0 0 0.2rem;
+  }
+  .receipt-header p {
+    font-size: 0.82rem; color: rgba(255,255,255,0.75);
+    margin: 0;
+  }
+
+  /* Statut badge */
+  .status-badge-wrap {
+    padding: 1.5rem 2rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.5rem;
+    border-radius: 99px;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+  .status-success {
+    background: rgba(5,150,105,0.15);
+    border: 1.5px solid rgba(5,150,105,0.5);
+    color: #10b981;
+  }
+  .status-pending {
+    background: rgba(217,119,6,0.15);
+    border: 1.5px solid rgba(217,119,6,0.5);
+    color: #fbbf24;
+  }
+
+  /* Montant principal */
+  .amount-hero {
+    text-align: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(5,150,105,0.05);
+  }
+  .amount-hero-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+  .amount-hero-value {
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: #10b981;
+    line-height: 1;
+  }
+  .amount-hero-unit {
+    font-size: 1.4rem;
+    color: #6ee7b7;
+  }
+  .amount-hero-ref {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 0.5rem;
+    font-family: monospace;
+  }
+
+  /* Sections de détail */
+  .receipt-section { padding: 1.5rem 2rem; border-bottom: 1px solid var(--border); }
+  .receipt-section:last-child { border-bottom: none; }
+  .section-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--primary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+  .detail-item {}
+  .detail-label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.2rem;
+  }
+  .detail-value {
+    font-size: 0.9rem;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* Footer reçu */
+  .receipt-footer {
+    background: rgba(255,255,255,0.02);
+    padding: 1.2rem 2rem;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--muted);
+    line-height: 1.6;
+    border-top: 1px solid var(--border);
+  }
+
+  @media print {
+    body { background: white !important; }
+    .receipt-actions { display: none; }
+    .receipt-wrapper { background: white; padding: 0; }
+    .receipt-card {
+      border: 1px solid #e2e8f0;
+      box-shadow: none;
+      border-radius: 8px;
+    }
+    .receipt-header { background: #4f46e5 !important; -webkit-print-color-adjust: exact; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="receipt-wrapper">
+  <div class="receipt-container">
+
+    <!-- Actions -->
+    <div class="receipt-actions">
+      <a href="{% url 'paiements:download_receipt' paiement.reference %}"
+         class="btn-action btn-download" id="download-receipt-btn">
+        📄 Télécharger PDF
+      </a>
+      <button onclick="window.print()" class="btn-action btn-print">
+        🖨️ Imprimer
+      </button>
+      {% if request.user.role == 'patient' %}
+      <a href="{% url 'patients:suivi' %}" class="btn-action btn-back" style="background: rgba(79,70,229,0.15); color: #818cf8; border-color: rgba(79,70,229,0.3);">
+        🏠 Aller à l'accueil
+      </a>
+      {% else %}
+      <a href="{% url 'paiements:history' %}" class="btn-action btn-back">
+        ← Historique
+      </a>
+      {% endif %}
+    </div>
+
+    <!-- Reçu -->
+    <div class="receipt-card" id="receipt-printable">
+
+      <!-- Header -->
+      <div class="receipt-header">
+        <div class="receipt-header-content">
+          <span class="receipt-logo">🏥</span>
+          <h1>Fransick Santé</h1>
+          <p>Reçu de Paiement Officiel — Mobile Money Cameroun</p>
+        </div>
+      </div>
+
+      <!-- Statut -->
+      <div class="status-badge-wrap">
+        {% if paiement.is_successful %}
+          <div class="status-badge status-success">✅ PAIEMENT CONFIRMÉ</div>
+        {% else %}
+          <div class="status-badge status-pending">⏳ EN ATTENTE DE CONFIRMATION</div>
+        {% endif %}
+      </div>
+
+      <!-- Montant héros -->
+      <div class="amount-hero">
+        <div class="amount-hero-label">Montant payé</div>
+        <div class="amount-hero-value">
+          {{ paiement.montant_paye|floatformat:0 }}
+          <span class="amount-hero-unit"> XAF</span>
+        </div>
+        <div class="amount-hero-ref">Réf : {{ paiement.reference }}</div>
+      </div>
+
+      <!-- Patient -->
+      <div class="receipt-section">
+        <div class="section-title">👤 Informations Patient</div>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <div class="detail-label">Nom complet</div>
+            <div class="detail-value">{{ paiement.patient.get_full_name|default:paiement.patient.username }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Téléphone Mobile Money</div>
+            <div class="detail-value">{{ paiement.phone_number }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Email</div>
+            <div class="detail-value">{{ paiement.patient.email|default:"—" }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Opérateur</div>
+            <div class="detail-value">{{ paiement.campay_operator|default:"—" }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Médecin -->
+      <div class="receipt-section">
+        <div class="section-title">🩺 Médecin Traitant</div>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <div class="detail-label">Nom</div>
+            <div class="detail-value">Dr. {{ paiement.medecin.get_full_name|default:paiement.medecin.username }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Spécialité</div>
+            <div class="detail-value">{{ paiement.medecin.doctor_profile.speciality|default:"—" }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Détails paiement -->
+      <div class="receipt-section">
+        <div class="section-title">💳 Détails du Paiement</div>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <div class="detail-label">Type</div>
+            <div class="detail-value">{{ paiement.get_payment_type_display }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Tarif total consultation</div>
+            <div class="detail-value">{{ paiement.montant_total_consultation|floatformat:0 }} XAF</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Montant payé</div>
+            <div class="detail-value" style="color: #10b981; font-weight: 700;">
+              {{ paiement.montant_paye|floatformat:0 }} XAF
+            </div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Réf CamPay</div>
+            <div class="detail-value" style="font-family: monospace; font-size: 0.8rem;">
+              {{ paiement.campay_reference|default:"—" }}
+            </div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Date de paiement</div>
+            <div class="detail-value">
+              {% if paiement.paid_at %}
+                {{ paiement.paid_at|date:"d/m/Y à H:i" }}
+              {% else %}
+                {{ paiement.created_at|date:"d/m/Y à H:i" }}
+              {% endif %}
+            </div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Statut</div>
+            <div class="detail-value">{{ paiement.get_status_display }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rendez-vous lié -->
+      {% if paiement.rdv %}
+      <div class="receipt-section">
+        <div class="section-title">📅 Rendez-vous Associé</div>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <div class="detail-label">Date</div>
+            <div class="detail-value">{{ paiement.rdv.date|date:"d/m/Y" }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Heure</div>
+            <div class="detail-value">{{ paiement.rdv.time_slot }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Type</div>
+            <div class="detail-value">{{ paiement.rdv.get_consultation_type_display }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Statut RDV</div>
+            <div class="detail-value">{{ paiement.rdv.get_status_display }}</div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Footer -->
+      <div class="receipt-footer">
+        Document généré automatiquement par <strong>Fransick Santé</strong> — Plateforme de Télémédecine<br>
+        Paiement traité par <strong>CamPay</strong> (Mobile Money Cameroun)<br>
+        Pour toute réclamation : <strong>support@fransick-sante.cm</strong>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

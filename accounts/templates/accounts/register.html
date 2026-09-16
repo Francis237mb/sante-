@@ -228,7 +228,7 @@
                         </button>
                         <button type="button" id="next-to-step-2" class="hidden w-full bg-medical-blue hover:bg-medical-dark text-white font-bold py-3.5 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 transform active:scale-[0.98] text-sm flex items-center justify-center space-x-2 tracking-wide uppercase">
                             <span>{% translate "Suivant" %}</span>
-                            <span class="text-xs opacity-80">(2/3 - Infos prof.) ➔</span>
+                            <span class="text-xs opacity-80">(2/3 - Infos prof.) <i class="ti ti-arrow-right"></i></span>
                         </button>
                     </div>
                 </div>
@@ -238,7 +238,7 @@
                 <!-- ========================================== -->
                 <div id="step-2-container" class="hidden space-y-4 transition-all duration-300">
                     <div class="p-4 rounded-2xl bg-blue-50/50 border border-blue-100 text-xs text-blue-900 font-medium flex items-center space-x-3">
-                        <span class="text-2xl">🏥</span>
+                        <span class="text-2xl"><i class="ti ti-building-hospital"></i></span>
                         <div>Veuillez fournir vos coordonnées d'exercice et votre numéro d'ordre officiel. Ce numéro doit être unique.</div>
                     </div>
 
@@ -321,7 +321,7 @@
                         </button>
                         <button type="button" id="next-to-step-3" class="w-2/3 bg-medical-blue hover:bg-medical-dark text-white font-bold py-3.5 rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 transform active:scale-[0.98] text-xs uppercase tracking-wide flex items-center justify-center space-x-1.5">
                             <span>Suivant</span>
-                            <span class="opacity-80">(3/3 - Documents) ➔</span>
+                            <span class="opacity-80">(3/3 - Documents) <i class="ti ti-arrow-right"></i></span>
                         </button>
                     </div>
                 </div>
@@ -332,7 +332,7 @@
                 <div id="step-3-container" class="hidden space-y-4 transition-all duration-300">
                     <div class="p-4 rounded-2xl bg-amber-50 border border-amber-100 text-xs text-amber-900 font-medium">
                         <div class="font-bold flex items-center space-x-1.5 mb-1">
-                            <span>🔒 Confidentialité & Validation</span>
+                            <span><i class="ti ti-lock"></i> Confidentialité & Validation</span>
                         </div>
                         <span>Vos documents justificatifs sont stockés de façon sécurisée et analysés uniquement par notre comité médical. Formats acceptés : <strong>PDF, JPG, PNG</strong> (Max <strong>5 Mo</strong> par fichier).</span>
                     </div>
@@ -345,7 +345,7 @@
                         <div class="relative border-2 border-dashed border-gray-200 hover:border-medical-blue/60 rounded-2xl p-4 bg-gray-50/50 transition-all text-center group cursor-pointer" onclick="document.getElementById('id_diploma_document').click();">
                             <input type="file" name="diploma_document" id="id_diploma_document" accept=".pdf,.jpg,.jpeg,.png" class="hidden file-upload-input" data-target="preview-diploma">
                             <div id="preview-diploma-empty" class="space-y-1 pointer-events-none">
-                                <div class="w-10 h-10 mx-auto bg-blue-100 text-medical-blue rounded-full flex items-center justify-center font-bold text-lg group-hover:scale-110 transition-transform">📜</div>
+                                <div class="w-10 h-10 mx-auto bg-blue-100 text-medical-blue rounded-full flex items-center justify-center font-bold text-lg group-hover:scale-110 transition-transform"></div>
                                 <div class="text-xs font-bold text-medical-blue">Cliquez pour téléverser votre diplôme</div>
                                 <div class="text-[10px] text-gray-400">PDF, JPG ou PNG (Max 5 Mo)</div>
                             </div>
@@ -370,7 +370,7 @@
                         <div class="relative border-2 border-dashed border-gray-200 hover:border-medical-blue/60 rounded-2xl p-4 bg-gray-50/50 transition-all text-center group cursor-pointer" onclick="document.getElementById('id_professional_card_document').click();">
                             <input type="file" name="professional_card_document" id="id_professional_card_document" accept=".pdf,.jpg,.jpeg,.png" class="hidden file-upload-input" data-target="preview-card">
                             <div id="preview-card-empty" class="space-y-1 pointer-events-none">
-                                <div class="w-10 h-10 mx-auto bg-blue-100 text-medical-blue rounded-full flex items-center justify-center font-bold text-lg group-hover:scale-110 transition-transform">🪪</div>
+                                <div class="w-10 h-10 mx-auto bg-blue-100 text-medical-blue rounded-full flex items-center justify-center font-bold text-lg group-hover:scale-110 transition-transform"></div>
                                 <div class="text-xs font-bold text-medical-blue">Cliquez pour téléverser votre carte ou attestation</div>
                                 <div class="text-[10px] text-gray-400">PDF, JPG ou PNG (Max 5 Mo)</div>
                             </div>
@@ -694,7 +694,7 @@
 
             // Check file size
             if (file.size > maxSize) {
-                alert(`⚠️ Le fichier '${file.name}' est trop lourd (${(file.size / (1024*1024)).toFixed(1)} Mo). La taille maximale autorisée est de 5 Mo.`);
+                alert(`<i class="ti ti-alert-triangle"></i> Le fichier '${file.name}' est trop lourd (${(file.size / (1024*1024)).toFixed(1)} Mo). La taille maximale autorisée est de 5 Mo.`);
                 input.value = '';
                 emptyContainer.classList.remove('hidden');
                 previewContainer.classList.add('hidden');
@@ -704,7 +704,7 @@
             // Check extension
             const ext = file.name.split('.').pop().toLowerCase();
             if (!validExtensions.includes(ext)) {
-                alert(`⚠️ Le format '.${ext}' n'est pas supporté. Veuillez téléverser un fichier PDF, JPG ou PNG.`);
+                alert(`<i class="ti ti-alert-triangle"></i> Le format '.${ext}' n'est pas supporté. Veuillez téléverser un fichier PDF, JPG ou PNG.`);
                 input.value = '';
                 emptyContainer.classList.remove('hidden');
                 previewContainer.classList.add('hidden');

@@ -1,6 +1,7 @@
+{% load static %}
 {% load i18n static %}
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="{% if user.is_authenticated and user.dark_mode_enabled %}dark{% endif %}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{% static 'core/js/tailwindcss.js' %}"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -19,8 +20,8 @@
                         'medical-blue': '#14467d',
                         'medical-dark': '#0b2b50',
                         'medical-light': '#eef5fc',
-                        'leaf-green': '#15803d',
-                        'leaf-light': '#f0fdf4',
+                        'medical-blue': '#15803d',
+                        'medical-light': '#f0fdf4',
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
@@ -39,6 +40,24 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .animate-fade-in { animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    </style>
+
+    <!-- Surcharges globales Mode Sombre -->
+    <style>
+        html.dark body { background-color: #111827 !important; color: #f9fafb !important; }
+        html.dark .bg-white { background-color: #1f2937 !important; border-color: #374151 !important; }
+        html.dark .text-gray-800, html.dark .text-gray-900, html.dark .text-gray-700, html.dark h1, html.dark h2, html.dark h3, html.dark h4 { color: #f3f4f6 !important; }
+        html.dark .text-gray-500, html.dark .text-gray-400, html.dark .text-gray-600 { color: #9ca3af !important; }
+        html.dark .bg-gray-50, html.dark .bg-gray-100 { background-color: #374151 !important; border-color: #4b5563 !important; }
+        html.dark .bg-gray-200 { background-color: #4b5563 !important; }
+        html.dark .border, html.dark .border-b, html.dark .border-t, html.dark .border-gray-100, html.dark .border-gray-200 { border-color: #374151 !important; }
+        /* Adaptation des couleurs de marque */
+        html.dark .bg-medical-light, html.dark .bg-medical-light\/40 { background-color: rgba(30, 58, 138, 0.4) !important; color: #e8f0fe !important; }
+        html.dark .bg-leaf-light, html.dark .bg-leaf-light\/40 { background-color: rgba(20, 83, 45, 0.4) !important; color: #f1fcf0 !important; }
+        html.dark .hover\:bg-gray-50:hover { background-color: #374151 !important; }
+        html.dark .hover\:bg-medical-light\/40:hover { background-color: rgba(30, 58, 138, 0.6) !important; }
+        /* Navbar et popups */
+        html.dark header.bg-white\/75, html.dark div.bg-white\/95, html.dark nav.bg-white\/95 { background-color: rgba(31, 41, 55, 0.95) !important; border-color: #374151 !important; }
     </style>
 </head>
 <body class="bg-gray-50/70 font-inter text-gray-800 antialiased overflow-hidden">
@@ -65,7 +84,7 @@
             </a>
             <div>
                 <h1 class="text-base md:text-xl font-extrabold font-poppins text-gray-900 flex items-center space-x-2">
-                    <span class="text-medical-blue">📋</span>
+                    <span class="text-medical-blue"><i class="ti ti-clipboard-list"></i></span>
                     <span>Dossiers Patients & Diagnostics</span>
                 </h1>
                 <p class="text-[10px] md:text-xs text-gray-400 font-medium">Portail Médical • Historique des consultations et ordonnances délivrées</p>
@@ -87,7 +106,7 @@
             
             <div class="bg-white p-5 rounded-3xl border border-gray-150 shadow-xs flex items-center space-x-4">
                 <div class="w-12 h-12 rounded-2xl bg-blue-50 text-medical-blue flex items-center justify-center font-extrabold text-xl shadow-2xs">
-                    👥
+                    <i class="ti ti-users"></i>
                 </div>
                 <div>
                     <span class="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block">Patients Suivis</span>
@@ -96,8 +115,8 @@
             </div>
 
             <div class="bg-white p-5 rounded-3xl border border-gray-150 shadow-xs flex items-center space-x-4">
-                <div class="w-12 h-12 rounded-2xl bg-leaf-light text-leaf-green flex items-center justify-center font-extrabold text-xl shadow-2xs">
-                    🩺
+                <div class="w-12 h-12 rounded-2xl bg-medical-light text-medical-blue flex items-center justify-center font-extrabold text-xl shadow-2xs">
+                    <i class="ti ti-stethoscope"></i>
                 </div>
                 <div>
                     <span class="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block">Diagnostics Posés</span>
@@ -119,7 +138,7 @@
         <!-- Section Title & Counter -->
         <div class="flex items-center justify-between pt-2">
             <h2 class="text-sm font-extrabold text-gray-800 font-poppins uppercase tracking-wider flex items-center space-x-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-leaf-green shadow-2xs"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-medical-blue shadow-2xs"></span>
                 <span>Liste des Fiches Médicales Patients</span>
             </h2>
             <span id="patient-count-badge" class="bg-gray-100 text-gray-600 font-extrabold text-[10px] px-3 py-1 rounded-full">
@@ -142,7 +161,7 @@
                             <div>
                                 <div class="flex items-center space-x-2">
                                     <h3 class="text-base font-extrabold text-gray-900 font-poppins">{{ item.patient.username }}</h3>
-                                    <span class="bg-leaf-light text-leaf-green text-[9px] font-extrabold px-2.5 py-0.5 rounded-full border border-leaf-green/20">Dossier Actif</span>
+                                    <span class="bg-medical-light text-medical-blue text-[9px] font-extrabold px-2.5 py-0.5 rounded-full border border-medical-blue/20">Dossier Actif</span>
                                 </div>
                                 <p class="text-xs text-gray-400 font-medium mt-0.5">Âge : <span class="font-bold text-gray-700">{{ item.patient_age }}</span> • Dernier passage : <span class="font-bold text-gray-700">{{ item.last_ordonnance.date|date:"d F Y" }}</span></p>
                             </div>
@@ -152,7 +171,7 @@
                             <span class="bg-blue-50/80 text-medical-blue text-xs font-extrabold px-3.5 py-1.5 rounded-2xl border border-blue-100">
                                 {{ item.all_ordonnances|length }} Ordonnance(s)
                             </span>
-                            <a href="{% url 'ordonnances:create' %}" class="px-3.5 py-1.5 bg-leaf-green hover:bg-leaf-green/90 text-white text-xs font-extrabold rounded-xl transition-all shadow-2xs uppercase tracking-wider">
+                            <a href="{% url 'ordonnances:create' %}" class="px-3.5 py-1.5 bg-medical-blue hover:bg-medical-blue/90 text-white text-xs font-extrabold rounded-xl transition-all shadow-2xs uppercase tracking-wider">
                                 + Nouvelle Ordonnance
                             </a>
                         </div>
@@ -162,7 +181,7 @@
                     <div class="bg-gradient-to-r from-medical-light via-blue-50/50 to-white p-4 rounded-2xl border border-blue-100/80 space-y-2">
                         <div class="flex items-center justify-between">
                             <span class="text-[9px] font-black text-medical-blue uppercase tracking-wider flex items-center space-x-1">
-                                <span>🩺</span>
+                                <span><i class="ti ti-stethoscope"></i></span>
                                 <span>Dernier Diagnostic Établi :</span>
                             </span>
                             <span class="text-[10px] text-gray-400 font-semibold">{{ item.last_ordonnance.date|date:"d/m/Y" }}</span>
@@ -186,7 +205,7 @@
                                         <span class="font-extrabold text-gray-900 font-poppins">{{ ord.diagnostic }}</span>
                                     </div>
                                     <span class="text-[10px] text-gray-500 font-extrabold bg-white px-3 py-1 rounded-full border border-gray-200 shadow-2xs">
-                                        📅 {{ ord.date|date:"d F Y" }}
+                                        <i class="ti ti-calendar"></i> {{ ord.date|date:"d F Y" }}
                                     </span>
                                 </div>
 
@@ -198,7 +217,7 @@
                                 <div class="flex items-center justify-between pt-1">
                                     <span class="text-[10px] text-gray-400 font-semibold">Médecin signataire : Dr. {{ ord.doctor.username }}</span>
                                     <a href="{% url 'ordonnances:detail' pk=ord.id %}" class="px-3 py-1 bg-medical-blue/10 hover:bg-medical-blue hover:text-white text-medical-blue text-xs font-bold rounded-xl transition-all flex items-center space-x-1">
-                                        <span>Consulter l'Ordonnance 📄</span>
+                                        <span>Consulter l'Ordonnance <i class="ti ti-file-text"></i></span>
                                     </a>
                                 </div>
                             </div>
@@ -210,7 +229,7 @@
             {% else %}
                 <div class="p-12 text-center bg-white border border-gray-150 rounded-3xl space-y-4 shadow-xs">
                     <div class="w-16 h-16 rounded-full bg-blue-50 text-medical-blue flex items-center justify-center mx-auto text-3xl shadow-xs">
-                        📋
+                        <i class="ti ti-clipboard-list"></i>
                     </div>
                     <div class="space-y-1">
                         <h3 class="text-base font-bold text-gray-900 font-poppins">Aucun dossier patient répertorié pour le moment</h3>

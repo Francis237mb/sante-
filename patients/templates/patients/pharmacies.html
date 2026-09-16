@@ -1,6 +1,6 @@
-{% load i18n %}
+{% load i18n static %}
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="{% if user.is_authenticated and user.dark_mode_enabled %}dark{% endif %}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{% static 'core/js/tailwindcss.js' %}"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -95,13 +95,31 @@
             background-size: 20px 20px, 40px 40px, 40px 40px;
         }
     </style>
+
+    <!-- Surcharges globales Mode Sombre -->
+    <style>
+        html.dark body { background-color: #111827 !important; color: #f9fafb !important; }
+        html.dark .bg-white { background-color: #1f2937 !important; border-color: #374151 !important; }
+        html.dark .text-gray-800, html.dark .text-gray-900, html.dark .text-gray-700, html.dark h1, html.dark h2, html.dark h3, html.dark h4 { color: #f3f4f6 !important; }
+        html.dark .text-gray-500, html.dark .text-gray-400, html.dark .text-gray-600 { color: #9ca3af !important; }
+        html.dark .bg-gray-50, html.dark .bg-gray-100 { background-color: #374151 !important; border-color: #4b5563 !important; }
+        html.dark .bg-gray-200 { background-color: #4b5563 !important; }
+        html.dark .border, html.dark .border-b, html.dark .border-t, html.dark .border-gray-100, html.dark .border-gray-200 { border-color: #374151 !important; }
+        /* Adaptation des couleurs de marque */
+        html.dark .bg-medical-light, html.dark .bg-medical-light\/40 { background-color: rgba(30, 58, 138, 0.4) !important; color: #e8f0fe !important; }
+        html.dark .bg-leaf-light, html.dark .bg-leaf-light\/40 { background-color: rgba(20, 83, 45, 0.4) !important; color: #f1fcf0 !important; }
+        html.dark .hover\:bg-gray-50:hover { background-color: #374151 !important; }
+        html.dark .hover\:bg-medical-light\/40:hover { background-color: rgba(30, 58, 138, 0.6) !important; }
+        /* Navbar et popups */
+        html.dark header.bg-white\/75, html.dark div.bg-white\/95, html.dark nav.bg-white\/95 { background-color: rgba(31, 41, 55, 0.95) !important; border-color: #374151 !important; }
+    </style>
 </head>
 <body class="bg-[#f8fafc] font-inter text-gray-800 antialiased min-h-screen flex flex-col justify-between selection:bg-leaf-green selection:text-white">
 
     <!-- Notification Toast -->
     <div id="toast-notification" class="fixed top-6 right-6 z-50 transform -translate-y-16 opacity-0 pointer-events-none transition-all duration-300">
         <div class="bg-gray-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center space-x-3 border border-gray-800">
-            <span class="text-lg">ℹ️</span>
+            <span class="text-lg"><i class="ti ti-info-circle"></i></span>
             <span id="toast-message" class="text-xs font-bold font-poppins">Message</span>
         </div>
     </div>
@@ -121,7 +139,7 @@
             <header class="h-20 bg-white border-b border-gray-200/80 px-4 md:px-8 flex items-center justify-between flex-shrink-0 z-30 select-none">
                 <!-- Left: Title & Logo -->
                 <div class="flex items-center space-x-2.5">
-                    <div class="w-9 h-9 rounded-xl bg-leaf-green/10 text-leaf-green flex items-center justify-center font-bold flex-shrink-0">🏥</div>
+                    <div class="w-9 h-9 rounded-xl bg-leaf-green/10 text-leaf-green flex items-center justify-center font-bold flex-shrink-0"><i class="ti ti-building-hospital"></i></div>
                     <div>
                         <span class="font-poppins font-bold text-base md:text-lg text-leaf-green tracking-tight block">Fransick Pharmacies</span>
                         <p class="text-[10px] text-gray-400 font-semibold hidden md:block" id="current-date-field"></p>
@@ -152,7 +170,7 @@
                         <!-- Search & filter bar -->
                         <div class="bg-white border border-gray-150 rounded-3xl p-5 shadow-xs space-y-4">
                             <h3 class="text-sm font-extrabold text-gray-800 font-poppins flex items-center space-x-2">
-                                <span>🔍</span>
+                                <span><i class="ti ti-search"></i></span>
                                 <span>Rechercher Pharmacies & Médicaments</span>
                             </h3>
                             <input type="text" id="pharmacy-page-search" onkeyup="filterPharmacyPageList()" placeholder="Tapez un nom de pharmacie, médicament ou adresse..." class="w-full bg-[#f1f5f9]/80 border border-gray-200/50 rounded-2xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-leaf-green font-medium">
@@ -162,7 +180,7 @@
                         <div class="space-y-4">
                             <div class="flex items-center justify-between">
                                 <h3 class="text-xs font-extrabold text-gray-400 uppercase tracking-wider">Pharmacies Partenaires (Cliquez pour Catalogue & Itinéraire)</h3>
-                                <span class="text-[10px] text-leaf-green font-bold">💡 Cliquez sur une carte</span>
+                                <span class="text-[10px] text-leaf-green font-bold"><i class="ti ti-bulb"></i> Cliquez sur une carte</span>
                             </div>
                             
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="pharmacy-grid-container">
@@ -173,9 +191,9 @@
                                     
                                     <div class="space-y-2">
                                         <div class="flex items-center justify-between">
-                                            <span class="w-10 h-10 rounded-2xl bg-leaf-light text-leaf-green flex items-center justify-center font-bold text-sm shadow-xs group-hover:scale-105 transition-transform">🏥</span>
+                                            <span class="w-10 h-10 rounded-2xl bg-leaf-light text-leaf-green flex items-center justify-center font-bold text-sm shadow-xs group-hover:scale-105 transition-transform"><i class="ti ti-building-hospital"></i></span>
                                             {% if ph.pharmacy_profile.is_on_duty %}
-                                                <span class="bg-red-50 text-red-600 text-[8px] font-extrabold px-2.5 py-1 rounded-full border border-red-200 animate-pulse">DE GARDE 🚨</span>
+                                                <span class="bg-red-50 text-red-600 text-[8px] font-extrabold px-2.5 py-1 rounded-full border border-red-200 animate-pulse">DE GARDE </span>
                                             {% else %}
                                                 <span class="bg-emerald-50 text-emerald-600 text-[8px] font-extrabold px-2.5 py-1 rounded-full border border-emerald-200">Ouverte 24/7</span>
                                             {% endif %}
@@ -183,7 +201,7 @@
                                         <div>
                                             <h4 class="text-sm font-extrabold text-gray-900 group-hover:text-leaf-green transition-colors font-poppins">{{ ph.pharmacy_profile.pharmacy_name|default:ph.username }}</h4>
                                             <p class="text-[10px] text-gray-500 font-semibold mt-0.5 flex items-center space-x-1">
-                                                <span>📍</span>
+                                                <span><i class="ti ti-map-pin"></i></span>
                                                 <span>{{ ph.pharmacy_profile.address|default:"Adresse non renseignée" }}</span>
                                             </p>
                                         </div>
@@ -191,14 +209,14 @@
 
                                     <div class="border-t border-gray-100 pt-2.5 text-[10px] text-gray-500 font-semibold space-y-1">
                                         <p class="flex items-center space-x-1">
-                                            <span>📞</span>
+                                            <span><i class="ti ti-phone"></i></span>
                                             <span>Tel : {{ ph.pharmacy_profile.phone|default:"Téléphone non spécifié" }}</span>
                                         </p>
                                     </div>
 
                                     <div class="pt-1 flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wider text-leaf-green border-t border-gray-50">
-                                        <span>Catalogue & Carte 🗺️</span>
-                                        <span class="group-hover:translate-x-1 transition-transform">➔</span>
+                                        <span>Catalogue & Carte ️</span>
+                                        <span class="group-hover:translate-x-1 transition-transform"><i class="ti ti-arrow-right"></i></span>
                                     </div>
                                 </div>
                                 {% empty %}
@@ -218,7 +236,7 @@
                                     <div class="space-y-1">
                                         <div class="flex items-center space-x-2.5">
                                             <span class="font-extrabold text-sm text-gray-900">{{ med.name }} {{ med.dosage }}</span>
-                                            <span class="bg-purple-50 border border-purple-100 text-purple-700 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">{{ med.price }} FCFA</span>
+                                            <span class="bg-purple-50 border border-purple-100 text-medical-blue text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">{{ med.price }} FCFA</span>
                                         </div>
                                         <p class="text-xs text-gray-500 font-medium">{{ med.description|default:"Aucune description." }}</p>
                                     </div>
@@ -243,7 +261,7 @@
                         <div class="bg-gradient-to-br from-white to-leaf-light/20 border border-gray-150 rounded-[2.5rem] p-6 shadow-md flex flex-col justify-between space-y-5 sticky top-4">
                             <div class="space-y-4">
                                 <h3 class="text-base font-extrabold text-gray-900 font-poppins flex items-center space-x-2">
-                                    <span class="text-leaf-green">📋</span>
+                                    <span class="text-leaf-green"><i class="ti ti-clipboard-list"></i></span>
                                     <span>Transmettre une Ordonnance</span>
                                 </h3>
                                 <p class="text-xs text-gray-500 leading-relaxed font-medium">
@@ -259,7 +277,7 @@
                                         <label class="block text-gray-600 font-bold mb-1.5">Fichier Ordonnance (PDF, Photo)</label>
                                         <div class="border-2 border-dashed border-gray-200 rounded-2xl p-6 text-center hover:border-leaf-green transition-all bg-white cursor-pointer relative">
                                             <input type="file" id="prescription-file-input" class="absolute inset-0 opacity-0 cursor-pointer">
-                                            <span class="text-2xl block mb-2">📁</span>
+                                            <span class="text-2xl block mb-2"></span>
                                             <span class="text-[10px] text-gray-400 font-bold block" id="file-upload-label">Cliquez pour importer votre ordonnance</span>
                                         </div>
                                     </div>
@@ -267,7 +285,7 @@
                             </div>
 
                             <button type="button" onclick="submitPrescriptionToPharmacy()" class="w-full py-4 bg-leaf-green hover:bg-leaf-dark text-white font-extrabold rounded-2xl text-xs uppercase tracking-wider shadow-lg shadow-leaf-green/20 transition-all">
-                                Envoyer la préparation ➔
+                                Envoyer la préparation <i class="ti ti-arrow-right"></i>
                             </button>
                         </div>
                     </div>
@@ -290,14 +308,14 @@
             <div class="space-y-4 border-b border-gray-150 pb-5">
                 <div class="flex items-center space-x-3.5">
                     <div class="w-14 h-14 rounded-2xl bg-leaf-green/10 text-leaf-green flex items-center justify-center text-2xl shadow-xs flex-shrink-0">
-                        🏥
+                        <i class="ti ti-building-hospital"></i>
                     </div>
                     <div>
                         <div class="flex items-center space-x-2">
                             <h2 id="modal-pharmacy-name" class="text-xl font-extrabold text-gray-900 font-poppins">Nom Pharmacie</h2>
                             <span id="modal-duty-badge" class="bg-red-50 text-red-600 text-[9px] font-extrabold px-2.5 py-0.5 rounded-full border border-red-200">DE GARDE</span>
                         </div>
-                        <p id="modal-pharmacy-address" class="text-xs text-gray-500 font-medium mt-0.5">📍 Adresse de la pharmacie</p>
+                        <p id="modal-pharmacy-address" class="text-xs text-gray-500 font-medium mt-0.5"><i class="ti ti-map-pin"></i> Adresse de la pharmacie</p>
                     </div>
                 </div>
 
@@ -346,7 +364,7 @@
                 <div onclick="openGoogleMapsGPS()" class="google-map-pattern h-44 rounded-3xl border-2 border-gray-200 relative overflow-hidden flex flex-col items-center justify-center text-center p-4 cursor-pointer hover:border-leaf-green transition-all shadow-inner group">
                     <!-- Red Location Pin -->
                     <div class="w-12 h-12 rounded-full bg-red-600 text-white flex items-center justify-center shadow-2xl animate-bounce mb-2 border-2 border-white">
-                        📍
+                        <i class="ti ti-map-pin"></i>
                     </div>
                     <div class="bg-white/95 backdrop-blur-md px-4 py-2 rounded-2xl shadow-md border border-gray-200">
                         <span id="modal-map-name" class="text-xs font-extrabold text-gray-900 block">Pharmacie</span>
@@ -355,7 +373,7 @@
 
                     <!-- Watermark Button -->
                     <span class="absolute bottom-3 right-3 bg-blue-600 text-white text-[10px] font-extrabold px-3 py-1.5 rounded-xl shadow-lg flex items-center space-x-1 group-hover:scale-105 transition-transform">
-                        <span>Lancer GPS 🗺️</span>
+                        <span>Lancer GPS ️</span>
                     </span>
                 </div>
             </div>
@@ -363,10 +381,10 @@
             <!-- Action Buttons -->
             <div class="flex flex-col sm:flex-row gap-3 pt-2">
                 <button type="button" onclick="selectModalPharmacy()" class="flex-1 py-3.5 bg-leaf-green hover:bg-leaf-dark text-white font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-lg transition-all flex items-center justify-center space-x-2">
-                    <span>Sélectionner pour mon Ordonnance ➔</span>
+                    <span>Sélectionner pour mon Ordonnance <i class="ti ti-arrow-right"></i></span>
                 </button>
                 <button type="button" onclick="openGoogleMapsGPS()" class="py-3.5 px-6 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-lg transition-all flex items-center justify-center space-x-2">
-                    <span>Itinéraire Google Maps 🗺️</span>
+                    <span>Itinéraire Google Maps ️</span>
                 </button>
             </div>
 
@@ -384,14 +402,14 @@
 
             document.getElementById('modal-pharmacy-name').innerText = name;
             document.getElementById('modal-map-name').innerText = name;
-            document.getElementById('modal-pharmacy-address').innerText = `📍 ${address}`;
+            document.getElementById('modal-pharmacy-address').innerText = `<i class="ti ti-map-pin"></i> ${address}`;
             document.getElementById('modal-pharmacy-phone').innerText = phone;
             document.getElementById('modal-pharmacy-hours').innerText = hours;
 
             const badge = document.getElementById('modal-duty-badge');
             if (badge) {
                 if (isDuty === 'true' || isDuty === true) {
-                    badge.innerText = 'DE GARDE 🚨';
+                    badge.innerText = 'DE GARDE ';
                     badge.className = 'bg-red-50 text-red-600 text-[9px] font-extrabold px-2.5 py-0.5 rounded-full border border-red-200 animate-pulse';
                 } else {
                     badge.innerText = 'OUVERTE 24/7';
@@ -430,7 +448,7 @@
             const input = document.getElementById('selected-pharmacy-name');
             if (input) {
                 input.value = name;
-                showToast(`🏥 Pharmacie "${name}" sélectionnée !`);
+                showToast(`<i class="ti ti-building-hospital"></i> Pharmacie "${name}" sélectionnée !`);
             }
         }
 
@@ -449,9 +467,9 @@
         function submitPrescriptionToPharmacy() {
             const name = document.getElementById('selected-pharmacy-name').value;
             if (name === 'Aucune sélectionnée') {
-                showToast('⚠️ Veuillez d\'abord sélectionner une pharmacie à gauche.');
+                showToast('<i class="ti ti-alert-triangle"></i> Veuillez d\'abord sélectionner une pharmacie à gauche.');
             } else {
-                showToast(`🎉 Votre ordonnance a été transmise en priorité à la "${name}" !`);
+                showToast(` Votre ordonnance a été transmise en priorité à la "${name}" !`);
                 setTimeout(() => {
                     window.location.href = "{% url 'patients:dashboard' %}";
                 }, 2000);

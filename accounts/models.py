@@ -37,6 +37,10 @@ class CustomUser(AbstractUser):
         null=True,
         verbose_name="Photo de profil"
     )
+    dark_mode_enabled = models.BooleanField(
+        default=False,
+        verbose_name="Mode sombre activé"
+    )
 
     def __str__(self):
         return f"{self.username} ({self.get_role_display()})"
