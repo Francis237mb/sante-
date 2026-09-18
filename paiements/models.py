@@ -20,11 +20,13 @@ class Paiement(models.Model):
     STATUS_SUCCESSFUL = 'successful'
     STATUS_FAILED = 'failed'
     STATUS_EXPIRED = 'expired'
+    STATUS_CANCELLED = 'cancelled'
     STATUS_CHOICES = [
         (STATUS_PENDING, 'En attente'),
         (STATUS_SUCCESSFUL, 'Succès'),
         (STATUS_FAILED, 'Échoué'),
         (STATUS_EXPIRED, 'Expiré'),
+        (STATUS_CANCELLED, 'Annulé par le patient'),
     ]
 
     # Identification interne
@@ -97,7 +99,11 @@ class Paiement(models.Model):
     )
     campay_raw_response = models.JSONField(
         blank=True, null=True,
-        verbose_name="Réponse brute CamPay"
+        verbose_name="Réponse brute CamPay (nettoyée, sans données sensibles)"
+    )
+    error_message = models.CharField(
+        max_length=500, blank=True, default='',
+        verbose_name="Message d'erreur (lisible patient)"
     )
 
     # Timestamps
@@ -124,3 +130,27 @@ class Paiement(models.Model):
     @property
     def is_pending(self):
         return self.status == self.STATUS_PENDING
+
+    @property
+    def is_cancelled(self):
+        return self.status == self.STATUS_CANCELLED
+
+    @property
+    def is_terminal(self):
+        """Retourne True si le paiement est dans un état final (non modifiable)."""
+        return self.status in [
+            self.STATUS_SUCCESSFUL, self.STATUS_FAILED,
+            self.STATUS_EXPIRED, self.STATUS_CANCELLED,
+        ]
+
+    @property
+    def is_expired_pending(self):
+        """
+        Retourne True si le paiement est resté pending depuis plus de 5 minutes.
+        Utilisé pour déclencher l'expiration automatique côté polling.
+        """
+        import datetime
+        from django.utils import timezone
+        if self.status != self.STATUS_PENDING:
+            return False
+        return timezone.now() - self.created_at > datetime.timedelta(minutes=5)

@@ -337,9 +337,19 @@
           required
           autocomplete="tel"
         >
-        <p class="form-hint">
-          📱 Entrez votre numéro MTN ou Orange (avec ou sans indicatif 237).
+        <!-- Badge opérateur détecté dynamiquement -->
+        <div id="operator-badge" style="display:none;margin-top:0.6rem;">
+          <span id="operator-label" style="
+            display:inline-flex;align-items:center;gap:0.4rem;
+            padding:0.3rem 0.8rem;border-radius:99px;font-size:0.8rem;font-weight:600;
+          "></span>
+        </div>
+        <p class="form-hint" id="phone-hint">
+          📱 Entrez votre numéro MTN (67X/68X) ou Orange (69X/65X).<br>
           Un code USSD sera envoyé sur ce numéro pour confirmer le paiement.
+        </p>
+        <p class="form-hint" id="phone-error" style="color:#f87171;display:none;">
+          ⚠️ Format invalide. Utilisez un numéro camerounais à 9 chiffres (ex: 677000000).
         </p>
       </div>
 
@@ -365,7 +375,86 @@
 </div>
 
 <script>
-document.getElementById('payment-form').addEventListener('submit', function() {
+// Préfixes opérateurs (injectés par Django depuis campay_service)
+const MTN_PREFIXES    = {{ mtn_prefixes_json|safe }};
+const ORANGE_PREFIXES = {{ orange_prefixes_json|safe }};
+
+function detectOperator(phone) {
+  // Nettoyer le numéro
+  let cleaned = phone.replace(/[\s\-\(\)\+]/g, '');
+  if (cleaned.startsWith('00237')) cleaned = cleaned.slice(2);  // 00237 → 237
+  if (cleaned.startsWith('237') && cleaned.length === 12) cleaned = cleaned.slice(3); // 237XXX → XXX
+  if (cleaned.length !== 9 || !cleaned.startsWith('6')) return null;
+
+  const prefix3 = cleaned.slice(0, 3); // ex: '677'
+  if (MTN_PREFIXES.includes(prefix3)) return 'MTN';
+  if (ORANGE_PREFIXES.includes(prefix3)) return 'ORANGE';
+  return 'UNKNOWN';
+}
+
+function isValidPhone(phone) {
+  let cleaned = phone.replace(/[\s\-\(\)\+]/g, '');
+  if (cleaned.startsWith('00237')) cleaned = cleaned.slice(2);
+  if (cleaned.startsWith('237')) cleaned = cleaned.slice(3);
+  return /^6\d{8}$/.test(cleaned);
+}
+
+const phoneInput  = document.getElementById('id_phone');
+const badgeEl     = document.getElementById('operator-badge');
+const labelEl     = document.getElementById('operator-label');
+const hintEl      = document.getElementById('phone-hint');
+const errorEl     = document.getElementById('phone-error');
+const submitBtn   = document.getElementById('pay-submit-btn');
+
+phoneInput.addEventListener('input', () => {
+  const val = phoneInput.value.trim();
+  if (!val) {
+    badgeEl.style.display = 'none';
+    hintEl.style.display = 'block';
+    errorEl.style.display = 'none';
+    return;
+  }
+
+  const valid = isValidPhone(val);
+  hintEl.style.display  = valid ? 'block' : 'none';
+  errorEl.style.display = valid ? 'none' : 'block';
+
+  if (valid) {
+    const op = detectOperator(val);
+    if (op === 'MTN') {
+      badgeEl.style.display = 'block';
+      labelEl.style.background = 'rgba(251,191,36,0.15)';
+      labelEl.style.border = '1px solid rgba(251,191,36,0.5)';
+      labelEl.style.color = '#fbbf24';
+      labelEl.innerHTML = '<span style="width:8px;height:8px;border-radius:50%;background:#fbbf24;display:inline-block;"></span> MTN Mobile Money détecté';
+    } else if (op === 'ORANGE') {
+      badgeEl.style.display = 'block';
+      labelEl.style.background = 'rgba(249,115,22,0.15)';
+      labelEl.style.border = '1px solid rgba(249,115,22,0.5)';
+      labelEl.style.color = '#fb923c';
+      labelEl.innerHTML = '<span style="width:8px;height:8px;border-radius:50%;background:#f97316;display:inline-block;"></span> Orange Money détecté';
+    } else {
+      badgeEl.style.display = 'block';
+      labelEl.style.background = 'rgba(148,163,184,0.1)';
+      labelEl.style.border = '1px solid rgba(148,163,184,0.3)';
+      labelEl.style.color = '#94a3b8';
+      labelEl.innerHTML = '📱 Opérateur inconnu — CamPay détectera automatiquement';
+    }
+  } else {
+    badgeEl.style.display = 'none';
+  }
+});
+
+// Désactiver la soumission si le numéro est invalide
+document.getElementById('payment-form').addEventListener('submit', function(e) {
+  const val = phoneInput.value.trim();
+  if (!isValidPhone(val)) {
+    e.preventDefault();
+    errorEl.style.display = 'block';
+    phoneInput.focus();
+    return;
+  }
+  // Animation de chargement
   const btn = document.getElementById('pay-submit-btn');
   btn.disabled = true;
   btn.innerHTML = `
@@ -375,10 +464,13 @@ document.getElementById('payment-form').addEventListener('submit', function() {
     </svg>
     Initiation en cours...
   `;
-  // Ajout animation spin
   const style = document.createElement('style');
   style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
   document.head.appendChild(style);
 });
+
+// Détecter l'opérateur dès le chargement si le champ est prérempli
+if (phoneInput.value) phoneInput.dispatchEvent(new Event('input'));
 </script>
 {% endblock %}
+
