@@ -198,6 +198,8 @@ AGORA_APP_ID = env('AGORA_APP_ID', default=os.getenv('AGORA_APP_ID', ''))
 AGORA_APP_CERTIFICATE = env('AGORA_APP_CERTIFICATE', default=os.getenv('AGORA_APP_CERTIFICATE', ''))
 
 # CamPay Payment Gateway
+CAMPAY_USERNAME = env('CAMPAY_USERNAME', default=os.getenv('CAMPAY_USERNAME', ''))
+CAMPAY_PASSWORD = env('CAMPAY_PASSWORD', default=os.getenv('CAMPAY_PASSWORD', ''))
 CAMPAY_API_TOKEN = env('CAMPAY_API_TOKEN', default=os.getenv('CAMPAY_API_TOKEN', ''))
 CAMPAY_ENVIRONMENT = env('CAMPAY_ENVIRONMENT', default='PROD')  # 'PROD' or 'DEV'
 CAMPAY_API_BASE_URL = 'https://campay.net/api' if CAMPAY_ENVIRONMENT == 'PROD' else 'https://demo.campay.net/api'

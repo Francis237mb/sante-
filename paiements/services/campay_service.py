@@ -10,13 +10,32 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 CAMPAY_BASE_URL = getattr(settings, 'CAMPAY_API_BASE_URL', 'https://campay.net/api')
-CAMPAY_TOKEN = getattr(settings, 'CAMPAY_API_TOKEN', '')
+CAMPAY_USERNAME = getattr(settings, 'CAMPAY_USERNAME', '')
+CAMPAY_PASSWORD = getattr(settings, 'CAMPAY_PASSWORD', '')
+CAMPAY_API_TOKEN = getattr(settings, 'CAMPAY_API_TOKEN', '')
 
+def _get_campay_token():
+    """Récupère un jeton temporaire depuis CamPay avec les identifiants de l'application."""
+    if not CAMPAY_USERNAME or not CAMPAY_PASSWORD:
+        raise ValueError("Les identifiants CamPay (Username/Password) ne sont pas configurés.")
+        
+    url = f'{CAMPAY_BASE_URL}/token/'
+    response = requests.post(url, json={'username': CAMPAY_USERNAME, 'password': CAMPAY_PASSWORD}, timeout=15)
+    data = response.json()
+    
+    if response.status_code == 200 and data.get('token'):
+        return data['token']
+    else:
+        logger.error(f"[CamPay] Erreur d'authentification: {data}")
+        raise ValueError(f"Impossible d'obtenir le jeton CamPay: {data.get('detail', 'Erreur inconnue')}")
 
 def _get_headers():
     """Retourne les en-têtes HTTP avec le token d'authentification CamPay."""
+    token = CAMPAY_API_TOKEN
+    if not token:
+        token = _get_campay_token()
     return {
-        'Authorization': f'Token {CAMPAY_TOKEN}',
+        'Authorization': f'Token {token}',
         'Content-Type': 'application/json',
     }
 
